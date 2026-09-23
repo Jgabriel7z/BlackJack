@@ -31,6 +31,19 @@ export const TEMPOS_DE_TELA = Object.freeze({
   iniciais: 20000,
 });
 
+/**
+ * O ritmo dos textos. Tudo que fica na tela para ser LIDO — a fala do
+ * anfitrião, a explicação da carta trunfo, o resultado da rodada — é
+ * multiplicado por isto. Pedido do grupo depois de jogar: estava tudo
+ * rápido demais para acompanhar.
+ *
+ * Mexer aqui é o jeito de calibrar a leitura inteira de uma vez. O
+ * `?rapido=1` das capturas continua encurtando tudo por cima disso.
+ */
+export const RITMO = Object.freeze({
+  leitura: 1.5,
+});
+
 /** Quem assina o trabalho; aparece no rodapé da tela de título. */
 export const EQUIPE = Object.freeze([NOMES.jogador, NOMES.oponente, NOMES.anfitriao]);
 

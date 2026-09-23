@@ -996,6 +996,21 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
   - Na mesma leva, a mensagem da carta que o oponente joga deixou de durar 700 ms fixos e passou a acompanhar o tamanho do texto (1,1 s a 4,2 s).
 - **Impressões da equipe:**
 
+### Prompt 36 — Textos mais lentos
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> pode deixar os tesxtos mais lentos no geral
+
+- **Resposta (resumo):** em vez de mexer nas oito durações espalhadas pelo código, entrou um multiplicador único no `config.js` (`RITMO.leitura`, hoje 1,5×) que vale para tudo que fica na tela para ser lido. Calibrar a leitura do jogo inteiro virou mexer num número.
+- **Arquivos gerados/alterados:** alterados `src/config.js`, `src/ui/main.js`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **"No geral" pedia um botão, não oito remendos.** As durações de texto estavam espalhadas em cinco lugares diferentes, cada uma com um número cravado. Um multiplicador único resolve o pedido e deixa o próximo ajuste ser de uma linha.
+  - **Apareceu um buraco no meio do caminho:** a mensagem de quem ganhou a rodada era substituída por "a lâmina desce sobre a sua mão" quase na hora. Entrou um respiro de 1,2 s entre o resultado e a punição.
+  - O `?rapido=1` continua por cima do multiplicador, então as capturas não ficaram mais lentas — conferido: a captura do ciclo completo continua em torno de dois minutos e com os mesmos números.
+- **Impressões da equipe:**
+
 ---
 
 ## Contagem de prompts por etapa
@@ -1007,4 +1022,4 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
 | Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
 | Etapa 3 — Abertura | 4 (sub-passos 3.1 a 3.5; o prompt 26 trouxe 3.4 e 3.5 juntos) | 1 (fechamento) | 5 |
-| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 7 (29 a 35: fechamento e os ajustes feitos jogando) | 8 |
+| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 8 (29 a 36: fechamento e os ajustes feitos jogando) | 9 |

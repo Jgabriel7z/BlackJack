@@ -342,3 +342,10 @@ Primeira rodada de mudanças pedidas jogando, não planejando.
 - Duas correções: os visores passam a mostrar a aposta **efetiva**, e `sincronizarTrunfos` (chamado a cada carta jogada, dos dois lados) atualiza os dois números na hora.
 - E um aviso visual: o visor **pisca por 2,4 s** quando o número muda, senão a troca acontecia em silêncio.
 - Conferido na tela: Shield leva a aposta do jogador de 1 para 0; Two-Up leva a dele de 1 para 3, com os dois visores acendendo.
+
+## 2026-09-23 — Um número só para o ritmo dos textos
+- O grupo pediu tudo mais lento para dar tempo de ler. Em vez de mexer em oito durações espalhadas pelo código, entrou `RITMO.leitura` no `config.js`: **um multiplicador só**, hoje em 1,5×, que vale para tudo que fica na tela para ser lido.
+- O que ficou mais lento: a explicação da carta trunfo jogada (de 1,6 s a 6,3 s, conforme o texto), o comentário do Kaio (7,8 s), as falas da troca de nível (3,9 s por linha), a despedida e a trapaça.
+- E entrou um respiro novo de 1,2 s **entre o resultado da rodada e a punição** — antes a mensagem de quem ganhou era trocada por "a lâmina desce..." quase na hora.
+- O `?rapido=1` das capturas continua encurtando tudo por cima disso, então os roteiros não ficaram mais lentos.
+- Calibrar a leitura inteira do jogo agora é mexer num número só.

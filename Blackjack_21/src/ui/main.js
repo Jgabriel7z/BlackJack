@@ -78,7 +78,7 @@ import {
   CARTAS_DO_JOGADOR,
 } from '../engine/trumps.js';
 import catalogoJson from '../../data/trump_cards.js';
-import { NOMES, EQUIPE, TITULO, TRUNFOS, FALA_DA_VITORIA, FALA_DA_TRAPACA } from '../config.js';
+import { NOMES, EQUIPE, TITULO, TRUNFOS, RITMO, FALA_DA_VITORIA, FALA_DA_TRAPACA } from '../config.js';
 import { lerParametros } from './parametros.js';
 import {
   criarRenderizador,
@@ -161,7 +161,7 @@ let trapaca = criarTrapaca();
 /** Quem decide quando o Kaio abre a boca durante a rodada. */
 let anfitriao = null;
 /** Quanto tempo um comentário dele fica na tela. */
-const DURACAO_DO_COMENTARIO = 5200;
+const DURACAO_DO_COMENTARIO = 5200 * RITMO.leitura;
 let lampada = null;
 let pontuacao = null;
 
@@ -485,6 +485,10 @@ function adicionarRevelacao(resultado) {
     },
   });
 
+  // Um respiro para ler quem ganhou e o que custou, antes de a punição
+  // trocar a mensagem por "a lâmina desce...".
+  sequencia.adicionar(pausa('resultado', 800 * RITMO.leitura));
+
   adicionarPunicao(resultado);
 
   // Só agora, com a lâmina já tendo descido e a mesa atualizada, ele
@@ -667,7 +671,7 @@ function adicionarTrocaDeNivel() {
   for (const fala of proximo.fala) {
     sequencia.adicionar({
       nome: 'trocando-nivel',
-      duracao: 2600,
+      duracao: 2600 * RITMO.leitura,
       ritmoReal: true,
       aoIniciar() {
         mesa.kaio = fala;
@@ -801,7 +805,7 @@ function adicionarDespedidaDoAnfitriao() {
   for (const fala of FALA_DA_VITORIA) {
     sequencia.adicionar({
       nome: 'despedida',
-      duracao: 3000,
+      duracao: 3000 * RITMO.leitura,
       ritmoReal: true,
       aoIniciar() {
         mesa.kaio = fala;
@@ -1516,7 +1520,7 @@ function adicionarTrapacaDoAnfitriao() {
   for (const fala of FALA_DA_TRAPACA) {
     sequencia.adicionar({
       nome: 'trapaca',
-      duracao: 2800,
+      duracao: 2800 * RITMO.leitura,
       ritmoReal: true,
       aoIniciar() {
         mesa.kaio = fala;
@@ -1579,7 +1583,7 @@ function adicionarTrapacaDoAnfitriao() {
  */
 function tempoDeLeitura(carta) {
   const letras = `${carta.nome}. ${carta.texto}`.length;
-  return Math.min(4200, 1100 + letras * 26);
+  return Math.min(4200, 1100 + letras * 26) * RITMO.leitura;
 }
 
 /**
