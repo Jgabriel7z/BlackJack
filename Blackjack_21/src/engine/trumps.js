@@ -22,39 +22,70 @@
 import { comprar } from './deck.js';
 import { TRUNFOS } from '../config.js';
 
-/** Ids das cartas implementadas nesta etapa. */
-export const CARTAS_DA_ETAPA_2 = Object.freeze([
+/**
+ * As cartas trunfo do jogador. As 16 primeiras são da Etapa 2; as 11
+ * de baixo entraram no sub-passo 4.4a e completam a lista de
+ * `player_cards` do catálogo.
+ */
+export const CARTAS_DO_JOGADOR = Object.freeze([
   'one_up', 'two_up',
   'card_2', 'card_3', 'card_4', 'card_5', 'card_6', 'card_7',
   'remove', 'return', 'shield', 'destroy', 'perfect_draw',
   'go_for_17', 'go_for_24', 'go_for_27',
+  // 4.4a
+  'two_up_plus', 'shield_plus', 'exchange', 'trump_switch', 'trump_switch_plus',
+  'destroy_plus', 'destroy_plus_plus', 'perfect_draw_plus', 'ultimate_draw',
+  'harvest', 'love_your_enemy',
 ]);
 
 /** Tipos de efeito que este módulo sabe executar. */
 const EFEITOS_SUPORTADOS = new Set([
   'bet_mod', 'draw_trump', 'draw_specific', 'return_last_faceup',
   'destroy_last_trump', 'draw_best', 'set_target',
+  // 4.4a
+  'swap_last_faceup', 'discard_random_trumps', 'destroy_all_trumps',
+  'block_trumps', 'on_trump_use_draw_trump',
+  // 4.8 (a carta que o anfitrião joga)
+  'block_draw',
 ]);
 
 /**
  * Prepara o catálogo a partir do JSON já carregado por quem chama.
  * Devolve { porId, disponiveis } com só as cartas desta etapa.
  * `opcoes.ids` permite outra lista (usada nos testes).
+ *
+ * `opcoes.sorteaveis` (4.1) diz quais delas o SORTEIO pode tirar. Serve
+ * para as cartas que ainda não foram desbloqueadas: o motor continua
+ * conhecendo a carta (então `?trunfos=` ainda consegue forçá-la numa
+ * captura), ela só não aparece sozinha na mão de ninguém.
  */
 export function prepararCatalogo(json, opcoes = {}) {
-  const ids = opcoes.ids ?? CARTAS_DA_ETAPA_2;
+  const ids = opcoes.ids ?? CARTAS_DO_JOGADOR;
   const porId = new Map();
-  for (const carta of json.player_cards ?? []) {
-    if (!ids.includes(carta.id)) continue;
+  // `opcoes.extras` traz cartas de INIMIGO que o motor precisa conhecer
+  // mas ninguém sorteia — hoje só a Desperation, que o anfitrião joga
+  // na trapaça do 4.8.
+  const extras = opcoes.extras ?? [];
+  const fonte = [...(json.player_cards ?? []), ...(json.enemy_cards ?? [])];
+  for (const carta of fonte) {
+    if (!ids.includes(carta.id) && !extras.includes(carta.id)) continue;
+    if (porId.has(carta.id)) continue;
     const naoSuportado = carta.effects.find((e) => !EFEITOS_SUPORTADOS.has(e.type));
     if (naoSuportado) {
       throw new Error(`Carta ${carta.id} usa efeito não suportado nesta etapa: ${naoSuportado.type}`);
     }
     porId.set(carta.id, carta);
   }
-  const faltando = ids.filter((id) => !porId.has(id));
+  const faltando = [...ids, ...extras].filter((id) => !porId.has(id));
   if (faltando.length) throw new Error(`Cartas ausentes no catálogo: ${faltando.join(', ')}`);
-  return { porId, disponiveis: [...porId.keys()] };
+
+  // O sorteio nunca tira as extras: elas não são cartas de mão.
+  const todas = [...porId.keys()].filter((id) => !extras.includes(id));
+  const sorteaveis = opcoes.sorteaveis
+    ? todas.filter((id) => opcoes.sorteaveis.includes(id))
+    : todas;
+  if (sorteaveis.length === 0) throw new Error('Nenhuma carta trunfo pode ser sorteada.');
+  return { porId, disponiveis: sorteaveis };
 }
 
 // ---------------------------------------------------------------------
@@ -79,7 +110,39 @@ export function darTrunfo(jogo, lado, id = null) {
 export function podeJogarTrunfo(jogo, lado, id) {
   return jogo.fase === 'jogando'
     && jogo.turno === lado
-    && jogo.jogadores[lado].trunfos.includes(id);
+    && jogo.jogadores[lado].trunfos.includes(id)
+    && !trunfosBloqueados(jogo, lado);
+}
+
+/**
+ * True se alguma carta na mesa proíbe `lado` de COMPRAR cartas. É a
+ * Desperation, que o anfitrião joga na trapaça do 4.8.
+ */
+export function compraBloqueada(jogo, lado) {
+  return temEfeitoContra(jogo, lado, 'block_draw');
+}
+
+/**
+ * True se alguma carta na mesa proíbe `lado` de jogar trunfos. Hoje só
+ * o Destroy++ faz isso, e ele vale enquanto estiver na mesa (4.4a).
+ */
+export function trunfosBloqueados(jogo, lado) {
+  return temEfeitoContra(jogo, lado, 'block_trumps');
+}
+
+/** Procura na mesa dos dois lados um efeito persistente contra `lado`. */
+function temEfeitoContra(jogo, lado, tipo) {
+  for (const dono of ['jogador', 'oponente']) {
+    for (const carta of jogo.jogadores[dono].trunfosNaMesa) {
+      for (const efeito of carta.efeitos) {
+        if (efeito.type !== tipo) continue;
+        if (efeito.target === 'both') return true;
+        const afetado = efeito.target === 'self' ? dono : outro(dono);
+        if (afetado === lado) return true;
+      }
+    }
+  }
+  return false;
 }
 
 /** Cartas persistentes na mesa do lado de `lado`. */
@@ -107,6 +170,8 @@ export function modificadorDeAposta(jogo, lado) {
     for (const carta of jogo.jogadores[dono].trunfosNaMesa) {
       for (const efeito of carta.efeitos) {
         if (efeito.type !== 'bet_mod') continue;
+        // "both" é da Desperation (4.8): ela encarece os DOIS lados.
+        if (efeito.target === 'both') { soma += efeito.amount; continue; }
         const afetado = efeito.target === 'self' ? dono : outro(dono);
         if (afetado === lado) soma += efeito.amount;
       }
@@ -191,14 +256,68 @@ export function aplicarTrunfo(jogo, lado, id) {
   const relatorio = { id, lado, nome: carta.name, acoes: [], ficouNaMesa: false };
   const persistentes = [];
 
+  // Harvest (4.4a): "enquanto esta carta estiver na mesa, você compra uma
+  // carta trunfo depois de usar uma". Conta antes de a carta nova entrar,
+  // senão a própria Harvest se pagaria na hora em que é jogada.
+  const colheitas = jogo.jogadores[lado].trunfosNaMesa
+    .flatMap((c) => c.efeitos)
+    .filter((e) => e.type === 'on_trump_use_draw_trump');
+
   for (const efeito of carta.effects) {
     const alvoLado = efeito.target === 'opponent' ? outro(lado) : lado;
 
     switch (efeito.type) {
       case 'bet_mod':
       case 'set_target':
+      case 'block_trumps':
+      case 'on_trump_use_draw_trump':
+      case 'block_draw':
         persistentes.push(efeito);
         break;
+
+      // --- 4.4a ---------------------------------------------------------
+
+      case 'swap_last_faceup': {
+        // Exchange: troca a última carta virada de cada lado. Se um dos
+        // dois não tiver nenhuma, não acontece nada.
+        const meu = jogo.jogadores[lado];
+        const dele = jogo.jogadores[outro(lado)];
+        if (meu.abertas.length === 0 || dele.abertas.length === 0) {
+          relatorio.acoes.push({ tipo: 'swap_last_faceup', trocou: false });
+          break;
+        }
+        const i = meu.abertas.length - 1;
+        const j = dele.abertas.length - 1;
+        const minhaAntes = meu.abertas[i];
+        const delaAntes = dele.abertas[j];
+        meu.abertas[i] = delaAntes;
+        dele.abertas[j] = minhaAntes;
+        relatorio.acoes.push({
+          tipo: 'swap_last_faceup', trocou: true, recebi: delaAntes, entreguei: minhaAntes,
+        });
+        break;
+      }
+
+      case 'discard_random_trumps': {
+        // Trump Switch: descarta cartas da mão no sorteio, com o gerador
+        // dos trunfos, para a mesma seed dar sempre o mesmo descarte.
+        const mao = jogo.jogadores[alvoLado].trunfos;
+        const descartados = [];
+        for (let i = 0; i < (efeito.count ?? 1) && mao.length > 0; i++) {
+          const indice = Math.floor(jogo._aleatorioTrunfos() * mao.length);
+          descartados.push(mao.splice(indice, 1)[0]);
+        }
+        relatorio.acoes.push({ tipo: 'discard_random_trumps', lado: alvoLado, descartados });
+        break;
+      }
+
+      case 'destroy_all_trumps': {
+        const naMesa = jogo.jogadores[alvoLado].trunfosNaMesa;
+        const destruidos = naMesa.map((c) => c.id);
+        naMesa.length = 0;
+        relatorio.acoes.push({ tipo: 'destroy_all_trumps', lado: alvoLado, destruidos });
+        break;
+      }
 
       case 'draw_trump': {
         const ganhos = [];
@@ -265,5 +384,13 @@ export function aplicarTrunfo(jogo, lado, id) {
   }
 
   jogo.stats.trunfosUsados[lado] += 1;
+
+  // E agora a Harvest que já estava na mesa devolve uma carta.
+  for (const colheita of colheitas) {
+    const ganhos = [];
+    for (let i = 0; i < (colheita.count ?? 1); i++) ganhos.push(darTrunfo(jogo, lado));
+    relatorio.acoes.push({ tipo: 'harvest', lado, trunfos: ganhos });
+  }
+
   return relatorio;
 }

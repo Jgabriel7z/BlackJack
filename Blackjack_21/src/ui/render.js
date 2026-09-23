@@ -21,8 +21,9 @@ import {
   MAO_DIREITA_LUIZ_PX,
 } from './pixelart.js';
 import { desenharTextoPixel } from './fonte-pixel.js';
-import { criarCenario } from './cenario.js';
+import { criarCenario, TV } from './cenario.js';
 import { criarEfeitos } from './efeitos.js';
+import { tensaoDaCena } from './tensao.js';
 import { LINHA_DOS_NOS } from './sprites/mao.js';
 
 export const LARGURA = 1280;
@@ -932,10 +933,19 @@ function desenharSimboloTrunfo(ctx, id, cx, cy, tamanho) {
     ], semente + 5);
   };
 
-  switch (id) {
+  // As cartas "+" e "++" (4.4a) desenham o mesmo símbolo da irmã menor,
+  // com uma ou duas cruzinhas no canto.
+  const grau = id.endsWith('_plus_plus') ? 2 : id.endsWith('_plus') ? 1 : 0;
+  const base = id.replace(/_plus_plus$|_plus$/, '');
+  if (grau > 0) {
+    const marca = grau === 2 ? '++' : '+';
+    texto(ctx, marca, cx + u * 0.82, cy - u * 0.62, u * 0.75, COR_TRUNFO.tinta, 'center', true);
+  }
+
+  switch (base) {
     case 'one_up':
     case 'two_up': {
-      const n = id === 'one_up' ? 1 : 2;
+      const n = base === 'one_up' ? 1 : 2;
       setaTremida(ctx, cx, cy + u * 0.75, cx, cy - u * 0.55, semente);
       texto(ctx, `+${n}`, cx + u * 0.55, cy - u * 0.05, u * 0.95, COR_TRUNFO.tinta, 'center', true);
       break;
@@ -977,8 +987,64 @@ function desenharSimboloTrunfo(ctx, id, cx, cy, tamanho) {
     case 'go_for_17': numero(17, u * 0.9); circuloTremido(ctx, cx, cy, u * 1.02, semente + 3); break;
     case 'go_for_24': numero(24, u * 0.9); circuloTremido(ctx, cx, cy, u * 1.02, semente + 3); break;
     case 'go_for_27': numero(27, u * 0.9); circuloTremido(ctx, cx, cy, u * 1.02, semente + 3); break;
+    // --- 4.4a ---------------------------------------------------------
+    case 'exchange':
+      // Duas cartas trocando de lugar.
+      cartinha(-u * 0.42, u * 0.12, 0.8);
+      cartinha(u * 0.42, -u * 0.12, 0.8);
+      setaTremida(ctx, cx - u * 0.1, cy - u * 0.55, cx + u * 0.5, cy - u * 0.55, semente + 3);
+      setaTremida(ctx, cx + u * 0.1, cy + u * 0.55, cx - u * 0.5, cy + u * 0.55, semente + 7);
+      break;
+
+    case 'trump_switch':
+      // Uma carta saindo e outra entrando.
+      cartinha(0, 0, 0.9);
+      setaTremida(ctx, cx - u * 0.95, cy - u * 0.5, cx - u * 0.3, cy - u * 0.5, semente + 2);
+      setaTremida(ctx, cx + u * 0.3, cy + u * 0.5, cx + u * 0.95, cy + u * 0.5, semente + 8);
+      break;
+
+    case 'harvest': {
+      // Um monte de cartas e uma seta caindo dentro dele.
+      cartinha(-u * 0.30, u * 0.26, 0.72);
+      cartinha(0, u * 0.26, 0.72);
+      cartinha(u * 0.30, u * 0.26, 0.72);
+      setaTremida(ctx, cx, cy - u * 0.95, cx, cy - u * 0.28, semente + 4);
+      break;
+    }
+
+    case 'ultimate_draw': {
+      // A estrela do Perfect Draw com cartas atrás.
+      cartinha(-u * 0.34, u * 0.05, 0.75);
+      cartinha(u * 0.34, u * 0.05, 0.75);
+      const pontas = [];
+      for (let i = 0; i < 10; i++) {
+        const a = -Math.PI / 2 + (i / 10) * Math.PI * 2;
+        const r = i % 2 === 0 ? u * 0.52 : u * 0.23;
+        pontas.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+      }
+      pontas.push(pontas[0]);
+      tracoTremido(ctx, pontas, semente + 11, 0.7);
+      break;
+    }
+
+    case 'love_your_enemy': {
+      // Um coração torto, que é o que a carta é: um presente ao inimigo.
+      const pontos = [[cx, cy + u * 0.78]];
+      for (let i = 0; i <= 24; i++) {
+        const t = Math.PI + (i / 24) * Math.PI;
+        pontos.push([cx - u * 0.46 + Math.cos(t) * u * 0.42, cy - u * 0.20 + Math.sin(t) * u * 0.42]);
+      }
+      for (let i = 0; i <= 24; i++) {
+        const t = Math.PI + (i / 24) * Math.PI;
+        pontos.push([cx + u * 0.46 + Math.cos(t) * u * 0.42, cy - u * 0.20 + Math.sin(t) * u * 0.42]);
+      }
+      pontos.push([cx, cy + u * 0.78]);
+      tracoTremido(ctx, pontos, semente + 13, 0.5);
+      break;
+    }
+
     default: {
-      const valor = /^card_(\d+)$/.exec(id)?.[1];
+      const valor = /^card_(\d+)$/.exec(base)?.[1];
       if (valor) numero(valor);
       else texto(ctx, '?', cx, cy + u * 0.4, u, COR_TRUNFO.tinta, 'center', true);
     }
@@ -1166,6 +1232,55 @@ function desenharSeloDaDemonstracao(ctx, mesa, agora) {
 }
 
 // ---------------------------------------------------------------------
+//  O que está guardado (4.1)
+//
+//  Duas coisas aparecem por causa da persistência: o rodapé do título,
+//  que diz quantas recompensas já saíram e como apagar tudo, e a linha
+//  de "desbloqueado" no fim da partida.
+// ---------------------------------------------------------------------
+
+function desenharRodapeDosDados(ctx, mesa) {
+  const dados = mesa.dados;
+  if (!dados) return;
+  const y = 534;
+
+  if (dados.pedindoApagar) {
+    texto(ctx, 'APAGAR RECORDE, ESTATÍSTICAS E DESBLOQUEIOS?', LARGURA / 2, y, 17, COR.vermelho, 'center', true);
+    texto(ctx, 'DEL de novo confirma  ·  qualquer outra tecla desiste',
+      LARGURA / 2, y + 24, 14, COR.textoApagado);
+    return;
+  }
+
+  if (dados.apagadoHa !== null) {
+    texto(ctx, 'dados apagados', LARGURA / 2, y, 16, COR.textoApagado);
+    return;
+  }
+
+  const partes = [];
+  if (mesa.recorde.valor > 0) partes.push(`recorde ${mesa.recorde.valor}`);
+  partes.push(`desbloqueios ${dados.desbloqueadas}/${dados.total}`);
+  texto(ctx, partes.join('   ·   '), LARGURA / 2, y, 14, COR.textoApagado);
+
+  if (dados.salvando) {
+    const efeitos = mesa.efeitos?.ligados === false ? 'E liga os efeitos' : 'E desliga os efeitos';
+    texto(ctx, `M liga e desliga o som   ·   ${efeitos}   ·   DEL apaga os dados salvos`,
+      LARGURA / 2, y + 22, 12, 'rgba(140, 132, 122, 0.75)');
+  } else {
+    texto(ctx, 'este navegador não está guardando nada; o que você jogar some ao recarregar',
+      LARGURA / 2, y + 22, 12, COR.vermelho);
+  }
+}
+
+/** A linha de recompensa nova, no fim da partida. */
+function desenharDesbloqueios(ctx, mesa, y) {
+  if (!mesa.desbloqueios || mesa.desbloqueios.length === 0) return;
+  desenharTextoPixel(ctx, 'DESBLOQUEADO', LARGURA / 2, y, 3, '#8e857a', 'center');
+  mesa.desbloqueios.forEach((nome, i) => {
+    texto(ctx, nome, LARGURA / 2, y + 34 + i * 20, 15, COR.texto);
+  });
+}
+
+// ---------------------------------------------------------------------
 //  Tela de título (3.2)
 //
 //  A tela inteira se comporta como uma televisão de tubo sendo ligada:
@@ -1235,6 +1350,7 @@ function desenharTelaDeTitulo(ctx, mesa, agora, cenario) {
     if (aceso) {
       texto(ctx, 'PRESSIONE QUALQUER TECLA', LARGURA / 2, meio + 108, 20, COR.texto, 'center', true);
     }
+    desenharRodapeDosDados(ctx, mesa);
     texto(ctx, EQUIPE_NO_RODAPE, LARGURA / 2, ALTURA - 54, 13, COR.textoApagado);
     texto(ctx, 'Atividade 02 · jogo feito com agente de codificação', LARGURA / 2, ALTURA - 34, 11, 'rgba(140, 132, 122, 0.75)');
   }
@@ -1269,7 +1385,8 @@ function desenharTelaDeGameOver(ctx, mesa) {
   if (mesa.recorde.valor > mesa.pontos.total) {
     desenharTextoPixel(ctx, `RECORDE ${mesa.recorde.valor}`, LARGURA / 2, 476, 3, '#6d685f', 'center');
   }
-  texto(ctx, 'qualquer tecla volta ao início', LARGURA / 2, 560, 13, '#5d584f');
+  desenharDesbloqueios(ctx, mesa, 510);
+  texto(ctx, 'qualquer tecla volta ao início', LARGURA / 2, 606, 13, '#5d584f');
 }
 
 // ---------------------------------------------------------------------
@@ -1332,6 +1449,7 @@ function desenharTelaDeIniciais(ctx, mesa, agora) {
     ctx.fillRect(x - 48, y + 7 * escala + 18, 96, naVez ? 7 : 4);
   });
 
+  desenharDesbloqueios(ctx, mesa, 436);
   texto(ctx, 'digite as três letras  ·  as setas também mudam  ·  ENTER confirma',
     LARGURA / 2, 506, 15, COR.textoApagado);
   if (iniciais.restante !== null) {
@@ -1394,11 +1512,14 @@ export function criarRenderizador(canvas, opcoes = {}) {
     ctx.fillStyle = COR.fundo;
     ctx.fillRect(0, 0, LARGURA, ALTURA);
 
-    // Tremor de tela (impacto da guilhotina): desloca tudo alguns pixels.
+    // Tremor de tela: o do impacto, e por baixo dele um tremor constante
+    // que cresce com a tensão da cena (4.3) — quase nada no começo da
+    // partida, visível quando a morte está perto.
     ctx.save();
-    if (mesa.tremor > 0) {
+    const tremorTotal = Math.max(mesa.tremor, mesa.tremorAmbiente ?? 0);
+    if (tremorTotal > 0) {
       const passo = Math.floor(agora / 16);
-      const forca = 14 * mesa.tremor;
+      const forca = 14 * tremorTotal;
       ctx.translate(
         Math.round((ruidoFixo(passo) - 0.5) * 2 * forca),
         Math.round((ruidoFixo(passo + 31) - 0.5) * 2 * forca * 0.7),
@@ -1616,10 +1737,31 @@ export function criarRenderizador(canvas, opcoes = {}) {
     // Dica da carta sob o cursor, acima de tudo menos os efeitos.
     if (mesa.dica) desenharDica(ctx, mesa.dica);
 
-    // Pós-processamento: granulado, linhas de varredura e vinheta, mais fortes
-    // quando a tela escurece ou o jogador está perto de perder tudo.
-    const perigoNaTela = (5 - folgaDaMao) / 5;
-    efeitos.aplicar(ctx, agora, Math.max(mesa.escurecimento, perigoNaTela * 0.6));
+    // Pós-processamento: granulado, linhas de varredura, separação de cores
+    // nas bordas e vinheta, tudo mais forte conforme a aposta sobe e a morte
+    // se aproxima (parte B3 do PDF). A imagem da TV rasga quando o
+    // anfitrião fala.
+    const tensao = mesa.tela === 'jogando' ? tensaoDaCena(mesa) : 0;
+    efeitos.aplicar(ctx, agora, Math.max(mesa.escurecimento, tensao), {
+      tvForca: mesa.kaio ? 0.45 + 0.55 * mesa.tvForte : 0,
+      tvArea: TV,
+    });
+
+    // A trapaça do anfitrião (4.8): a luz da sala vira vermelha.
+    if (mesa.trapaca?.forca > 0) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.fillStyle = `rgba(255, 120, 95, ${1 - 0.55 * mesa.trapaca.forca})`;
+      ctx.fillRect(0, 0, LARGURA, ALTURA);
+      ctx.restore();
+      ctx.fillStyle = `rgba(120, 10, 10, ${0.20 * mesa.trapaca.forca})`;
+      ctx.fillRect(0, 0, LARGURA, ALTURA);
+    }
+
+    // Som desligado: um aviso discreto, no canto de cima.
+    if (mesa.som?.mudo) {
+      texto(ctx, 'SOM DESLIGADO  ·  M', LARGURA - 16, 26, 12, 'rgba(150, 140, 130, 0.8)', 'right');
+    }
 
     // A seed é informação de bastidor: só aparece com a mesa em jogo.
     if (mesa.tela === 'jogando' || mesa.tela === 'game_over') {
@@ -1628,5 +1770,7 @@ export function criarRenderizador(canvas, opcoes = {}) {
     }
   }
 
-  return { desenhar };
+  // O `efeitos` sai junto para o main.js poder ligar e desligar o
+  // pós-processamento pela tecla E (4.3).
+  return { desenhar, efeitos };
 }

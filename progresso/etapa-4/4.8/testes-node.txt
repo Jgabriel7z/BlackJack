@@ -1,0 +1,278 @@
+  ok   rng: mesma seed gera a mesma sequência
+  ok   rng: seeds diferentes geram sequências diferentes
+  ok   rng: valores ficam em [0, 1) e a seed fica guardada
+  ok   rng: seed inválida lança erro; seedAleatoria devolve inteiro de 32 bits
+  ok   baralho novo tem 11 cartas únicas de 1 a 11
+  ok   embaralhar não perde nem repete cartas e não altera o original
+  ok   embaralhar com função aleatória fixa é previsível
+  ok   mesma seed dá o mesmo baralho; seed diferente dá baralho diferente
+  ok   embaralhar sem gerador ainda funciona (seed sorteada)
+  ok   comprar tira a carta do topo e falha com baralho vazio
+  ok   somarMao soma oculta + abertas
+  ok   estourou só acima do alvo
+  ok   vencedor: nenhum estourou, maior total vence
+  ok   vencedor: um estourou, o outro vence
+  ok   vencedor: os dois estouraram, menor total vence
+  ok   vencedor: totais iguais é empate (abaixo e acima do alvo)
+  ok   vencedor respeita alvo diferente de 21
+  ok   jogo novo começa aguardando, com 5 dedos cada e nomes vindos do config
+  ok   jogo sem seed sorteia uma e guarda em jogo.seed
+  ok   mesma seed reproduz a mesma partida inteira
+  ok   iniciarRodada dá 1 oculta + 1 aberta para cada e deixa 7 no baralho
+  ok   aposta começa em 1 e sobe 1 por rodada para os dois
+  ok   não dá para iniciar rodada com outra em andamento
+  ok   hit compra uma carta aberta, zera stays e passa a vez
+  ok   agir fora do turno lança erro
+  ok   agir sem rodada em andamento lança erro
+  ok   um stay só passa a vez; hit no meio zera a contagem
+  ok   dois stays seguidos resolvem a rodada
+  ok   com baralho vazio não dá para comprar, só passar
+  ok   vitória normal: perdedor perde dedos = aposta, vencedor conta rodada
+  ok   estouro: quem passa de 21 perde
+  ok   duplo estouro: menor total vence
+  ok   empate: os dois perdem dedos
+  ok   resumo da rodada expõe as cartas ocultas dos dois
+  ok   dedos nunca ficam negativos
+  ok   nível 1 termina quando o oponente perde todos os dedos
+  ok   o jogador perder encerra o jogo, sem próximo nível
+  ok   empate final: os dois zerados, ninguém vence
+  ok   verMesa esconde a oculta do adversário durante a rodada
+  ok   verMesa revela tudo depois da rodada resolvida
+  ok   verMesa não altera o estado
+  ok   IA: limite de compra é 17
+  ok   IA: com 16 compra
+  ok   IA: com 17 para
+  ok   IA: com mais de 17 (inclusive estourado) para
+  ok   IA: com baralho vazio para, mesmo com total baixo
+  ok   IA: decidir não altera o estado
+  ok   IA: funciona para qualquer lado (também decide pelo jogador)
+  ok   IA contra IA: 200 partidas com seeds diferentes terminam sem erro nem travar
+  ok   IA contra IA: mesma seed dá a mesma partida
+  ok   IA nível 3: só conta as cartas que ela ainda não viu (a oculta do outro entra)
+  ok   IA nível 3: risco de estourar sai da contagem de cartas
+  ok   IA nível 3: o risco de parar leva em conta que o outro ainda compra
+  ok   IA nível 3: compra quando estourar é menos provável que perder parado
+  ok   IA nível 3: para quando já estourou
+  ok   IA: o nível pode ser escolhido na chamada, sem mexer no jogo
+  ok   IA nível 1: não usa cartas trunfo
+  ok   IA nível 2: joga Shield quando a aposta dele está cara
+  ok   IA nível 2: joga Two-Up quando está na frente
+  ok   IA nível 3: guarda o Destroy e só usa contra carta perigosa na mesa
+  ok   IA nível 3: usa Go For quando o alvo novo salva a mão dele
+  ok   IA nível 3: não troca o alvo quando isso não ajuda
+  ok   IA nível 3 contra nível 1: em 1000 rodadas, estoura menos e ganha mais
+  ok   parâmetros: sem nada na URL, seed null, ritmo normal e efeitos ligados
+  ok   parâmetros: ?tela=jogando pula a abertura
+  ok   parâmetros: ?nivel=2 e ?nivel=3 escolhem o aparelho; valor inválido é ignorado
+  ok   parâmetros: ?trunfos=... vira a mão inicial, ignorando lixo
+  ok   parâmetros: ?efeitos=0 desliga o pós-processamento
+  ok   parâmetros: ?seed=123 vira número
+  ok   parâmetros: seed inválida é ignorada
+  ok   parâmetros: ?rapido=1 encurta o tempo; outro valor não
+  ok   sequenciador: começa ocioso e roda um passo até o fim
+  ok   sequenciador: chama aoIniciar e aoTerminar uma vez cada, na ordem
+  ok   sequenciador: fatorTempo encurta a duração (?rapido=1)
+  ok   sequenciador: aoTerminar pode enfileirar o próximo passo (reação da IA)
+  ok   sequenciador: limpar joga fora a fila e o passo em andamento
+  ok   sequenciador: passo com ritmoReal ignora o fatorTempo
+  ok   sequenciador: duração zero termina no mesmo quadro
+  ok   suavização e utilidades: extremos e limites
+  ok   pontuação: começa zerada
+  ok   pontuação: rodada vencida simples vale 100
+  ok   pontuação: +50 ao fechar exatamente no alvo
+  ok   pontuação: alvo diferente de 21 (cartas Go For) conta o alvo informado
+  ok   pontuação: +25 ao vencer com o oponente estourado
+  ok   pontuação: +10 por trunfo usado (parâmetro já previsto)
+  ok   multiplicador: 1x, 1,5x e 2x pela sequência de vitórias
+  ok   pontuação: duas vitórias seguidas aplicam ×1,5 na segunda
+  ok   pontuação: terceira vitória seguida dobra, com bônus dentro do multiplicador
+  ok   pontuação: derrota e empate não pontuam e zeram a sequência
+  ok   pontuação: +500 por nível concluído, fora do multiplicador
+  ok   recorde: começa zerado
+  ok   recorde: a primeira partida sobe o valor mas não conta como "bateu"
+  ok   recorde: superar um recorde anterior conta como "bateu"
+  ok   recorde: pontuação menor ou igual não mexe no recorde
+  ok   recorde: o recorde atravessa várias partidas e conta quantas foram
+  ok   pontuação: histórico guarda um registro por rodada com o total acumulado
+  ok   trunfos: catálogo traz as cartas do jogador, e só elas
+  ok   trunfos: catálogo recusa carta com efeito que o motor não sabe executar
+  ok   trunfos: o baralho não muda por causa dos trunfos (geradores separados)
+  ok   trunfos: o motor não carrega o JSON sozinho (sem catálogo, sem trunfos)
+  ok   One-Up: +1 na aposta do oponente e compra 1 trunfo
+  ok   Two-Up: +2 na aposta do oponente e compra 1 trunfo
+  ok   Two-Up: só vale enquanto está na mesa; Destroy devolve a aposta
+  ok   2 Card: compra a carta 2 se ela ainda está no baralho
+  ok   3 Card: compra a carta 3 se ela ainda está no baralho
+  ok   4 Card: compra a carta 4 se ela ainda está no baralho
+  ok   5 Card: compra a carta 5 se ela ainda está no baralho
+  ok   6 Card: compra a carta 6 se ela ainda está no baralho
+  ok   7 Card: compra a carta 7 se ela ainda está no baralho
+  ok   5 Card: não faz nada se o 5 já saiu do baralho
+  ok   Remove: devolve ao baralho a última carta aberta do oponente
+  ok   Return: devolve ao baralho a última carta aberta de quem jogou
+  ok   Shield: reduz a própria aposta em 1 enquanto está na mesa
+  ok   Shield: a aposta nunca fica negativa
+  ok   Shield: com a aposta zerada, perder a rodada não tira dedo
+  ok   Destroy: remove a última carta trunfo que o oponente pôs na mesa
+  ok   Destroy: sem trunfos do oponente na mesa, não faz nada
+  ok   Perfect Draw: compra a carta que chega mais perto do alvo sem passar
+  ok   Perfect Draw: se todas estouram, pega a menor carta
+  ok   melhorCartaDoBaralho: casos diretos
+  ok   Go for 17: muda o alvo da rodada para 17
+  ok   Go for 24 substitui o Go for 17 que já estava na mesa
+  ok   Go for 27: vira o alvo e substitui a Go For anterior
+  ok   Go For: o alvo novo vale na hora de decidir a rodada
+  ok   trunfos: cada lado recebe os iniciais no começo da rodada
+  ok   trunfos: a mesa é limpa entre rodadas, a mão não
+  ok   trunfos: a mão não passa do máximo do config
+  ok   trunfos: comprar carta dá trunfo com a chance do config
+  ok   trunfos: não dá para jogar carta que não está na mão nem fora do turno
+  ok   trunfos: usar carta conta nas estatísticas (para a pontuação)
+  ok   verMesa: mostra a mesa do adversário, mas esconde a mão de trunfos dele
+  ok   níveis: os três existem, com aparelho e trunfos iniciais próprios
+  ok   níveis: jogo novo começa no 1, ou no que a opção pedir
+  ok   choque: o medidor sobe pela aposta e não passa de 10
+  ok   choque: chegar a 10 é morte; abaixo disso não
+  ok   choque: perder a rodada sobe o medidor de quem perdeu
+  ok   choque: empate leva os dois ao choque
+  ok   serra: começa no meio do trilho de 15
+  ok   serra: quem perde puxa a lâmina para o próprio lado
+  ok   serra: chegar na ponta do trilho mata o lado de lá
+  ok   serra: empate não mexe a lâmina
+  ok   nível: vencer o 1 leva a NIVEL_CONCLUIDO, e avancarNivel prepara o 2
+  ok   nível: vencer o 3 é vitória final, não tem próximo nível
+  ok   nível: o jogador cair encerra o jogo em qualquer nível
+  ok   nível: avancarNivel só vale depois de concluir o nível
+  ok   morte: a frase final combina com o aparelho
+  ok   telas: o jogo começa no título
+  ok   telas: dá para começar em outra tela (para captura e depuração)
+  ok   telas: só a tela de jogo não sai sozinha
+  ok   telas: sem ninguém mexer, o laço é título → attract → pontuações → título
+  ok   telas: cada tela espera o tempo do config antes de trocar
+  ok   telas: nenhuma tela trava — em 10 minutos o laço fecha várias voltas
+  ok   telas: nenhuma tela fica mais que o tempo dela
+  ok   telas: mexer no título começa o jogo
+  ok   telas: mexer no attract ou nas pontuações volta ao título
+  ok   telas: mexer durante o jogo não troca de tela
+  ok   telas: a tela de jogo não sai com o tempo, só quando a partida acaba
+  ok   telas: o fim de jogo volta ao título sozinho, ou antes se alguém mexer
+  ok   telas: o fator de tempo encurta a espera (?rapido=1)
+  ok   telas: avisa cada troca, dizendo de onde veio
+  ok   telas: o relógio da primeira tela começa no primeiro quadro, não no zero
+  ok   telas: ir para a tela em que já está não conta como troca
+  ok   telas: entrando nas cinco melhores, o fim de jogo leva a digitar as iniciais
+  ok   telas: sem entrar na lista, o fim de jogo volta ao título como antes
+  ok   telas: a tecla que corta o fim de jogo leva ao mesmo destino da espera
+  ok   telas: o desvio vale só para a partida que acabou de terminar
+  ok   telas: digitar as iniciais não é "mexer": a tela não sai com tecla
+  ok   telas: quem sai para tomar um café não trava a máquina nas iniciais
+  ok   telas: o ?rapido=1 não encurta o tempo de digitar as iniciais
+  ok   placar: começa vazio e cabem cinco
+  ok   placar: com a lista incompleta, qualquer pontuação entra
+  ok   placar: pontuação zero (ou negativa) não entra
+  ok   placar: a lista fica sempre em ordem decrescente
+  ok   placar: com a lista cheia, só entra quem passa do último
+  ok   placar: entrar na lista cheia empurra o último para fora
+  ok   placar: quem chegou antes fica na frente no empate
+  ok   placar: guarda até onde a partida chegou e se o jogador saiu inteiro
+  ok   placar: as iniciais são sempre três letras de A a Z
+  ok   placar: digitar letras preenche as casas e anda o cursor
+  ok   placar: digitar na última casa troca a letra, não estoura
+  ok   placar: as setas trocam a letra e dão a volta no alfabeto
+  ok   placar: as setas laterais andam entre as casas, sem sair
+  ok   placar: Backspace volta uma casa e apaga
+  ok   placar: Enter confirma, e depois nada mais muda
+  ok   placar: tecla que não interessa é ignorada
+  ok   placar: dá para começar com as iniciais da partida anterior
+  ok   progresso: começa zerado e sem nada desbloqueado
+  ok   progresso: conta trunfos usados e trunfos do inimigo removidos
+  ok   progresso: o contador de trunfos da rodada zera quando ela acaba
+  ok   progresso: fechar no alvo conta, e errar quebra a sequência
+  ok   progresso: o alvo da mesa vale, mesmo quando não é 21
+  ok   progresso: a sequência sem tortura só conta vitórias limpas e seguidas
+  ok   progresso: o recorde é o mesmo objeto que o score.js já mexia
+  ok   progresso: as quatro recompensas possíveis hoje estão listadas
+  ok   progresso: Go For 24 sai depois de vencer 5 partidas
+  ok   progresso: Go For 27 sai com três alvos exatos seguidos
+  ok   progresso: três alvos exatos no total dão uma carta trunfo a mais
+  ok   progresso: vencer tendo estourado dá outra carta trunfo a mais
+  ok   progresso: as duas recompensas de trunfo inicial se somam
+  ok   progresso: uma recompensa só é anunciada uma vez
+  ok   progresso: as cartas presas ficam fora do sorteio até serem ganhas
+  ok   progresso: conferir recompensas não inventa nada sem motivo
+  ok   progresso: lixo no lugar dos dados vira um progresso zerado
+  ok   progresso: dados bons atravessam inteiros
+  ok   progresso: campos mexidos à mão são consertados, não aceitos
+  ok   progresso: a lista guardada nunca passa de cinco
+  ok   armazenamento: guarda e devolve o que foi guardado
+  ok   armazenamento: apagar limpa só a chave do jogo
+  ok   armazenamento: depósito que explode não derruba nada
+  ok   armazenamento: texto corrompido não derruba nada
+  ok   armazenamento: o jogo continua de pé com o depósito quebrado
+  ok   som: o coração acelera com a aposta
+  ok   som: o coração acelera perto da morte
+  ok   som: aposta fora da faixa não quebra a conta
+  ok   som: o perigo do nível 1 é quantos dedos já foram
+  ok   som: no nível 2 o perigo é o medidor de choque
+  ok   som: no nível 3 o perigo é a serra chegando perto
+  ok   som: sem mesa, nenhum perigo
+  ok   som: o abafamento fecha na hora e volta devagar
+  ok   som: abafado corta os agudos
+  ok   som: sem Web Audio o jogo continua, mudo
+  ok   som: um AudioContext que explode não derruba o jogo
+  ok   som: ligar monta o caminho inteiro do som
+  ok   som: ligar duas vezes não monta tudo de novo
+  ok   som: todos os efeitos rodam sem lançar erro
+  ok   som: a tecla M alterna o mudo
+  ok   som: mudo não toca nada, mas continua anotando
+  ok   som: o quadro roda com mesa de qualquer nível, sem erro
+  ok   som: o coração para na revelação e volta depois
+  ok   tensão: a aposta pesa de 0 a 1
+  ok   tensão: no começo da partida está quase zerada
+  ok   tensão: a aposta sozinha não passa da metade
+  ok   tensão: um passo da morte já aperta quase tudo, mesmo apostando pouco
+  ok   tensão: aposta alta e morte perto chegam ao máximo
+  ok   tensão: cresce junto com a aposta, com o mesmo perigo
+  ok   tensão: cresce junto com o perigo, com a mesma aposta
+  ok   tensão: cada nível olha o próprio aparelho
+  ok   tensão: sem mesa, nada
+  ok   tensão: nunca sai da faixa de 0 a 1
+  ok   4.4a: as onze cartas que faltavam entraram no catálogo
+  ok   4.4a: o catálogo do jogador cobre todas as player_cards do arquivo
+  ok   4.4a: Two-Up+ devolve a carta virada do oponente e ainda encarece a aposta dele
+  ok   4.4a: Shield+ tira dois da própria aposta
+  ok   4.4a: Shield+ não deixa a aposta ficar negativa
+  ok   4.4a: Exchange troca a última carta virada de cada lado
+  ok   4.4a: Exchange não faz nada se um dos lados não tem carta virada
+  ok   4.4a: Trump Switch descarta 2 da mão e compra 3
+  ok   4.4a: Trump Switch+ descarta só 1 e compra 4
+  ok   4.4a: Trump Switch com a mão vazia não quebra
+  ok   4.4a: o descarte do Trump Switch é sempre o mesmo com a mesma seed
+  ok   4.4a: Destroy+ limpa a mesa inteira do oponente
+  ok   4.4a: Destroy+ com a mesa dele vazia não quebra
+  ok   4.4a: Destroy++ limpa a mesa e ainda tranca os trunfos do oponente
+  ok   4.4a: Perfect Draw+ compra a melhor carta e encarece muito a aposta dele
+  ok   4.4a: Ultimate Draw compra a melhor carta e mais duas cartas trunfo
+  ok   4.4a: com a mão já fechada, Perfect Draw+ compra a carta que estoura menos
+  ok   4.4a: Harvest devolve uma carta trunfo a cada carta jogada depois dela
+  ok   4.4a: a Harvest do oponente não paga o jogador
+  ok   4.4a: Love Your Enemy dá a melhor carta ao OPONENTE
+  ok   4.4a: nenhuma das cartas novas lança erro ao ser jogada
+  ok   4.4a: o bloqueio do Destroy++ acaba quando a mesa é limpa
+  ok   4.4a: o baralho continua sem depender dos trunfos
+  ok   trapaça: a carta da saída chega ao jogador ao entrar no nível 3
+  ok   trapaça: a carta da saída não é entregue duas vezes
+  ok   trapaça: nos níveis 1 e 2 nada disso acontece
+  ok   trapaça: só arma quando a serra está a uma derrota do Luiz Alberto
+  ok   trapaça: a aposta dele conta, não a distância crua
+  ok   trapaça: acontece uma vez só na partida
+  ok   trapaça: o anfitrião joga Perfect Draw e Desperation pelo oponente
+  ok   trapaça: com a Desperation na mesa, a próxima derrota mata qualquer um
+  ok   trapaça: com a Desperation na mesa, o jogador não pode mais comprar
+  ok   trapaça: o Love Your Enemy estoura a mão que o Perfect Draw fechou
+  ok   trapaça: dá para ganhar a partida usando o Love Your Enemy
+  ok   trapaça: sem o Love Your Enemy, quem morre é o jogador
+  ok   trapaça: matando o Luiz antes da hora, ela nunca acontece
+  ok   trapaça: a partida acabada não arma mais nada
+
+276/276 testes passaram.

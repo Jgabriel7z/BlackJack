@@ -43,8 +43,8 @@ const argumentos = process.argv.slice(2);
 const subPasso = argumentos.find((a) => !a.startsWith('--'));
 const semVideo = argumentos.includes('--sem-video');
 
-// Aceita "1.3" (sub-passo) ou "1.final" (captura especial da etapa).
-if (!subPasso || !/^\d+\.(\d+|[a-z][a-z0-9-]*)$/.test(subPasso)) {
+// Aceita "1.3" (sub-passo), "4.4a" (parte de um sub-passo) ou "1.final".
+if (!subPasso || !/^\d+\.(\d+[a-z]?|[a-z][a-z0-9-]*)$/.test(subPasso)) {
   console.error('Uso: node tools/capturar.mjs <sub-passo> [--sem-video]');
   console.error('Exemplos: node tools/capturar.mjs 1.3   |   node tools/capturar.mjs 1.final');
   console.error(`Roteiros disponíveis: ${await listarRoteiros()}`);
@@ -53,7 +53,7 @@ if (!subPasso || !/^\d+\.(\d+|[a-z][a-z0-9-]*)$/.test(subPasso)) {
 
 const [etapa, sufixo] = subPasso.split('.');
 // "1.3" vai para progresso/etapa-1/1.3/ ; "1.final" vai para progresso/etapa-1/final/
-const nomePasta = /^\d+$/.test(sufixo) ? subPasso : sufixo;
+const nomePasta = /^\d+[a-z]?$/.test(sufixo) ? subPasso : sufixo;
 const pastaDestino = path.join(RAIZ_PROJETO, 'progresso', `etapa-${etapa}`, nomePasta);
 const arquivoRoteiro = path.join(PASTA_TOOLS, 'roteiros', `${subPasso}.mjs`);
 

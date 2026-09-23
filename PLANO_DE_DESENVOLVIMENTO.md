@@ -193,14 +193,16 @@ Cada item é independente. Fazer na ordem abaixo; parar onde o tempo acabar.
 
 | # | Extra | Seção da atividade | O que entregar | Como testar |
 |---|-------|-------------------|----------------|-------------|
-| 4.1 | Persistência | 6.1 | `localStorage` para high scores e desbloqueios (recompensas da tabela A5: Go for 24 após 5 vitórias, Shield+ etc.) | Fechar e reabrir o browser mantém recorde e cartas desbloqueadas |
-| 4.2 | Som | 6.4 | `audio.js` com Web Audio **sintetizado** (sem arquivos): drone grave, zumbido da lâmpada, batimento que acelera com a aposta, papel da carta, guilhotina, taser, serra, silêncio total na revelação, abafamento após punição | Ouvir cada evento; mute funciona |
-| 4.3 | Efeitos visuais | 6.5 | `effects.js`: granulado, vinheta, scanlines, aberração cromática leve, tremor; intensidade cresce com a aposta e a proximidade da morte; distorção da TV quando o Anfitrião fala. Referências do grupo em `REFERENCIAS.md` (PixiJS Filters, mgGlitch) como guia de implementação, não como dependência | Efeitos visíveis e mais fortes perto da morte; opção de desligar |
-| 4.4 | Trunfos restantes e variantes de oponente | 6.6 | Cartas que faltam do `trump_cards.json` (Exchange, Trump Switch, Destroy+/++, Ultimate Draw, Harvest, Love Your Enemy) + cartas inimigas; variantes Arame Farpado, Mãos Ensanguentadas, Mofado, Marcas de Contagem, Morto-Vivo, Cabeção; modo **Sobrevivência** (5 oponentes seguidos) | Cada variante usa suas cartas; Sobrevivência termina no 5º oponente |
+| 4.1 ✅ | Persistência | 6.1 | `src/engine/progresso.js` (puro): as estatísticas da parte C3, as recompensas da A5 que funcionam com as cartas de hoje, e um `normalizar` que transforma qualquer coisa vinda de fora num progresso válido. `src/ui/armazenamento.js` é o **único** arquivo que toca em `localStorage`, com try/catch em toda operação: se falhar, o jogo segue na memória e o título avisa. Recorde, lista das cinco melhores, estatísticas e desbloqueios atravessam o recarregar. **Quatro recompensas**: Go For 24 (vencer 5 partidas), Go For 27 (3 alvos exatos seguidos) e duas de "uma carta trunfo a mais no começo da rodada" (3 alvos exatos no total; vencer tendo estourado). As duas cartas premiadas saem do sorteio até serem ganhas. No título, DEL apaga tudo, em dois tempos | 26 testes novos, incluindo um depósito de mentira que explode em toda operação. Roteiro `4.1.mjs`: partida, recarregar a página, conferir recorde/lista/desbloqueios/estatísticas, apagar pelo título e recarregar de novo. **Feito em 2026-09-23: 211 testes, 8 prints + vídeo** |
+| 4.2 ✅ | Som | 6.4 | `src/ui/audio.js`, tudo sintetizado, sem um único arquivo de áudio. Dois barramentos (ambiente e foley) passando por um **abafador** passa-baixa até o mestre: na revelação o ambiente cala e fica só a carta virando; depois da punição o abafador fecha para tudo por 3,5 s, com um zumbido agudo de 3,7 kHz por fora dele (dentro do ouvido). Drone de três osciladores com respiração lenta, zumbido elétrico que sobe quando a lâmpada pisca, coração de 52 a 142 bpm conforme a aposta e a proximidade da morte, papel da carta, metal da lâmina, capacitor, descarga, motor da serra mais alto quanto mais perto, chiado da TV quando o Kaio fala. **M** liga e desliga (menos digitando as iniciais, onde M é letra). Só acorda depois de um gesto do usuário, e some sem quebrar nada se não houver Web Audio | 18 testes: as contas puras (bpm, perigo, abafamento) e um `AudioContext` de mentira que prova que o caminho do som monta inteiro e que nenhum efeito lança erro. Roteiro `4.2.mjs` confere a sequência `carta → silêncio → ambiente volta → lâmina → impacto` por `body[data-som]`. **O vídeo é mudo: o Playwright não grava áudio** — como gravar à mão está em `progresso/etapa-4/4.2/COMO-GRAVAR-COM-SOM.md`. **Feito em 2026-09-23: 229 testes, 6 prints + vídeo** |
+| 4.3 ✅ | Efeitos visuais | 6.5 | `src/ui/efeitos.js` completado: granulado, linhas de varredura, vinheta, **separação de cores nas bordas** e **tremor constante**, todos crescendo com a tensão da cena; a imagem da TV **rasga em fatias** com barra de sincronismo enquanto o Kaio fala. A conta da tensão saiu para `src/ui/tensao.js` (puro), porque o som (4.2) e os efeitos usam a mesma: aposta pesa até 0,45 e a morte chegando até 0,75. **Desempenho**: a separação de cores é montada em 1/3 da resolução e esticada, o truque que o próprio PDF sugere — medido em **86 fps com e sem efeitos**. **E** liga e desliga, e a escolha fica salva com o resto do progresso (4.1) | 10 testes da tensão. Roteiro `4.3.mjs`: a mesma mesa com tensão 0,00 e 0,53 (montadas lado a lado em `comparacao-tensao.png`), a cena sem efeitos, o fps medido nos dois casos, e a TV distorcendo na troca de nível. **Feito em 2026-09-23: 239 testes, 6 prints + comparação + vídeo** |
+| 4.4a ✅ | Trunfos restantes do jogador | 6.6 | As **11 cartas que faltavam** entraram: Two-Up+, Shield+, Exchange, Trump Switch, Trump Switch+, Destroy+, Destroy++, Perfect Draw+, Ultimate Draw, Harvest e Love Your Enemy. Cinco tipos de efeito novos no motor: `swap_last_faceup`, `discard_random_trumps` (com o gerador dos trunfos, então o descarte é reproduzível), `destroy_all_trumps`, `block_trumps` (o Destroy++ tranca os trunfos do oponente enquanto estiver na mesa) e `on_trump_use_draw_trump` (a Harvest paga as cartas jogadas depois dela, nunca a si mesma). Cada carta ganhou símbolo desenhado; as "+" reusam o símbolo da irmã menor com uma ou duas cruzinhas | 22 testes novos, um por carta mais os casos de borda (mão vazia, mesa vazia, só um lado com carta virada, descarte reproduzível). Roteiro `4.4a.mjs` fixa a mão com `?trunfos=` e joga Harvest, Exchange, Ultimate Draw e Destroy++ em sequência. **Feito em 2026-09-23: 262 testes, 6 prints + vídeo** |
+| 4.4b | Variantes de oponente | 6.6 | Cartas inimigas e as versões do Luiz Alberto (arame farpado, mãos ensanguentadas, mofado, marcas de contagem, morto-vivo, cabeção), cada uma com visual próprio e sem sangue | Cada variante usa suas cartas |
+| 4.4c | Modo Sobrevivência | 6.6 | 5 oponentes seguidos, aposta que não sobe, e o quinto é o mofado jogando Curse logo no começo | Sobrevivência termina no 5º oponente |
 | 4.5 | Violência reduzida (baixa prioridade: o jogo já é sem sangue por decisão do grupo) | 6.2 / B7 | Opção no título: dedos "quebrados" em vez de cortados, serra vira bomba com corte para preto | Alternar a opção muda as animações |
 | 4.6 | Tema visual | 6.2 | Segundo tema (ex.: "fita VHS" ou "hospital abandonado") trocável no título; fontes e paleta por tema | Trocar tema muda cores, fonte e ruído |
 | 4.7 | Multiplayer local | 6.3 | Modo 2 jogadores no mesmo teclado; a carta oculta fica escondida até o dono pressionar "olhar" | Duas pessoas jogam; a carta oculta não vaza |
-| 4.8 | Trapaça roteirizada do Anfitrião | 6.6 | No nível 3: jogador recebe Love Your Enemy no início; quando a serra está a 1 do oponente, Anfitrião joga Perfect Draw + Desperation; a luz muda e a TV grita | Sequência acontece no momento certo e é vencível com Love Your Enemy |
+| 4.8 ✅ | Trapaça roteirizada do Anfitrião | 6.6 | `src/engine/trapaca.js` (puro): ao entrar no nível 3 o jogador recebe **Love Your Enemy**; quando a serra fica a **uma derrota** de encostar no Luiz Alberto (`serra + aposta dele >= 15`, conferido no começo de cada rodada), o Kaio joga **Perfect Draw** e **Desperation** por ele, sem esperar a vez. A Desperation exigiu dois efeitos novos: `bet_mod` com alvo `both` (as duas apostas sobem 100, então a próxima derrota mata) e `block_draw` (o jogador não pode mais comprar). A saída é o Love Your Enemy: obriga o Luiz a comprar mais uma carta e estoura a mão que o Perfect Draw fechou. Na tela a luz da sala vira vermelha, a TV rasga e grita, a música para | 14 testes, **os dois caminhos**: a trapaça armando e sendo virada, e a trapaça NÃO acontecendo quando o jogador mata o Luiz encarecendo a aposta dele dentro da rodada. Roteiro `4.8.mjs` em velocidade normal, seed 44 no nível 3: a trapaça arma na rodada 4 e a virada fecha em 1000 pontos. **Feito em 2026-09-23: 276 testes, 7 prints + vídeo** |
 
 ---
 
@@ -219,3 +221,40 @@ Cada item é independente. Fazer na ordem abaixo; parar onde o tempo acabar.
 - "Explique este trecho de código como para alguém que nunca viu JavaScript." (para o relatório sobre déficit de compreensão)
 - "Rode os testes e me mostre a saída."
 - "Liste o que você fez além do que pedi." (para detectar escopo extra)
+
+---
+
+## Números finais (2026-09-23)
+
+Levantados com `find`/`wc` sobre o repositório, para o relatório.
+
+### Linhas de código por pasta
+
+| Pasta | Linhas | Arquivos | O que é |
+|---|---:|---:|---|
+| `Blackjack_21/src/engine/` | 1.911 | 11 | as regras, tudo puro e sem DOM |
+| `Blackjack_21/src/ui/` | 5.485 | 13 | desenho, som, telas, efeitos, armazenamento |
+| `Blackjack_21/src/ui/sprites/` | 1.385 | 2 | as grades de pixel art geradas pelo Python |
+| `Blackjack_21/tests/` | 3.204 | 16 | os 276 testes |
+| `Blackjack_21/tools/roteiros/` | 2.188 | 26 | um roteiro de captura por sub-passo |
+| `Blackjack_21/tools/arte/` | 905 | 3 | geradores de pixel art (Python) |
+| `Blackjack_21/tools/` | 673 | 6 | captura, servidor, simulador, comparador de IA |
+| `Blackjack_21/data/` | 709 | 1 | o catálogo de cartas trunfo |
+| HTML (`index.html`, `tests/tests.html`) | 213 | 2 | |
+| **Total de código** | **16.673** | **80** | |
+
+Documentos do relatório (`CLAUDE.md`, `PLANO_DE_DESENVOLVIMENTO.md`, `PROMPTS_E_RESPOSTAS.md`, `REFERENCIAS.md`, `RELATORIO.md`, `progresso/LINHA_DO_TEMPO.md`): **1.597 linhas**, fora os resumos de etapa.
+
+### O resto
+
+| | |
+|---|---:|
+| Testes automáticos | 276 |
+| Prompts registrados | 29 |
+| Commits | 4 (um por etapa) |
+| Prints de evidência | 136 |
+| Vídeos de captura | 24 |
+| Sub-passos concluídos | 21 |
+| Cartas trunfo implementadas | 27 das 27 do jogador |
+
+A relação entre código de jogo (`src/`, 8.781 linhas) e código de apoio (testes e ferramentas, 6.970 linhas) ficou perto de 1,3 para 1 — quase tanto esforço em provar que funciona quanto em fazer funcionar.

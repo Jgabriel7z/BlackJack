@@ -25,6 +25,7 @@ Se o PDF e o plano discordarem, o plano vence (ele registra as decisões do grup
 ## Regras de código
 
 - **`src/engine/` é lógica pura.** Nada dentro dela pode importar ou tocar em DOM, `document`, `window`, Canvas, Web Audio ou `localStorage`. Só dados e funções.
+- **Só `src/ui/armazenamento.js` toca em `localStorage`** (4.1). Toda operação dele está dentro de try/catch e ele aceita um "depósito" por parâmetro, para dar para testar no terminal com um depósito de mentira. O formato do que é salvo mora em `src/engine/progresso.js`, que é puro; `normalizar` é a porta de entrada obrigatória de tudo o que volta do disco, porque aquilo pode estar velho, cortado ou mexido à mão.
 - **Aleatoriedade sempre com seed.** Qualquer coisa aleatória (embaralhar, chance de trunfo, IA que sorteia, piscar de lâmpada) usa o gerador de `src/engine/rng.js` com uma seed conhecida. `Math.random` só pode ser chamado para escolher uma seed nova quando o usuário não informa uma. A seed da partida fica guardada no estado (`jogo.seed`) para permitir repetir a mesma partida.
 - **Nomes dos personagens vêm de `src/config.js`** (`NOMES`). Nenhum nome de personagem fixo em outro arquivo.
 - Identificadores e comentários em **português**. Comentário de cabeçalho em cada arquivo dizendo o que ele faz e de qual sub-passo veio.
@@ -46,13 +47,27 @@ Necessários para a ferramenta de captura funcionar e os prints saírem sempre i
 - **Console limpo:** nenhum `console.error`, exceção ou requisição 404 durante o uso normal. A captura falha se houver.
 - **Layout pensado para 1280x720**, que é o viewport dos prints e do vídeo.
 - Ações do jogador acessíveis por elementos com `id` ou `data-acao` estáveis (ex.: `#botao-hit`, `#botao-stay`, `#botao-proxima`) para os roteiros clicarem sem depender de texto.
-- **Ganchos para roteiros:** `body[data-pronto="1"]` depois do primeiro desenho, `body[data-fase]` com a fase do jogo, `body[data-animacao]` com o passo atual, e `body[data-meu-total]`, `data-meus-dedos`, `data-dedos-dele`, `data-pontos`, `data-alvo`, `data-nivel`, `data-medidor-meu`, `data-medidor-dele`, `data-serra`, `data-iniciais` (as três letras sendo digitadas), `data-placar` (`INI:pontos;...`), `data-demonstracao`, `data-trunfos-na-mesa` e `data-trunfo-slots` (`id@x,y` de cada carta da minha mão, para os roteiros clicarem) — tudo já visível na tela. Nunca expor as cartas do oponente nem o objeto `jogo` no DOM ou em `window`: a carta oculta dele não pode ser descoberta pelo inspetor nem pelo console.
+- **Ganchos para roteiros:** `body[data-pronto="1"]` depois do primeiro desenho, `body[data-fase]` com a fase do jogo, `body[data-animacao]` com o passo atual, e `body[data-meu-total]`, `data-meus-dedos`, `data-dedos-dele`, `data-pontos`, `data-alvo`, `data-nivel`, `data-medidor-meu`, `data-medidor-dele`, `data-serra`, `data-iniciais` (as três letras sendo digitadas), `data-placar` (`INI:pontos;...`), `data-demonstracao`, `data-salvando`, `data-desbloqueios`, `data-partidas-jogadas`, `data-trunfos-na-mesa` e `data-trunfo-slots` (`id@x,y` de cada carta da minha mão, para os roteiros clicarem) — tudo já visível na tela. Nunca expor as cartas do oponente nem o objeto `jogo` no DOM ou em `window`: a carta oculta dele não pode ser descoberta pelo inspetor nem pelo console.
 
 ## Arte em pixel art
 
 - Os sprites grandes (mão do João, Luiz Alberto) **não são digitados à mão**: vêm dos geradores em `tools/arte/gerar_*.py` (Python + Pillow), que rasterizam a forma, sombreiam e exportam grades de caracteres para `src/ui/sprites/*.js` mais um `preview_*.png`. Para mudar um sprite: editar o gerador, rodar `python tools/arte/gerar_<nome>.py`, abrir o preview, iterar. Retoques pixel a pixel podem ser feitos direto no `.js`, mas se o gerador rodar de novo eles se perdem.
 - Cada parte que pode sumir ou se mexer (dedo, cabeça) é uma **camada separada**; animação de personagem é por **quadros** (grades alternativas), não por rotação no canvas, para manter os pixels nítidos.
 - Python só é usado nas ferramentas de arte; o jogo continua sem dependências.
+
+## Som (a partir da Etapa 4)
+
+- Tudo sintetizado em `src/ui/audio.js`; **nenhum arquivo de áudio** entra no projeto.
+- O som só acorda depois de um gesto do usuário (regra do navegador) e **nunca pode derrubar o jogo**: sem Web Audio, ou com ele falhando, o jogo roda mudo.
+- **O Playwright não grava áudio.** Todo vídeo de captura é mudo, e isso não é defeito. Para provar som num roteiro, conferir `body[data-som]` (último efeito) e `body[data-sons]` (quantos já tocaram). Para gravar com som de verdade: `progresso/etapa-4/4.2/COMO-GRAVAR-COM-SOM.md`.
+
+## Dados guardados (a partir da Etapa 4)
+
+- Recorde, lista das cinco melhores, estatísticas (parte C3 do PDF) e desbloqueios (tabela A5) ficam no `localStorage`. **Nada disso pode ser obrigatório**: com o armazenamento quebrado o jogo joga igual, só não guarda, e o título avisa.
+- **A demonstração não escreve nada**: nem recorde, nem lista, nem estatística, nem desbloqueio.
+- **Desbloquear uma carta tira ela do sorteio até ser ganha**, mas ela continua no catálogo, então `?trunfos=` ainda consegue forçá-la numa captura.
+- **Mexer no sorteio muda partidas antigas.** Ao acrescentar ou prender cartas, medir antes: um script que simula as seeds de referência (1617 da regressão, 177 da captura final da Etapa 3) e depois rodar `3.regressao`. Cartas a mais entregues por recompensa vêm num laço separado, DEPOIS do sorteio normal, para que sem recompensa nenhuma a sequência de sorteios seja idêntica à de antes.
+- Cada captura roda num perfil de navegador novo, então o `localStorage` começa vazio: dentro de uma mesma captura, porém, ele atravessa os `abrir()` — é assim que o roteiro do 4.1 prova a persistência.
 
 ## Telas (a partir da Etapa 3)
 

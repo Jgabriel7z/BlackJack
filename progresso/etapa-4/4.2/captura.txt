@@ -1,0 +1,39 @@
+Sub-passo: 4.2
+Roteiro: Som: uma rodada inteira com punição, com os eventos conferidos (seed 31)
+Data: 2026-09-23T18:43:44.434Z
+Duração: 25.2 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 6
+  - 01-titulo-com-o-aviso-do-som.png
+  - 02-mesa-com-som-ligado.png
+  - 03-silencio-antes-da-revelacao.png
+  - 04-impacto-e-abafamento.png
+  - 05-som-desligado.png
+  - 06-som-religado.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 4.2 — Som: uma rodada inteira com punição, com os eventos conferidos (seed 31)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-4\4.2
+Servidor: http://127.0.0.1:51250
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=31
+print  01-titulo-com-o-aviso-do-som.png
+nota   as cartas sendo distribuídas já fazem barulho de papel
+print  02-mesa-com-som-ligado.png
+nota   os dois pararam: o ambiente cala e fica só a carta virando (B4)
+print  03-silencio-antes-da-revelacao.png
+nota   anunciado o resultado, o ambiente volta
+nota   a lâmina da guilhotina sendo armada
+nota   impacto seco: zumbido agudo e todo o som abafado por alguns segundos
+print  04-impacto-e-abafamento.png
+nota   sequência ouvida: nenhum → carta → silencio → ambiente-volta → lamina → impacto
+nota   total de sons disparados até aqui: 10
+print  05-som-desligado.png
+nota   M desliga o som e a mesa avisa no canto
+nota   M de novo religa
+print  06-som-religado.png
+vídeo  video.mp4 (convertido com ffmpeg)

@@ -1,5 +1,13 @@
 // Captura final da Etapa 2 — uma partida passando pelos três níveis.
 //
+// HISTÓRICO: este roteiro retrata o jogo como ele era no fim da Etapa 2.
+// O sub-passo 4.4a acrescentou 11 cartas trunfo ao monte, e com o
+// sorteio diferente a seed 21 mudou de rumo: hoje ela termina no nível
+// 2, com uma troca de nível em vez de duas, e o roteiro falha na
+// conferência. Não é defeito: é o jogo ter crescido. A evidência
+// original está guardada em progresso/etapa-2/final/, e quem confere que
+// o nível 1 continua igual é `node tools/capturar.mjs 3.regressao`.
+//
 // Roda com ?rapido=1 para o vídeo não ficar longo demais, mas as trocas
 // de nível são marcadas com `ritmoReal` no código e continuam na
 // velocidade normal: dá para ler a fala do anfitrião.

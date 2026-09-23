@@ -10,7 +10,7 @@ import {
   darTrunfo,
   podeJogarTrunfo,
   melhorCartaDoBaralho,
-  CARTAS_DA_ETAPA_2,
+  CARTAS_DO_JOGADOR,
 } from '../src/engine/trumps.js';
 import {
   criarJogo,
@@ -62,14 +62,17 @@ const abertas = (jogo, lado) => jogo.jogadores[lado].abertas;
 //  Catálogo
 // ---------------------------------------------------------------------
 
-teste('trunfos: catálogo traz as 16 cartas desta etapa, e só elas', () => {
-  assertIgual(CATALOGO.disponiveis.length, CARTAS_DA_ETAPA_2.length);
-  for (const id of CARTAS_DA_ETAPA_2) assert(CATALOGO.porId.has(id), `faltou ${id}`);
-  assert(!CATALOGO.porId.has('harvest'), 'não deveria trazer cartas da Etapa 4');
+teste('trunfos: catálogo traz as cartas do jogador, e só elas', () => {
+  assertIgual(CATALOGO.disponiveis.length, CARTAS_DO_JOGADOR.length);
+  for (const id of CARTAS_DO_JOGADOR) assert(CATALOGO.porId.has(id), `faltou ${id}`);
+  assert(!CATALOGO.porId.has('curse'), 'carta de inimigo não entra na mão do jogador (4.4b)');
 });
 
-teste('trunfos: catálogo recusa carta com efeito não suportado nesta etapa', () => {
-  assertLanca(() => prepararCatalogo(catalogoJson, { ids: ['trump_switch'] }));
+teste('trunfos: catálogo recusa carta com efeito que o motor não sabe executar', () => {
+  const inventado = {
+    player_cards: [{ id: 'carta_maluca', name: 'Maluca', effects: [{ type: 'efeito_inexistente' }] }],
+  };
+  assertLanca(() => prepararCatalogo(inventado, { ids: ['carta_maluca'] }));
 });
 
 teste('trunfos: o baralho não muda por causa dos trunfos (geradores separados)', () => {

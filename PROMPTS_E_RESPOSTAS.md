@@ -793,7 +793,96 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
 
 ## Fase 5 — Etapa 4: extras
 
-_(preencher)_
+### Prompt 28 — Etapa 4 inteira pedida de uma vez; feito só o 4.1 (persistência)
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> Primeiro extra: salvar no localStorage os recordes, as estatísticas (tem uma lista na parte C3 do PDF) e os desbloqueios da tabela A5 que dão certo com as cartas que a gente já tem. Se o localStorage der erro o jogo tem que continuar funcionando. Coloca no título uma opção pra apagar tudo.
+>
+> Captura: joga, recarrega a página e tira print mostrando que o recorde continua lá. Fechamento e para aqui.
+>
+> 4.2 — Som
+> Agora o som. Não quero usar arquivo de áudio nenhum, tudo gerado com Web Audio. Segue a parte B4 do PDF: um som grave de fundo constante, o zumbido da lâmpada, um coração que acelera conforme a aposta sobe e para na revelação, silêncio total antes de virar as cartas, o barulho da carta, da guilhotina, do choque, da serra, e depois da punição um impacto com um apito agudo e o som todo abafado por uns segundos. Chiado quando o Kaio fala na TV.
+>
+> Tecla M pra mutar. Lembra que o navegador só deixa tocar som depois que o usuário clica em alguma coisa.
+>
+> Captura: vídeo com som de uma rodada com punição. Se o Playwright não gravar áudio, me avisa e me diz como gravar na mão. Fechamento e para aqui.
+>
+> 4.3 — Efeitos visuais
+> Efeitos visuais agora: granulado, vinheta, linhas de TV, aquela separação de cores leve nas bordas e tremor. Tudo isso fica mais forte quanto maior a aposta e mais perto da morte (parte B3). Quando o Kaio fala, a imagem da TV distorce. Coloca opção de desligar no título.
+>
+> Fica de olho no desempenho. O PDF sugere desenhar numa resolução baixa e esticar, se ajudar pode fazer assim.
+>
+> Captura: a mesma cena com aposta 1 e perto da morte, lado a lado, e um vídeo do efeito aumentando. Fechamento e para aqui.
+>
+> 4.4 — Resto dos trunfos, variantes e Sobrevivência
+> Esse é grande, então vamos em três partes e você para depois de cada uma pra eu testar:
+> (a) as cartas trunfo que faltam do jogador, com teste
+> (b) as cartas dos inimigos e as versões do Luiz Alberto (arame farpado, mãos ensanguentadas, mofado, marcas de contagem, morto-vivo e cabeção), cada uma com um visual diferente e sem sangue
+> (c) o modo Sobrevivência: 5 oponentes seguidos, a aposta não sobe, e o quinto é o mofado que joga o Curse logo no começo
+>
+> Faz só a (a) agora. Captura e fechamento no fim de cada parte.
+>
+> 4.8 — A trapaça do Kaio
+> Por último, a trapaça do final da história (parte A4 e B6 do PDF). No nível 3 o João Gabriel ganha o Love Your Enemy logo no começo. Quando a serra estiver a uma derrota de pegar o Luiz Alberto, o Kaio joga Perfect Draw e Desperation: a luz muda de cor, a TV distorce e grita, a música para. Tem que dar pra ganhar usando o Love Your Enemy. E se o jogador matar o Luiz Alberto antes aumentando a aposta dele, a trapaça nem acontece.
+>
+> Quero teste dos dois caminhos. Captura: vídeo da trapaça em velocidade normal e da virada com o Love Your Enemy. Fechamento.
+
+- **Observação sobre o formato:** a mensagem trouxe **cinco sub-passos de uma vez** (4.1, 4.2, 4.3, 4.4a e 4.8), mas cada bloco termina com "Fechamento e para aqui", e o 4.4 diz "você para depois de cada uma pra eu testar". Foi feito **só o 4.1**; os outros quatro ficaram na fila, na ordem em que vieram. Foi a primeira vez que o pedido e a regra do projeto ("um sub-passo por prompt") apontaram para o mesmo lado por escrito.
+
+#### Sub-passo 4.1 — persistência
+
+- **Resposta (resumo):** as três coisas pedidas cabem num objeto só, e ele é lógica pura: `src/engine/progresso.js` tem as estatísticas da parte C3 do PDF, as recompensas da tabela A5 e um `normalizar` que transforma qualquer coisa vinda de fora num progresso válido. Quem toca em `localStorage` é um arquivo só, `src/ui/armazenamento.js`, com try/catch em toda operação. O recorde e a lista das cinco melhores não foram duplicados: passaram a ser os mesmos objetos que `score.js` e `placar.js` já mexiam, agora com carona para o disco. Das treze linhas da tabela A5, quatro funcionam com as cartas de hoje; as outras esperam as cartas do 4.4a e o modo Sobrevivência do 4.4c. No título, DEL apaga tudo, em dois tempos.
+- **Arquivos gerados/alterados:** `src/engine/progresso.js`, `src/ui/armazenamento.js`, `tests/progresso.test.js` e `tools/roteiros/4.1.mjs` (novos); alterados `src/engine/trumps.js`, `src/engine/game.js`, `src/ui/main.js`, `src/ui/render.js`, `tests/run-node.mjs`, `tests/tests.html`, `CLAUDE.md`, `PLANO_DE_DESENVOLVIMENTO.md`, `progresso/LINHA_DO_TEMPO.md`, `progresso/etapa-2/RESUMO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **"Se o localStorage der erro o jogo tem que continuar funcionando" virou teste, não promessa.** Os testes injetam um depósito de mentira que lança erro em `getItem`, `setItem` e `removeItem`, e outro que devolve JSON quebrado. Nos dois casos o jogo carrega zerado, continua jogando e o título passa a avisar em vermelho que nada está sendo guardado. Deu para testar isso no terminal porque o `armazenamento.js` aceita o depósito por parâmetro — sem isso seria preciso um navegador.
+  - **Desbloquear uma carta significa que antes ela não estava lá.** Go For 24 e Go For 27 saíram do sorteio até serem ganhas. Mas elas continuam no catálogo, e só a lista de sorteáveis encolhe: assim o `?trunfos=go_for_24` das capturas antigas continua funcionando.
+  - **Isso muda o jogo, então foi medido antes de seguir.** Com o sorteio passando de 16 para 14 cartas, a mão de trunfos muda e algumas partidas mudam de rumo. Um script comparou as seeds de referência: a 1617 (a regressão canônica) e a 177 (a captura final da Etapa 3) **não mudaram**, nem a 44 no nível 3. A 21 mudou — antes o Luiz Alberto vencia na rodada 10, agora o João Gabriel vence na 14. A regressão foi rodada de novo depois da mudança e passou igual.
+  - **Erro encontrado no próprio relatório.** Ao investigar a seed 21 apareceu que o `progresso/etapa-2/RESUMO.md` chamava a captura final da Etapa 2 de "vitória nos três níveis", enquanto o print e o `captura.txt` sempre disseram "João Gabriel perdeu, rodada 10, 963 pontos". A legenda foi corrigida, com a correção datada e explicada no próprio arquivo. A causa: o roteiro `2.final` conferia que a partida acabou e que houve duas trocas de nível, mas nunca conferiu **quem ganhou** — e a legenda foi escrita do jeito que se esperava, não do jeito que estava na imagem.
+  - **A ordem dos sorteios teve de ser preservada.** A carta trunfo a mais das recompensas é entregue num laço separado, DEPOIS do sorteio normal, e não dentro dele: assim, sem nenhuma recompensa, a sequência de números sorteados é exatamente a de antes e as seeds antigas continuam valendo.
+  - **A captura precisou de dois ritmos.** A parte do apagar não cabia no `?rapido=1`: com ele o título dura menos de um segundo antes de chamar a demonstração, e não dava tempo de apertar DEL duas vezes. O roteiro recarrega a página sem o `?rapido` para essa parte — o que, de brinde, virou mais uma prova de que os dados voltam do disco.
+  - **A seed da captura foi escolhida pela recompensa, não pelo placar.** Era preciso uma partida curta que destravasse alguma coisa de verdade, senão o desbloqueio ficaria sem prova visual. "Vencer tendo estourado" é a única condição alcançável numa partida só; um script de busca confirmou que a seed 44 no nível 3 (a mesma do 3.3) serve.
+  - Ficou de fora de propósito, **neste sub-passo**: som (4.2), efeitos visuais (4.3), as cartas que faltam (4.4a), variantes e Sobrevivência (4.4b/c) e a trapaça do Kaio (4.8). O grupo depois mandou seguir até o fim do prompt, e os outros vieram em seguida, cada um com o seu fechamento.
+- **Impressões da equipe:**
+
+#### Sub-passo 4.2 — som
+
+- **Resposta (resumo):** `src/ui/audio.js` sintetiza tudo com Web Audio, sem um único arquivo de áudio. O desenho que resolveu a parte B4 inteira foi separar o som em **dois barramentos** — ambiente (drone, lâmpada, coração, serra, chiado da TV) e foley (carta, lâmina, capacitor, impacto) — passando por um **abafador** passa-baixa antes do mestre. O "silêncio antes da revelação" é o ambiente indo a zero com o foley intacto; o "abafamento depois da punição" é o abafador fechando para os dois, com o zumbido agudo ligado por fora dele, como se fosse dentro do ouvido. **M** liga e desliga.
+- **Arquivos gerados/alterados:** `src/ui/audio.js`, `tests/audio.test.js`, `tools/roteiros/4.2.mjs` e `progresso/etapa-4/4.2/COMO-GRAVAR-COM-SOM.md` (novos); alterados `src/ui/main.js`, `src/ui/render.js`, `tests/run-node.mjs`, `tests/tests.html`, `CLAUDE.md`, `PLANO_DE_DESENVOLVIMENTO.md`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **O Playwright não grava áudio, e não tem opção para isso.** O vídeo da captura é mudo. Para o som não ficar sem prova nenhuma, cada efeito passou a ser anotado em `body[data-som]`, e o roteiro confere que a sequência `carta → silêncio → ambiente volta → lâmina → impacto` aconteceu na ordem certa. Para ouvir de verdade, escrevi um guia de gravação manual (Game Bar, OBS e ffmpeg) na pasta da evidência.
+  - **Deu para testar som no terminal.** O `criarAudio` aceita o construtor do `AudioContext` por parâmetro, então os testes passam um de mentira que só conta o que foi criado. Isso prova que o caminho do som monta inteiro, que nenhum efeito lança erro, que mudo não cria oscilador nenhum e que o coração realmente para na revelação e volta depois — tudo sem abrir navegador.
+  - **A ordem do silêncio não era a que eu tinha escrito no roteiro.** Eu esperava `silêncio → lâmina → impacto → ambiente volta`, e o que acontece é o ambiente voltar quando o **resultado é anunciado**, antes de a lâmina descer. Olhando de novo, é o certo: o silêncio é da revelação, e quem segura a tensão da punição é o abafamento depois do impacto. Quem estava errado era a expectativa do roteiro.
+  - **M tem um conflito e ele foi resolvido por tela.** Na tela de digitar as iniciais, M é uma letra do nome; em todas as outras, é o mudo.
+  - Ficou de fora de propósito: a música industrial abafada "vinda de outra sala" que a B4 também cita, e a voz do anfitrião distorcida (há o chiado do alto-falante, mas não fala sintetizada) — são de outra escala de trabalho.
+- **Impressões da equipe:**
+
+### Prompt 29 — Fechamento do trabalho
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> pode continuar, só para quando fazer tudo que o prompt pede
+
+> Quando acabar:
+>
+> Acabou, agora só fechar:
+> - roda todos os testes e todas as capturas finais de novo e me diz se alguma coisa quebrou
+> - faz um progresso/index.html mostrando a evolução etapa por etapa, com os prints e vídeos em ordem e as datas da LINHA_DO_TEMPO.md, pra gente abrir na apresentação
+> - me passa uns números pro relatório: quantas linhas de código por pasta, quantos testes, quantos commits e quantos prompts tem no PROMPTS_E_RESPOSTAS.md
+> - commit e tag final
+>
+> e faz commit de tudo nesse repositorio: https://github.com/Jgabriel7z/BlackJack.git
+
+- **Resposta (resumo):** o primeiro recado liberou a fila do prompt 28 (4.2, 4.3, 4.4a e 4.8, feitos em sequência, cada um com o seu fechamento). O segundo é o encerramento: rodar tudo de novo, montar a página da apresentação, levantar os números e publicar.
+- **Arquivos gerados/alterados:** `progresso/index.html` e `Blackjack_21/tools/gerar_index_progresso.py` (novos), `progresso/etapa-4/RESUMO.md` (novo), `tools/roteiros/2.final.mjs` (marcado como histórico), `PLANO_DE_DESENVOLVIMENTO.md`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **Uma coisa quebrou, e era previsível.** A captura final da Etapa 2 (seed 21) não se reproduz mais: com as 11 cartas trunfo que o 4.4a acrescentou ao sorteio, aquela partida passou a terminar no nível 2 em vez de atravessar os três, e o roteiro falha ao contar as trocas de nível. O roteiro foi marcado como **histórico**, como já tinha acontecido com o `1.final`. É a segunda vez no trabalho que uma evidência antiga deixa de se reproduzir porque o jogo cresceu, e nas duas a saída foi a mesma: guardar a evidência, marcar o roteiro e apontar quem faz a regressão de verdade.
+  - **O que não quebrou é o que importa.** A partida de referência desde a Etapa 1 (seed 1617) continua dando 3 rodadas e 2×0 no nível 1, pela quarta etapa seguida; e o ciclo completo da Etapa 3 (seed 177) dá os mesmos 175 pontos e a mesma lista. Os 276 testes passam.
+  - **A página da apresentação é gerada, não escrita à mão.** `tools/gerar_index_progresso.py` lê as pastas de evidência, pega a descrição de cada captura no `captura.txt` e a data na `LINHA_DO_TEMPO.md`, e monta o `progresso/index.html` com 136 prints e 24 vídeos em ordem. Dá para rodar de novo quando houver evidência nova, em vez de a página envelhecer.
+  - **A nota sobre o vídeo mudo entrou no rodapé da página**, porque é a primeira pergunta que alguém faz ao abrir.
+- **Impressões da equipe:**
 
 ---
 
@@ -806,4 +895,4 @@ _(preencher)_
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
 | Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
 | Etapa 3 — Abertura | 4 (sub-passos 3.1 a 3.5; o prompt 26 trouxe 3.4 e 3.5 juntos) | 1 (fechamento) | 5 |
-| Etapa 4 — Extras | | | |
+| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 1 (prompt 29: seguir até o fim da fila e fechar o trabalho) | 2 |

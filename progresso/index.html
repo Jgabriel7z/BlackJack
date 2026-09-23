@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>21 — a evolução do trabalho</title>
+<link rel="icon" href="data:,">
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; padding: 0 24px 80px;
+    background: #0b0a0a; color: #ece6da;
+    font-family: "Courier New", Courier, monospace; line-height: 1.5;
+  }
+  header { padding: 48px 0 24px; border-bottom: 1px solid #2a2724; }
+  h1 { font-size: 44px; margin: 0 0 8px; letter-spacing: 2px; }
+  .equipe { color: #b0a89a; margin: 0 0 16px; }
+  .numeros { color: #8e857a; font-size: 14px; }
+  .indice { margin: 16px 0 0; font-size: 14px; }
+  .indice a { color: #e0554a; text-decoration: none; }
+  h2 {
+    margin: 56px 0 8px; font-size: 26px; color: #f2ece0;
+    border-left: 4px solid #e0554a; padding-left: 12px;
+  }
+  .passo { margin: 28px 0 40px; padding: 16px 0 0; border-top: 1px solid #201d1b; }
+  .passo h3 { margin: 0 0 4px; font-size: 17px; font-weight: normal; }
+  .rotulo { color: #f2ece0; text-transform: uppercase; letter-spacing: 1px; }
+  .data { color: #6d685f; margin-left: 12px; font-size: 13px; }
+  .titulo { margin: 0 0 6px; color: #b0a89a; font-size: 14px; }
+  .descricao { margin: 0 0 10px; color: #8e857a; font-size: 13px; }
+  .erro { color: #e0554a; }
+  .notas { margin: 8px 0 14px; padding-left: 18px; color: #9a9184; font-size: 13px; }
+  .galeria { display: flex; flex-wrap: wrap; gap: 12px; }
+  figure { margin: 0; width: 300px; }
+  img { width: 100%; display: block; border: 1px solid #2a2724; background: #000; }
+  figcaption { font-size: 11px; color: #6d685f; margin-top: 4px; }
+  video { width: 640px; max-width: 100%; display: block; margin: 0 0 14px; border: 1px solid #2a2724; }
+  .anexo a { color: #e0554a; font-size: 13px; }
+  footer { margin-top: 64px; padding-top: 16px; border-top: 1px solid #2a2724; color: #6d685f; font-size: 12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>21</h1>
+  <p class="equipe">João Gabriel · Luiz Alberto · Kaio — Atividade 02</p>
+  <p class="numeros">136 prints e 24 vídeos, em ordem, de todas as etapas.
+  Cada bloco traz o que o roteiro de captura conferiu naquele momento.</p>
+  <p class="indice">etapas: <a href="#etapa-1">1</a> · <a href="#etapa-2">2</a> · <a href="#etapa-3">3</a> · <a href="#etapa-4">4</a></p>
+</header>
+<h2 id="etapa-1">Etapa 1 — a base do jogo</h2>
+<p class="anexo"><a href="etapa-1/RESUMO.md">resumo da etapa</a></p>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 1.1</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 1, sub-passo 1.1: motor de regras (guilhotina)</p>
+<p class="descricao">Página de testes do motor de regras (tests/tests.html)</p>
+<ul class="notas">
+<li>resumo dos testes: 40/40 passaram</li>
+</ul>
+<video controls preload="none" src="etapa-1/1.1/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-1/1.1/01-testes.png" target="_blank"><img loading="lazy" src="etapa-1/1.1/01-testes.png" alt="testes"></a><figcaption>testes</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 1.2</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 1, sub-passo 1.2: IA básica</p>
+<p class="descricao">Página de testes com motor de regras + IA básica (tests/tests.html)</p>
+<ul class="notas">
+<li>resumo dos testes: 49/49 passaram</li>
+</ul>
+<video controls preload="none" src="etapa-1/1.2/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-1/1.2/01-testes.png" target="_blank"><img loading="lazy" src="etapa-1/1.2/01-testes.png" alt="testes"></a><figcaption>testes</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 1.3</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 1, sub-passo 1.3: primeira tela (Canvas 2D)</p>
+<p class="descricao">Mesa visual: inicial, após HIT e resultado da rodada (seed 123)</p>
+<ul class="notas">
+<li>fase após HIT: jogando</li>
+<li>fase final: rodada_encerrada; botão &quot;próxima rodada&quot; visível</li>
+</ul>
+<video controls preload="none" src="etapa-1/1.3/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-1/1.3/01-mesa-inicial.png" target="_blank"><img loading="lazy" src="etapa-1/1.3/01-mesa-inicial.png" alt="mesa inicial"></a><figcaption>mesa inicial</figcaption></figure>
+<figure><a href="etapa-1/1.3/02-apos-hit.png" target="_blank"><img loading="lazy" src="etapa-1/1.3/02-apos-hit.png" alt="apos hit"></a><figcaption>apos hit</figcaption></figure>
+<figure><a href="etapa-1/1.3/03-resultado-rodada.png" target="_blank"><img loading="lazy" src="etapa-1/1.3/03-resultado-rodada.png" alt="resultado rodada"></a><figcaption>resultado rodada</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 1.4</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 1, sub-passo 1.4: dar vida à mesa</p>
+<p class="descricao">Rodada inteira com animações no ritmo real (seed 123, sem rapido)</p>
+<ul class="notas">
+<li>HIT desabilitado enquanto pensa: true</li>
+<li>fase final: rodada_encerrada</li>
+</ul>
+<video controls preload="none" src="etapa-1/1.4/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-1/1.4/01-distribuindo-carta.png" target="_blank"><img loading="lazy" src="etapa-1/1.4/01-distribuindo-carta.png" alt="distribuindo carta"></a><figcaption>distribuindo carta</figcaption></figure>
+<figure><a href="etapa-1/1.4/02-mesa-pronta.png" target="_blank"><img loading="lazy" src="etapa-1/1.4/02-mesa-pronta.png" alt="mesa pronta"></a><figcaption>mesa pronta</figcaption></figure>
+<figure><a href="etapa-1/1.4/03-carta-deslizando.png" target="_blank"><img loading="lazy" src="etapa-1/1.4/03-carta-deslizando.png" alt="carta deslizando"></a><figcaption>carta deslizando</figcaption></figure>
+<figure><a href="etapa-1/1.4/04-oponente-pensando.png" target="_blank"><img loading="lazy" src="etapa-1/1.4/04-oponente-pensando.png" alt="oponente pensando"></a><figcaption>oponente pensando</figcaption></figure>
+<figure><a href="etapa-1/1.4/05-escurecendo.png" target="_blank"><img loading="lazy" src="etapa-1/1.4/05-escurecendo.png" alt="escurecendo"></a><figcaption>escurecendo</figcaption></figure>
+<figure><a href="etapa-1/1.4/06-revelando-oculta.png" target="_blank"><img loading="lazy" src="etapa-1/1.4/06-revelando-oculta.png" alt="revelando oculta"></a><figcaption>revelando oculta</figcaption></figure>
+<figure><a href="etapa-1/1.4/07-resultado.png" target="_blank"><img loading="lazy" src="etapa-1/1.4/07-resultado.png" alt="resultado"></a><figcaption>resultado</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 1.5</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 1, sub-passo 1.5: punição e fim de jogo (Etapa 1 concluída)</p>
+<p class="descricao">Duas partidas completas (seeds 1617 e 31): guilhotina, tela final e jogar de novo</p>
+<ul class="notas">
+<li>joao-vence: seed 1617, dedos João 2 x Luiz 0</li>
+<li>joao-perde: seed 31, dedos João 0 x Luiz 3</li>
+<li>reinício: rodada 1, 5/5 dedos para os dois</li>
+</ul>
+<video controls preload="none" src="etapa-1/1.5/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-1/1.5/01-guilhotina-joao-vence.png" target="_blank"><img loading="lazy" src="etapa-1/1.5/01-guilhotina-joao-vence.png" alt="guilhotina joao vence"></a><figcaption>guilhotina joao vence</figcaption></figure>
+<figure><a href="etapa-1/1.5/02-fim-joao-vence.png" target="_blank"><img loading="lazy" src="etapa-1/1.5/02-fim-joao-vence.png" alt="fim joao vence"></a><figcaption>fim joao vence</figcaption></figure>
+<figure><a href="etapa-1/1.5/03-guilhotina-joao-perde.png" target="_blank"><img loading="lazy" src="etapa-1/1.5/03-guilhotina-joao-perde.png" alt="guilhotina joao perde"></a><figcaption>guilhotina joao perde</figcaption></figure>
+<figure><a href="etapa-1/1.5/04-fim-joao-perde.png" target="_blank"><img loading="lazy" src="etapa-1/1.5/04-fim-joao-perde.png" alt="fim joao perde"></a><figcaption>fim joao perde</figcaption></figure>
+<figure><a href="etapa-1/1.5/05-reinicio.png" target="_blank"><img loading="lazy" src="etapa-1/1.5/05-reinicio.png" alt="reinicio"></a><figcaption>reinicio</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">captura final da etapa</span></h3>
+<p class="descricao">Partida inteira em velocidade normal (seed 1617) até a tela final</p>
+<ul class="notas">
+<li>seed 1617: dedos João 2 x Luiz 0</li>
+</ul>
+<video controls preload="none" src="etapa-1/final/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-1/final/01-mesa-rodada-1.png" target="_blank"><img loading="lazy" src="etapa-1/final/01-mesa-rodada-1.png" alt="mesa rodada 1"></a><figcaption>mesa rodada 1</figcaption></figure>
+<figure><a href="etapa-1/final/02-oponente-pensando.png" target="_blank"><img loading="lazy" src="etapa-1/final/02-oponente-pensando.png" alt="oponente pensando"></a><figcaption>oponente pensando</figcaption></figure>
+<figure><a href="etapa-1/final/03-revelacao.png" target="_blank"><img loading="lazy" src="etapa-1/final/03-revelacao.png" alt="revelacao"></a><figcaption>revelacao</figcaption></figure>
+<figure><a href="etapa-1/final/04-guilhotina.png" target="_blank"><img loading="lazy" src="etapa-1/final/04-guilhotina.png" alt="guilhotina"></a><figcaption>guilhotina</figcaption></figure>
+<figure><a href="etapa-1/final/05-tela-final.png" target="_blank"><img loading="lazy" src="etapa-1/final/05-tela-final.png" alt="tela final"></a><figcaption>tela final</figcaption></figure>
+</div>
+</section>
+<h2 id="etapa-2">Etapa 2 — níveis, pontuação e cartas trunfo</h2>
+<p class="anexo"><a href="etapa-2/RESUMO.md">resumo da etapa</a></p>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 2.1</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 2, sub-passo 2.1: pontuação (+ ajustes visuais)</p>
+<p class="descricao">Visor de pontos: zerado, após 1ª vitória e após 2ª vitória seguida (seed 41)</p>
+<ul class="notas">
+<li>pontos no início: 0</li>
+<li>pontos após a rodada 1: 150</li>
+<li>pontos após a rodada 2: 375</li>
+<li>total conferido: 375 = 150 + 225</li>
+</ul>
+<video controls preload="none" src="etapa-2/2.1/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-2/2.1/01-visor-zerado.png" target="_blank"><img loading="lazy" src="etapa-2/2.1/01-visor-zerado.png" alt="visor zerado"></a><figcaption>visor zerado</figcaption></figure>
+<figure><a href="etapa-2/2.1/02-primeira-vitoria.png" target="_blank"><img loading="lazy" src="etapa-2/2.1/02-primeira-vitoria.png" alt="primeira vitoria"></a><figcaption>primeira vitoria</figcaption></figure>
+<figure><a href="etapa-2/2.1/03-segunda-vitoria-multiplicador.png" target="_blank"><img loading="lazy" src="etapa-2/2.1/03-segunda-vitoria-multiplicador.png" alt="segunda vitoria multiplicador"></a><figcaption>segunda vitoria multiplicador</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 2.2</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 2, sub-passo 2.2: cartas trunfo (só lógica)</p>
+<p class="descricao">Página de testes com motor, IA, animação, pontuação e cartas trunfo (tests/tests.html)</p>
+<ul class="notas">
+<li>resumo dos testes: 106/106 passaram</li>
+</ul>
+<video controls preload="none" src="etapa-2/2.2/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-2/2.2/01-testes.png" target="_blank"><img loading="lazy" src="etapa-2/2.2/01-testes.png" alt="testes"></a><figcaption>testes</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 2.3</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 2, sub-passo 2.3: cartas trunfo na tela</p>
+<p class="descricao">Mão de trunfos, cartas na mesa, dica no mouse e o estalo da placa (seed 41)</p>
+<ul class="notas">
+<li>mão inicial: two_up@686,660;shield@762,660;go_for_24@838,660</li>
+<li>depois do Two-Up, na minha mesa: two_up</li>
+<li>alvo: 21 -&gt; 24</li>
+</ul>
+<video controls preload="none" src="etapa-2/2.3/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-2/2.3/01-mao-de-trunfos.png" target="_blank"><img loading="lazy" src="etapa-2/2.3/01-mao-de-trunfos.png" alt="mao de trunfos"></a><figcaption>mao de trunfos</figcaption></figure>
+<figure><a href="etapa-2/2.3/02-dica-no-mouse.png" target="_blank"><img loading="lazy" src="etapa-2/2.3/02-dica-no-mouse.png" alt="dica no mouse"></a><figcaption>dica no mouse</figcaption></figure>
+<figure><a href="etapa-2/2.3/03-jogou-two-up.png" target="_blank"><img loading="lazy" src="etapa-2/2.3/03-jogou-two-up.png" alt="jogou two up"></a><figcaption>jogou two up</figcaption></figure>
+<figure><a href="etapa-2/2.3/04-jogou-shield.png" target="_blank"><img loading="lazy" src="etapa-2/2.3/04-jogou-shield.png" alt="jogou shield"></a><figcaption>jogou shield</figcaption></figure>
+<figure><a href="etapa-2/2.3/05-estalo-da-placa.png" target="_blank"><img loading="lazy" src="etapa-2/2.3/05-estalo-da-placa.png" alt="estalo da placa"></a><figcaption>estalo da placa</figcaption></figure>
+<figure><a href="etapa-2/2.3/06-jogou-go-for-24.png" target="_blank"><img loading="lazy" src="etapa-2/2.3/06-jogou-go-for-24.png" alt="jogou go for 24"></a><figcaption>jogou go for 24</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 2.4</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 2, sub-passo 2.4: níveis 2 (choque) e 3 (serra)</p>
+<p class="descricao">Níveis 2 (choque) e 3 (serra), uma punição em cada e a troca de nível com o Kaio</p>
+<ul class="notas">
+<li>nível 2: medidores em 0 e 0</li>
+<li>depois do choque: medidores em 1 e 0</li>
+<li>nível 3: serra na marca 7 de 15</li>
+<li>depois da rodada: serra 7 -&gt; 6</li>
+<li>depois da troca: nível 2, medidores zerados em 0/0</li>
+</ul>
+<video controls preload="none" src="etapa-2/2.4/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-2/2.4/01-nivel-2-choque.png" target="_blank"><img loading="lazy" src="etapa-2/2.4/01-nivel-2-choque.png" alt="nivel 2 choque"></a><figcaption>nivel 2 choque</figcaption></figure>
+<figure><a href="etapa-2/2.4/02-nivel-2-punicao.png" target="_blank"><img loading="lazy" src="etapa-2/2.4/02-nivel-2-punicao.png" alt="nivel 2 punicao"></a><figcaption>nivel 2 punicao</figcaption></figure>
+<figure><a href="etapa-2/2.4/03-nivel-3-serra.png" target="_blank"><img loading="lazy" src="etapa-2/2.4/03-nivel-3-serra.png" alt="nivel 3 serra"></a><figcaption>nivel 3 serra</figcaption></figure>
+<figure><a href="etapa-2/2.4/04-nivel-3-punicao.png" target="_blank"><img loading="lazy" src="etapa-2/2.4/04-nivel-3-punicao.png" alt="nivel 3 punicao"></a><figcaption>nivel 3 punicao</figcaption></figure>
+<figure><a href="etapa-2/2.4/05-nivel-1-guilhotina.png" target="_blank"><img loading="lazy" src="etapa-2/2.4/05-nivel-1-guilhotina.png" alt="nivel 1 guilhotina"></a><figcaption>nivel 1 guilhotina</figcaption></figure>
+<figure><a href="etapa-2/2.4/06-kaio-falando.png" target="_blank"><img loading="lazy" src="etapa-2/2.4/06-kaio-falando.png" alt="kaio falando"></a><figcaption>kaio falando</figcaption></figure>
+<figure><a href="etapa-2/2.4/07-mesa-do-nivel-2.png" target="_blank"><img loading="lazy" src="etapa-2/2.4/07-mesa-do-nivel-2.png" alt="mesa do nivel 2"></a><figcaption>mesa do nivel 2</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 2.5</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 2, sub-passo 2.5: IA diferente por nível</p>
+<p class="descricao">Luiz Alberto no nível 3 usando carta trunfo (seed 21)</p>
+<ul class="notas">
+<li>nível 3, serra na marca 7</li>
+<li>na minha mesa depois da resposta dele: &quot;&quot;</li>
+</ul>
+<video controls preload="none" src="etapa-2/2.5/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-2/2.5/01-nivel-3-antes.png" target="_blank"><img loading="lazy" src="etapa-2/2.5/01-nivel-3-antes.png" alt="nivel 3 antes"></a><figcaption>nivel 3 antes</figcaption></figure>
+<figure><a href="etapa-2/2.5/02-joguei-two-up.png" target="_blank"><img loading="lazy" src="etapa-2/2.5/02-joguei-two-up.png" alt="joguei two up"></a><figcaption>joguei two up</figcaption></figure>
+<figure><a href="etapa-2/2.5/03-luiz-jogando-trunfo.png" target="_blank"><img loading="lazy" src="etapa-2/2.5/03-luiz-jogando-trunfo.png" alt="luiz jogando trunfo"></a><figcaption>luiz jogando trunfo</figcaption></figure>
+<figure><a href="etapa-2/2.5/04-depois-do-trunfo-dele.png" target="_blank"><img loading="lazy" src="etapa-2/2.5/04-depois-do-trunfo-dele.png" alt="depois do trunfo dele"></a><figcaption>depois do trunfo dele</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 2.6</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 2, sub-passo 2.6: recorde da sessão</p>
+<p class="descricao">Recorde da sessão: duas partidas, a segunda batendo o recorde (seed 21)</p>
+<ul class="notas">
+<li>começo: pontos 0, recorde 0</li>
+<li>partida 1 (comprando abaixo de 11): 125 pontos, recorde 125</li>
+<li>partida 2 começa: pontos 0, recorde 125</li>
+<li>recorde batido: 125 -&gt; 313, visor piscando</li>
+</ul>
+<video controls preload="none" src="etapa-2/2.6/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-2/2.6/01-visores-zerados.png" target="_blank"><img loading="lazy" src="etapa-2/2.6/01-visores-zerados.png" alt="visores zerados"></a><figcaption>visores zerados</figcaption></figure>
+<figure><a href="etapa-2/2.6/02-fim-da-partida-1.png" target="_blank"><img loading="lazy" src="etapa-2/2.6/02-fim-da-partida-1.png" alt="fim da partida 1"></a><figcaption>fim da partida 1</figcaption></figure>
+<figure><a href="etapa-2/2.6/03-partida-2-comecando.png" target="_blank"><img loading="lazy" src="etapa-2/2.6/03-partida-2-comecando.png" alt="partida 2 comecando"></a><figcaption>partida 2 comecando</figcaption></figure>
+<figure><a href="etapa-2/2.6/04-visor-piscando.png" target="_blank"><img loading="lazy" src="etapa-2/2.6/04-visor-piscando.png" alt="visor piscando"></a><figcaption>visor piscando</figcaption></figure>
+<figure><a href="etapa-2/2.6/05-visor-piscando-outro-instante.png" target="_blank"><img loading="lazy" src="etapa-2/2.6/05-visor-piscando-outro-instante.png" alt="visor piscando outro instante"></a><figcaption>visor piscando outro instante</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">regressão</span></h3>
+<p class="descricao">Regressão: o nível 1 com a seed 1617 termina como na Etapa 1 (3 rodadas, 2x0)</p>
+<ul class="notas">
+<li>nível 1 com a seed 1617: 3 rodadas, dedos João 2 x Luiz 0</li>
+<li>registro da Etapa 1: 3 rodadas, dedos João 2 x Luiz 0</li>
+</ul>
+<div class="galeria">
+<figure><a href="etapa-2/regressao/01-mesa-rodada-1.png" target="_blank"><img loading="lazy" src="etapa-2/regressao/01-mesa-rodada-1.png" alt="mesa rodada 1"></a><figcaption>mesa rodada 1</figcaption></figure>
+<figure><a href="etapa-2/regressao/02-guilhotina-nivel-1.png" target="_blank"><img loading="lazy" src="etapa-2/regressao/02-guilhotina-nivel-1.png" alt="guilhotina nivel 1"></a><figcaption>guilhotina nivel 1</figcaption></figure>
+<figure><a href="etapa-2/regressao/03-fim-do-nivel-1.png" target="_blank"><img loading="lazy" src="etapa-2/regressao/03-fim-do-nivel-1.png" alt="fim do nivel 1"></a><figcaption>fim do nivel 1</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">captura final da etapa</span></h3>
+<p class="descricao">Partida inteira pelos três níveis (seed 21, rápido, trocas em velocidade normal)</p>
+<ul class="notas">
+<li>nível 1: pontos 0, recorde 0</li>
+<li>nível 2: pontos 313, recorde 313</li>
+<li>nível 3: pontos 963, recorde 963</li>
+<li>fim: nível 3, 963 pontos, recorde 963</li>
+<li>trocas de nível vistas: 2</li>
+</ul>
+<video controls preload="none" src="etapa-2/final/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-2/final/01-mesa-nivel-1.png" target="_blank"><img loading="lazy" src="etapa-2/final/01-mesa-nivel-1.png" alt="mesa nivel 1"></a><figcaption>mesa nivel 1</figcaption></figure>
+<figure><a href="etapa-2/final/02-punicao-nivel-1.png" target="_blank"><img loading="lazy" src="etapa-2/final/02-punicao-nivel-1.png" alt="punicao nivel 1"></a><figcaption>punicao nivel 1</figcaption></figure>
+<figure><a href="etapa-2/final/03-troca-para-nivel-2.png" target="_blank"><img loading="lazy" src="etapa-2/final/03-troca-para-nivel-2.png" alt="troca para nivel 2"></a><figcaption>troca para nivel 2</figcaption></figure>
+<figure><a href="etapa-2/final/04-mesa-nivel-2.png" target="_blank"><img loading="lazy" src="etapa-2/final/04-mesa-nivel-2.png" alt="mesa nivel 2"></a><figcaption>mesa nivel 2</figcaption></figure>
+<figure><a href="etapa-2/final/05-punicao-nivel-2.png" target="_blank"><img loading="lazy" src="etapa-2/final/05-punicao-nivel-2.png" alt="punicao nivel 2"></a><figcaption>punicao nivel 2</figcaption></figure>
+<figure><a href="etapa-2/final/06-troca-para-nivel-3.png" target="_blank"><img loading="lazy" src="etapa-2/final/06-troca-para-nivel-3.png" alt="troca para nivel 3"></a><figcaption>troca para nivel 3</figcaption></figure>
+<figure><a href="etapa-2/final/07-mesa-nivel-3.png" target="_blank"><img loading="lazy" src="etapa-2/final/07-mesa-nivel-3.png" alt="mesa nivel 3"></a><figcaption>mesa nivel 3</figcaption></figure>
+<figure><a href="etapa-2/final/08-punicao-nivel-3.png" target="_blank"><img loading="lazy" src="etapa-2/final/08-punicao-nivel-3.png" alt="punicao nivel 3"></a><figcaption>punicao nivel 3</figcaption></figure>
+<figure><a href="etapa-2/final/09-tela-final.png" target="_blank"><img loading="lazy" src="etapa-2/final/09-tela-final.png" alt="tela final"></a><figcaption>tela final</figcaption></figure>
+</div>
+</section>
+<h2 id="etapa-3">Etapa 3 — tela de abertura, GAME OVER e o ciclo de fliperama</h2>
+<p class="anexo"><a href="etapa-3/RESUMO.md">resumo da etapa</a></p>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 3.1</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 3, sub-passo 3.1: o jogo organizado em telas</p>
+<p class="descricao">Laço de telas sozinho: título, attract, pontuações e de volta ao título</p>
+<ul class="notas">
+<li>ordem das telas: titulo -&gt; attract -&gt; high_scores -&gt; titulo -&gt; attract -&gt; high_scores -&gt; titulo</li>
+<li>voltas ao título: 3</li>
+<li>uma tecla no título leva à mesa</li>
+</ul>
+<video controls preload="none" src="etapa-3/3.1/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-3/3.1/01-tela-titulo.png" target="_blank"><img loading="lazy" src="etapa-3/3.1/01-tela-titulo.png" alt="tela titulo"></a><figcaption>tela titulo</figcaption></figure>
+<figure><a href="etapa-3/3.1/02-tela-attract.png" target="_blank"><img loading="lazy" src="etapa-3/3.1/02-tela-attract.png" alt="tela attract"></a><figcaption>tela attract</figcaption></figure>
+<figure><a href="etapa-3/3.1/03-tela-high_scores.png" target="_blank"><img loading="lazy" src="etapa-3/3.1/03-tela-high_scores.png" alt="tela high_scores"></a><figcaption>tela high_scores</figcaption></figure>
+<figure><a href="etapa-3/3.1/04-tela-jogando.png" target="_blank"><img loading="lazy" src="etapa-3/3.1/04-tela-jogando.png" alt="tela jogando"></a><figcaption>tela jogando</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 3.2</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 3, sub-passo 3.2: a tela de título</p>
+<p class="descricao">Tela de título: a televisão acendendo, o título pronto e a primeira tecla</p>
+<ul class="notas">
+<li>título pronto: convite piscando, assinatura da equipe no rodapé</li>
+<li>a tecla levou para a tela de jogo</li>
+</ul>
+<video controls preload="none" src="etapa-3/3.2/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-3/3.2/01-tv-acendendo-linha.png" target="_blank"><img loading="lazy" src="etapa-3/3.2/01-tv-acendendo-linha.png" alt="tv acendendo linha"></a><figcaption>tv acendendo linha</figcaption></figure>
+<figure><a href="etapa-3/3.2/02-tv-acendendo-abrindo.png" target="_blank"><img loading="lazy" src="etapa-3/3.2/02-tv-acendendo-abrindo.png" alt="tv acendendo abrindo"></a><figcaption>tv acendendo abrindo</figcaption></figure>
+<figure><a href="etapa-3/3.2/03-tv-acendendo-surgindo.png" target="_blank"><img loading="lazy" src="etapa-3/3.2/03-tv-acendendo-surgindo.png" alt="tv acendendo surgindo"></a><figcaption>tv acendendo surgindo</figcaption></figure>
+<figure><a href="etapa-3/3.2/04-titulo-pronto.png" target="_blank"><img loading="lazy" src="etapa-3/3.2/04-titulo-pronto.png" alt="titulo pronto"></a><figcaption>titulo pronto</figcaption></figure>
+<figure><a href="etapa-3/3.2/05-titulo-convite-no-outro-tempo.png" target="_blank"><img loading="lazy" src="etapa-3/3.2/05-titulo-convite-no-outro-tempo.png" alt="titulo convite no outro tempo"></a><figcaption>titulo convite no outro tempo</figcaption></figure>
+<figure><a href="etapa-3/3.2/06-depois-da-tecla.png" target="_blank"><img loading="lazy" src="etapa-3/3.2/06-depois-da-tecla.png" alt="depois da tecla"></a><figcaption>depois da tecla</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 3.3</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 3, sub-passo 3.3: a tela de GAME OVER</p>
+<p class="descricao">Fim de jogo: derrota com GAME OVER e volta ao título; vitória com a despedida do anfitrião</p>
+<ul class="notas">
+<li>derrota: 0 pontos, recorde 0</li>
+<li>o fim de jogo voltou ao título sozinho em 4.8 s</li>
+<li>depois da despedida o jogo voltou ao título, sem passar pelo GAME OVER</li>
+</ul>
+<video controls preload="none" src="etapa-3/3.3/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-3/3.3/01-game-over.png" target="_blank"><img loading="lazy" src="etapa-3/3.3/01-game-over.png" alt="game over"></a><figcaption>game over</figcaption></figure>
+<figure><a href="etapa-3/3.3/02-voltou-ao-titulo.png" target="_blank"><img loading="lazy" src="etapa-3/3.3/02-voltou-ao-titulo.png" alt="voltou ao titulo"></a><figcaption>voltou ao titulo</figcaption></figure>
+<figure><a href="etapa-3/3.3/03-anfitriao-na-tv.png" target="_blank"><img loading="lazy" src="etapa-3/3.3/03-anfitriao-na-tv.png" alt="anfitriao na tv"></a><figcaption>anfitriao na tv</figcaption></figure>
+<figure><a href="etapa-3/3.3/04-anfitriao-segunda-fala.png" target="_blank"><img loading="lazy" src="etapa-3/3.3/04-anfitriao-segunda-fala.png" alt="anfitriao segunda fala"></a><figcaption>anfitriao segunda fala</figcaption></figure>
+<figure><a href="etapa-3/3.3/05-titulo-depois-da-vitoria.png" target="_blank"><img loading="lazy" src="etapa-3/3.3/05-titulo-depois-da-vitoria.png" alt="titulo depois da vitoria"></a><figcaption>titulo depois da vitoria</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 3.4</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 3, sub-passo 3.4: as cinco melhores da sessão</p>
+<p class="descricao">Melhores pontuações: uma derrota e uma vitória, iniciais digitadas e a tabela no laço do título (seed 44, nível 3)</p>
+<ul class="notas">
+<li>partida 1 (comprando abaixo de 14): 100 pontos, entrou na lista</li>
+<li>tabela depois da partida 1: LUI:100</li>
+<li>partida 2 (comprando abaixo de 17): 950 pontos</li>
+<li>tabela depois da partida 2: JOA:950;LUI:100</li>
+<li>sem ninguém mexer, a tabela saiu e o título voltou</li>
+<li>laço observado: titulo → attract → high_scores</li>
+</ul>
+<video controls preload="none" src="etapa-3/3.4/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-3/3.4/01-iniciais-em-branco.png" target="_blank"><img loading="lazy" src="etapa-3/3.4/01-iniciais-em-branco.png" alt="iniciais em branco"></a><figcaption>iniciais em branco</figcaption></figure>
+<figure><a href="etapa-3/3.4/02-iniciais-digitadas.png" target="_blank"><img loading="lazy" src="etapa-3/3.4/02-iniciais-digitadas.png" alt="iniciais digitadas"></a><figcaption>iniciais digitadas</figcaption></figure>
+<figure><a href="etapa-3/3.4/03-tabela-com-uma-linha.png" target="_blank"><img loading="lazy" src="etapa-3/3.4/03-tabela-com-uma-linha.png" alt="tabela com uma linha"></a><figcaption>tabela com uma linha</figcaption></figure>
+<figure><a href="etapa-3/3.4/04-iniciais-lembram-a-partida-anterior.png" target="_blank"><img loading="lazy" src="etapa-3/3.4/04-iniciais-lembram-a-partida-anterior.png" alt="iniciais lembram a partida anterior"></a><figcaption>iniciais lembram a partida anterior</figcaption></figure>
+<figure><a href="etapa-3/3.4/05-tabela-com-as-duas.png" target="_blank"><img loading="lazy" src="etapa-3/3.4/05-tabela-com-as-duas.png" alt="tabela com as duas"></a><figcaption>tabela com as duas</figcaption></figure>
+<figure><a href="etapa-3/3.4/06-tabela-linha-nova-piscando.png" target="_blank"><img loading="lazy" src="etapa-3/3.4/06-tabela-linha-nova-piscando.png" alt="tabela linha nova piscando"></a><figcaption>tabela linha nova piscando</figcaption></figure>
+<figure><a href="etapa-3/3.4/07-tabela-de-volta-pelo-laco.png" target="_blank"><img loading="lazy" src="etapa-3/3.4/07-tabela-de-volta-pelo-laco.png" alt="tabela de volta pelo laco"></a><figcaption>tabela de volta pelo laco</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 3.5</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 3, sub-passo 3.5: a demonstração (attract mode)</p>
+<p class="descricao">Demonstração: a IA jogando contra ela mesma com a câmera passeando (seed 153)</p>
+<ul class="notas">
+<li>o título chamou a demonstração sozinho depois de 15.2 s</li>
+<li>demonstração: rodada 1, nível 1</li>
+<li>na demonstração: 100 pontos na mesa, recorde 0, lista &quot;&quot;</li>
+<li>uma tecla devolveu o título, com a mesa limpa e a demonstração desligada</li>
+<li>a partida de verdade começa zerada, na rodada 1</li>
+<li>?tela=attract abre direto na demonstração, já jogando</li>
+</ul>
+<video controls preload="none" src="etapa-3/3.5/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-3/3.5/01-demonstracao-comeco.png" target="_blank"><img loading="lazy" src="etapa-3/3.5/01-demonstracao-comeco.png" alt="demonstracao comeco"></a><figcaption>demonstracao comeco</figcaption></figure>
+<figure><a href="etapa-3/3.5/02-demonstracao-camera-em-outro-ponto.png" target="_blank"><img loading="lazy" src="etapa-3/3.5/02-demonstracao-camera-em-outro-ponto.png" alt="demonstracao camera em outro ponto"></a><figcaption>demonstracao camera em outro ponto</figcaption></figure>
+<figure><a href="etapa-3/3.5/03-demonstracao-pontuando.png" target="_blank"><img loading="lazy" src="etapa-3/3.5/03-demonstracao-pontuando.png" alt="demonstracao pontuando"></a><figcaption>demonstracao pontuando</figcaption></figure>
+<figure><a href="etapa-3/3.5/04-a-tecla-cortou-a-demonstracao.png" target="_blank"><img loading="lazy" src="etapa-3/3.5/04-a-tecla-cortou-a-demonstracao.png" alt="a tecla cortou a demonstracao"></a><figcaption>a tecla cortou a demonstracao</figcaption></figure>
+<figure><a href="etapa-3/3.5/05-titulo-de-volta.png" target="_blank"><img loading="lazy" src="etapa-3/3.5/05-titulo-de-volta.png" alt="titulo de volta"></a><figcaption>titulo de volta</figcaption></figure>
+<figure><a href="etapa-3/3.5/06-partida-de-verdade-depois-da-demonstracao.png" target="_blank"><img loading="lazy" src="etapa-3/3.5/06-partida-de-verdade-depois-da-demonstracao.png" alt="partida de verdade depois da demonstracao"></a><figcaption>partida de verdade depois da demonstracao</figcaption></figure>
+<figure><a href="etapa-3/3.5/07-atalho-tela-attract.png" target="_blank"><img loading="lazy" src="etapa-3/3.5/07-atalho-tela-attract.png" alt="atalho tela attract"></a><figcaption>atalho tela attract</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">regressão</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 3 fechada</p>
+<p class="descricao">Regressão: a partida da Etapa 1 (seed 1617) continua dando 3 rodadas e 2x0 no nível 1</p>
+<ul class="notas">
+<li>nível 1 com a seed 1617: 3 rodadas, dedos João 2 x Luiz 0, 250 pontos</li>
+<li>registro da Etapa 1 (e conferido de novo ao fechar a Etapa 2): 3 rodadas, dedos João 2 x Luiz 0</li>
+</ul>
+<div class="galeria">
+<figure><a href="etapa-3/regressao/01-mesa-rodada-1.png" target="_blank"><img loading="lazy" src="etapa-3/regressao/01-mesa-rodada-1.png" alt="mesa rodada 1"></a><figcaption>mesa rodada 1</figcaption></figure>
+<figure><a href="etapa-3/regressao/02-guilhotina-nivel-1.png" target="_blank"><img loading="lazy" src="etapa-3/regressao/02-guilhotina-nivel-1.png" alt="guilhotina nivel 1"></a><figcaption>guilhotina nivel 1</figcaption></figure>
+<figure><a href="etapa-3/regressao/03-fim-do-nivel-1.png" target="_blank"><img loading="lazy" src="etapa-3/regressao/03-fim-do-nivel-1.png" alt="fim do nivel 1"></a><figcaption>fim do nivel 1</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">captura final da etapa</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 3 fechada</p>
+<p class="descricao">Ciclo completo: título, partida, GAME OVER, iniciais, melhores, título e o laço sozinho (seed 177)</p>
+<ul class="notas">
+<li>partida começou: rodada 1, 0 pontos</li>
+<li>fim da partida: 175 pontos, 0 dedos</li>
+<li>o GAME OVER passou a vez para as iniciais em 4.4 s, sozinho</li>
+<li>lista das melhores: JOA:175</li>
+<li>a lista devolveu o título em 7.9 s, sozinha</li>
+<li>o título chamou a demonstração em 11.5 s</li>
+<li>a demonstração passou a vez para a lista em 13.5 s</li>
+<li>o laço fechou: a lista devolveu o título em 7.4 s</li>
+<li>ciclo completo: título → partida → GAME OVER → iniciais → melhores → título → demonstração → melhores → título</li>
+</ul>
+<video controls preload="none" src="etapa-3/final/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-3/final/01-titulo-acendendo.png" target="_blank"><img loading="lazy" src="etapa-3/final/01-titulo-acendendo.png" alt="titulo acendendo"></a><figcaption>titulo acendendo</figcaption></figure>
+<figure><a href="etapa-3/final/02-titulo-pronto.png" target="_blank"><img loading="lazy" src="etapa-3/final/02-titulo-pronto.png" alt="titulo pronto"></a><figcaption>titulo pronto</figcaption></figure>
+<figure><a href="etapa-3/final/03-mesa-rodada-1.png" target="_blank"><img loading="lazy" src="etapa-3/final/03-mesa-rodada-1.png" alt="mesa rodada 1"></a><figcaption>mesa rodada 1</figcaption></figure>
+<figure><a href="etapa-3/final/04-a-guilhotina-desce.png" target="_blank"><img loading="lazy" src="etapa-3/final/04-a-guilhotina-desce.png" alt="a guilhotina desce"></a><figcaption>a guilhotina desce</figcaption></figure>
+<figure><a href="etapa-3/final/05-game-over.png" target="_blank"><img loading="lazy" src="etapa-3/final/05-game-over.png" alt="game over"></a><figcaption>game over</figcaption></figure>
+<figure><a href="etapa-3/final/06-digitando-as-iniciais.png" target="_blank"><img loading="lazy" src="etapa-3/final/06-digitando-as-iniciais.png" alt="digitando as iniciais"></a><figcaption>digitando as iniciais</figcaption></figure>
+<figure><a href="etapa-3/final/07-melhores-pontuacoes.png" target="_blank"><img loading="lazy" src="etapa-3/final/07-melhores-pontuacoes.png" alt="melhores pontuacoes"></a><figcaption>melhores pontuacoes</figcaption></figure>
+<figure><a href="etapa-3/final/08-de-volta-ao-titulo.png" target="_blank"><img loading="lazy" src="etapa-3/final/08-de-volta-ao-titulo.png" alt="de volta ao titulo"></a><figcaption>de volta ao titulo</figcaption></figure>
+<figure><a href="etapa-3/final/09-demonstracao-no-laco.png" target="_blank"><img loading="lazy" src="etapa-3/final/09-demonstracao-no-laco.png" alt="demonstracao no laco"></a><figcaption>demonstracao no laco</figcaption></figure>
+<figure><a href="etapa-3/final/10-melhores-no-laco.png" target="_blank"><img loading="lazy" src="etapa-3/final/10-melhores-no-laco.png" alt="melhores no laco"></a><figcaption>melhores no laco</figcaption></figure>
+</div>
+</section>
+<h2 id="etapa-4">Etapa 4 — os extras</h2>
+<p class="anexo"><a href="etapa-4/RESUMO.md">resumo da etapa</a></p>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 4.1</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 4, sub-passo 4.1: o que sobrevive a fechar o jogo</p>
+<p class="descricao">Persistência: partida, recarregar a página e o recorde continua lá (seed 44, nível 3)</p>
+<ul class="notas">
+<li>partida: 950 pontos, desbloqueios &quot;trunfo_inicial_estourado&quot;</li>
+<li>antes de recarregar: recorde 950, lista &quot;JOA:950&quot;, 1 partida(s)</li>
+<li>depois de recarregar: recorde 950, lista &quot;JOA:950&quot;, desbloqueios &quot;trunfo_inicial_estourado&quot;, 1 partida(s)</li>
+<li>a lista sobreviveu ao recarregar e à demonstração</li>
+<li>DEL duas vezes apagou recorde, lista, estatísticas e desbloqueios</li>
+<li>recarregando de novo, continua tudo zerado: o apagar foi para o disco</li>
+</ul>
+<video controls preload="none" src="etapa-4/4.1/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-4/4.1/01-recompensa-e-iniciais.png" target="_blank"><img loading="lazy" src="etapa-4/4.1/01-recompensa-e-iniciais.png" alt="recompensa e iniciais"></a><figcaption>recompensa e iniciais</figcaption></figure>
+<figure><a href="etapa-4/4.1/02-antes-de-recarregar.png" target="_blank"><img loading="lazy" src="etapa-4/4.1/02-antes-de-recarregar.png" alt="antes de recarregar"></a><figcaption>antes de recarregar</figcaption></figure>
+<figure><a href="etapa-4/4.1/03-titulo-depois-de-recarregar.png" target="_blank"><img loading="lazy" src="etapa-4/4.1/03-titulo-depois-de-recarregar.png" alt="titulo depois de recarregar"></a><figcaption>titulo depois de recarregar</figcaption></figure>
+<figure><a href="etapa-4/4.1/04-melhores-depois-de-recarregar.png" target="_blank"><img loading="lazy" src="etapa-4/4.1/04-melhores-depois-de-recarregar.png" alt="melhores depois de recarregar"></a><figcaption>melhores depois de recarregar</figcaption></figure>
+<figure><a href="etapa-4/4.1/05-titulo-com-os-dados-salvos.png" target="_blank"><img loading="lazy" src="etapa-4/4.1/05-titulo-com-os-dados-salvos.png" alt="titulo com os dados salvos"></a><figcaption>titulo com os dados salvos</figcaption></figure>
+<figure><a href="etapa-4/4.1/06-pergunta-antes-de-apagar.png" target="_blank"><img loading="lazy" src="etapa-4/4.1/06-pergunta-antes-de-apagar.png" alt="pergunta antes de apagar"></a><figcaption>pergunta antes de apagar</figcaption></figure>
+<figure><a href="etapa-4/4.1/07-dados-apagados.png" target="_blank"><img loading="lazy" src="etapa-4/4.1/07-dados-apagados.png" alt="dados apagados"></a><figcaption>dados apagados</figcaption></figure>
+<figure><a href="etapa-4/4.1/08-titulo-limpo-depois-de-recarregar.png" target="_blank"><img loading="lazy" src="etapa-4/4.1/08-titulo-limpo-depois-de-recarregar.png" alt="titulo limpo depois de recarregar"></a><figcaption>titulo limpo depois de recarregar</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 4.2</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 4, sub-passo 4.2: o som</p>
+<p class="descricao">Som: uma rodada inteira com punição, com os eventos conferidos (seed 31)</p>
+<ul class="notas">
+<li>as cartas sendo distribuídas já fazem barulho de papel</li>
+<li>os dois pararam: o ambiente cala e fica só a carta virando (B4)</li>
+<li>anunciado o resultado, o ambiente volta</li>
+<li>a lâmina da guilhotina sendo armada</li>
+<li>impacto seco: zumbido agudo e todo o som abafado por alguns segundos</li>
+<li>sequência ouvida: nenhum → carta → silencio → ambiente-volta → lamina → impacto</li>
+<li>total de sons disparados até aqui: 10</li>
+<li>M desliga o som e a mesa avisa no canto</li>
+<li>M de novo religa</li>
+</ul>
+<video controls preload="none" src="etapa-4/4.2/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-4/4.2/01-titulo-com-o-aviso-do-som.png" target="_blank"><img loading="lazy" src="etapa-4/4.2/01-titulo-com-o-aviso-do-som.png" alt="titulo com o aviso do som"></a><figcaption>titulo com o aviso do som</figcaption></figure>
+<figure><a href="etapa-4/4.2/02-mesa-com-som-ligado.png" target="_blank"><img loading="lazy" src="etapa-4/4.2/02-mesa-com-som-ligado.png" alt="mesa com som ligado"></a><figcaption>mesa com som ligado</figcaption></figure>
+<figure><a href="etapa-4/4.2/03-silencio-antes-da-revelacao.png" target="_blank"><img loading="lazy" src="etapa-4/4.2/03-silencio-antes-da-revelacao.png" alt="silencio antes da revelacao"></a><figcaption>silencio antes da revelacao</figcaption></figure>
+<figure><a href="etapa-4/4.2/04-impacto-e-abafamento.png" target="_blank"><img loading="lazy" src="etapa-4/4.2/04-impacto-e-abafamento.png" alt="impacto e abafamento"></a><figcaption>impacto e abafamento</figcaption></figure>
+<figure><a href="etapa-4/4.2/05-som-desligado.png" target="_blank"><img loading="lazy" src="etapa-4/4.2/05-som-desligado.png" alt="som desligado"></a><figcaption>som desligado</figcaption></figure>
+<figure><a href="etapa-4/4.2/06-som-religado.png" target="_blank"><img loading="lazy" src="etapa-4/4.2/06-som-religado.png" alt="som religado"></a><figcaption>som religado</figcaption></figure>
+</div>
+<p class="anexo"><a href="etapa-4/4.2/COMO-GRAVAR-COM-SOM.md">COMO-GRAVAR-COM-SOM.md</a></p>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 4.3</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 4, sub-passo 4.3: efeitos visuais</p>
+<p class="descricao">Efeitos visuais: a mesma mesa com pouca e com muita tensão, e a TV distorcendo (seeds 177 e 21)</p>
+<ul class="notas">
+<li>rodada 1: aposta 5 dedos inteiros, tensão 0</li>
+<li>perto do fim: 3 dedo(s), tensão 0.53</li>
+<li>E desliga o pós-processamento: a mesma cena, limpa</li>
+<li>desempenho: 40 fps com os efeitos, 43 fps sem eles</li>
+<li>a imagem da TV rasga em fatias enquanto o anfitrião fala</li>
+</ul>
+<video controls preload="none" src="etapa-4/4.3/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-4/4.3/01-tensao-baixa.png" target="_blank"><img loading="lazy" src="etapa-4/4.3/01-tensao-baixa.png" alt="tensao baixa"></a><figcaption>tensao baixa</figcaption></figure>
+<figure><a href="etapa-4/4.3/02-tensao-alta.png" target="_blank"><img loading="lazy" src="etapa-4/4.3/02-tensao-alta.png" alt="tensao alta"></a><figcaption>tensao alta</figcaption></figure>
+<figure><a href="etapa-4/4.3/03-mesma-cena-sem-efeitos.png" target="_blank"><img loading="lazy" src="etapa-4/4.3/03-mesma-cena-sem-efeitos.png" alt="mesma cena sem efeitos"></a><figcaption>mesma cena sem efeitos</figcaption></figure>
+<figure><a href="etapa-4/4.3/04-efeitos-religados.png" target="_blank"><img loading="lazy" src="etapa-4/4.3/04-efeitos-religados.png" alt="efeitos religados"></a><figcaption>efeitos religados</figcaption></figure>
+<figure><a href="etapa-4/4.3/05-tv-distorcendo-com-o-kaio.png" target="_blank"><img loading="lazy" src="etapa-4/4.3/05-tv-distorcendo-com-o-kaio.png" alt="tv distorcendo com o kaio"></a><figcaption>tv distorcendo com o kaio</figcaption></figure>
+<figure><a href="etapa-4/4.3/06-tv-distorcendo-outro-instante.png" target="_blank"><img loading="lazy" src="etapa-4/4.3/06-tv-distorcendo-outro-instante.png" alt="tv distorcendo outro instante"></a><figcaption>tv distorcendo outro instante</figcaption></figure>
+<figure><a href="etapa-4/4.3/comparacao-tensao.png" target="_blank"><img loading="lazy" src="etapa-4/4.3/comparacao-tensao.png" alt="comparacao tensao"></a><figcaption>comparacao tensao</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 4.4a</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 4, sub-passo 4.4a: as cartas trunfo que faltavam</p>
+<p class="descricao">Cartas trunfo novas: Harvest, Exchange, Ultimate Draw e Destroy++ jogadas em sequência</p>
+<ul class="notas">
+<li>mão fixada pela URL: harvest, exchange, ultimate_draw, destroy_plus_plus</li>
+<li>Harvest na mesa: daqui para a frente cada carta jogada devolve outra</li>
+<li>Exchange: minha mão foi de 10 para 7</li>
+<li>mão: 3 cartas antes do Exchange, 3 depois (a Harvest devolveu uma)</li>
+<li>Ultimate Draw: total 17, mão de 3 para 5 cartas</li>
+<li>Destroy++ na mesa: o oponente fica sem cartas e sem poder jogar trunfo</li>
+<li>fim da rodada com as cartas novas: 0 pontos</li>
+</ul>
+<video controls preload="none" src="etapa-4/4.4a/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-4/4.4a/01-mao-com-as-cartas-novas.png" target="_blank"><img loading="lazy" src="etapa-4/4.4a/01-mao-com-as-cartas-novas.png" alt="mao com as cartas novas"></a><figcaption>mao com as cartas novas</figcaption></figure>
+<figure><a href="etapa-4/4.4a/02-harvest-na-mesa.png" target="_blank"><img loading="lazy" src="etapa-4/4.4a/02-harvest-na-mesa.png" alt="harvest na mesa"></a><figcaption>harvest na mesa</figcaption></figure>
+<figure><a href="etapa-4/4.4a/03-exchange-trocou-as-cartas.png" target="_blank"><img loading="lazy" src="etapa-4/4.4a/03-exchange-trocou-as-cartas.png" alt="exchange trocou as cartas"></a><figcaption>exchange trocou as cartas</figcaption></figure>
+<figure><a href="etapa-4/4.4a/04-ultimate-draw.png" target="_blank"><img loading="lazy" src="etapa-4/4.4a/04-ultimate-draw.png" alt="ultimate draw"></a><figcaption>ultimate draw</figcaption></figure>
+<figure><a href="etapa-4/4.4a/05-destroy-mais-mais.png" target="_blank"><img loading="lazy" src="etapa-4/4.4a/05-destroy-mais-mais.png" alt="destroy mais mais"></a><figcaption>destroy mais mais</figcaption></figure>
+<figure><a href="etapa-4/4.4a/06-rodada-resolvida.png" target="_blank"><img loading="lazy" src="etapa-4/4.4a/06-rodada-resolvida.png" alt="rodada resolvida"></a><figcaption>rodada resolvida</figcaption></figure>
+</div>
+</section>
+<section class="passo">
+<h3><span class="rotulo">sub-passo 4.8</span><span class="data">2026-09-23</span></h3>
+<p class="titulo">Etapa 4, sub-passo 4.8: a trapaça do anfitrião</p>
+<p class="descricao">A trapaça do anfitrião e a virada com o Love Your Enemy (seed 44, nível 3)</p>
+<ul class="notas">
+<li>começo do nível 3: serra em 7, com o Love Your Enemy na mão</li>
+<li>a serra chegou a 11 e o anfitrião interveio</li>
+<li>depois da trapaça: aposta do jogador e do oponente nas alturas, e a compra travada</li>
+<li>Love Your Enemy: o oponente é obrigado a comprar, e a mão fechada dele estoura</li>
+<li>fim: 1000 pontos, serra em 15</li>
+</ul>
+<video controls preload="none" src="etapa-4/4.8/video.mp4"></video>
+<div class="galeria">
+<figure><a href="etapa-4/4.8/01-a-carta-da-saida-ja-esta-na-mao.png" target="_blank"><img loading="lazy" src="etapa-4/4.8/01-a-carta-da-saida-ja-esta-na-mao.png" alt="a carta da saida ja esta na mao"></a><figcaption>a carta da saida ja esta na mao</figcaption></figure>
+<figure><a href="etapa-4/4.8/02-a-luz-vira-e-a-tv-grita.png" target="_blank"><img loading="lazy" src="etapa-4/4.8/02-a-luz-vira-e-a-tv-grita.png" alt="a luz vira e a tv grita"></a><figcaption>a luz vira e a tv grita</figcaption></figure>
+<figure><a href="etapa-4/4.8/03-kaio-trapaceando.png" target="_blank"><img loading="lazy" src="etapa-4/4.8/03-kaio-trapaceando.png" alt="kaio trapaceando"></a><figcaption>kaio trapaceando</figcaption></figure>
+<figure><a href="etapa-4/4.8/04-as-cartas-do-anfitriao-na-mesa.png" target="_blank"><img loading="lazy" src="etapa-4/4.8/04-as-cartas-do-anfitriao-na-mesa.png" alt="as cartas do anfitriao na mesa"></a><figcaption>as cartas do anfitriao na mesa</figcaption></figure>
+<figure><a href="etapa-4/4.8/05-a-mesa-depois-da-trapaca.png" target="_blank"><img loading="lazy" src="etapa-4/4.8/05-a-mesa-depois-da-trapaca.png" alt="a mesa depois da trapaca"></a><figcaption>a mesa depois da trapaca</figcaption></figure>
+<figure><a href="etapa-4/4.8/06-love-your-enemy-jogada.png" target="_blank"><img loading="lazy" src="etapa-4/4.8/06-love-your-enemy-jogada.png" alt="love your enemy jogada"></a><figcaption>love your enemy jogada</figcaption></figure>
+<figure><a href="etapa-4/4.8/07-a-virada.png" target="_blank"><img loading="lazy" src="etapa-4/4.8/07-a-virada.png" alt="a virada"></a><figcaption>a virada</figcaption></figure>
+</div>
+</section>
+<footer>
+  Gerado por <code>python tools/gerar_index_progresso.py</code> a partir das pastas de evidência
+  e da <code>LINHA_DO_TEMPO.md</code>. Os vídeos são mudos: o Playwright grava tela, não áudio
+  (ver <code>etapa-4/4.2/COMO-GRAVAR-COM-SOM.md</code>).
+</footer>
+</body>
+</html>

@@ -44,6 +44,15 @@ export const FALA_DA_VITORIA = Object.freeze([
   'Descanse essa mão. Amanhã eu trago outro jogo, e ele é melhor.',
 ]);
 
+/**
+ * O que o anfitrião grita quando trapaceia, no nível 3, com a serra a
+ * uma derrota de encostar no Luiz Alberto (4.8).
+ */
+export const FALA_DA_TRAPACA = Object.freeze([
+  'NÃO. Não assim. Não hoje.',
+  'Eu decido quando esta mesa acaba — e não é agora.',
+]);
+
 /** A tela de título: o tubo acendendo e o convite piscando (3.2). */
 export const TITULO = Object.freeze({
   ligarTv: 2600,        // quanto dura a televisão acendendo

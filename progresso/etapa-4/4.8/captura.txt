@@ -1,0 +1,37 @@
+Sub-passo: 4.8
+Roteiro: A trapaça do anfitrião e a virada com o Love Your Enemy (seed 44, nível 3)
+Data: 2026-09-23T19:12:34.305Z
+Duração: 113.6 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 7
+  - 01-a-carta-da-saida-ja-esta-na-mao.png
+  - 02-a-luz-vira-e-a-tv-grita.png
+  - 03-kaio-trapaceando.png
+  - 04-as-cartas-do-anfitriao-na-mesa.png
+  - 05-a-mesa-depois-da-trapaca.png
+  - 06-love-your-enemy-jogada.png
+  - 07-a-virada.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 4.8 — A trapaça do anfitrião e a virada com o Love Your Enemy (seed 44, nível 3)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-4\4.8
+Servidor: http://127.0.0.1:64908
+Navegador: Chrome instalado na máquina
+abrir /index.html?tela=jogando&seed=44&nivel=3
+nota   começo do nível 3: serra em 7, com o Love Your Enemy na mão
+print  01-a-carta-da-saida-ja-esta-na-mao.png
+nota   a serra chegou a 11 e o anfitrião interveio
+print  02-a-luz-vira-e-a-tv-grita.png
+print  03-kaio-trapaceando.png
+print  04-as-cartas-do-anfitriao-na-mesa.png
+nota   depois da trapaça: aposta do jogador e do oponente nas alturas, e a compra travada
+print  05-a-mesa-depois-da-trapaca.png
+print  06-love-your-enemy-jogada.png
+nota   Love Your Enemy: o oponente é obrigado a comprar, e a mão fechada dele estoura
+print  07-a-virada.png
+nota   fim: 1000 pontos, serra em 15
+vídeo  video.mp4 (convertido com ffmpeg)

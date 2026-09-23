@@ -230,3 +230,61 @@ Uma entrada por sub-passo concluído. Prints e vídeos ficam em `progresso/etapa
 - Evidências em `progresso/etapa-3/`: `final/` (10 prints + `video.mp4` de 2min18), `regressao/` (3 prints) e `RESUMO.md`.
 - Commit e tag `etapa-3`.
 - Próximo: Etapa 4, começando pelo 4.1 (persistência), quando o grupo pedir.
+
+## 2026-09-23 — Etapa 4, sub-passo 4.1: o que sobrevive a fechar o jogo
+- Novo `src/engine/progresso.js`, puro: estatísticas da parte C3 do PDF, as recompensas da tabela A5 que funcionam com as cartas de hoje, e um `normalizar` que aceita qualquer coisa vinda de fora sem quebrar.
+- Novo `src/ui/armazenamento.js`, o único arquivo do projeto que toca em `localStorage`. Toda operação dentro de try/catch: com o depósito quebrado o jogo continua na memória e o título avisa em vermelho.
+- Recorde, lista das cinco melhores, estatísticas e desbloqueios passaram a atravessar o recarregar da página. O `recorde` e o `placar` viraram os mesmos objetos que já viviam em `score.js` e `placar.js`, sem duplicata.
+- Quatro recompensas da A5: Go For 24, Go For 27 e duas de "uma carta trunfo a mais no começo da rodada". As duas cartas premiadas **saem do sorteio** até serem ganhas — continuam no catálogo, então o `?trunfos=` ainda as força numa captura.
+- No título, DEL apaga tudo, em dois tempos: a primeira vez pergunta, a segunda apaga. Qualquer outra tecla desiste, e a pergunta não começa a partida.
+- Testes: 211/211 (26 novos, incluindo um depósito de mentira que explode em toda operação).
+- Evidências em `progresso/etapa-4/4.1/`: 8 prints, `video.mp4` (40 s), `captura.txt`, `testes-node.txt`.
+- Regressão conferida depois da mudança no sorteio: a seed 1617 continua dando 3 rodadas e 2×0 no nível 1.
+- Próximo: 4.2 (som), quando o grupo pedir.
+
+## 2026-09-23 — Etapa 4, sub-passo 4.2: o som
+- Novo `src/ui/audio.js`: tudo sintetizado com Web Audio, sem nenhum arquivo de áudio. Drone grave, zumbido da lâmpada que sobe quando ela pisca, coração de 52 a 142 bpm conforme a aposta e a morte se aproximando, papel da carta, metal da lâmina, capacitor, descarga, motor da serra e chiado da TV.
+- Dois barramentos (ambiente e foley) passando por um abafador: na revelação o ambiente cala e fica só a carta virando; depois da punição o abafador fecha para tudo por 3,5 s, com um zumbido agudo por fora dele.
+- **M** liga e desliga, em qualquer tela menos a de digitar as iniciais, onde M é uma letra do nome. O som só acorda depois de um gesto do usuário, como o navegador exige.
+- 18 testes novos: as contas puras e um `AudioContext` de mentira, que prova que o caminho do som monta inteiro e que nenhum efeito lança erro — sem navegador.
+- **O vídeo da captura é mudo**: o Playwright grava tela, não áudio. O roteiro prova o som conferindo `body[data-som]`, e `COMO-GRAVAR-COM-SOM.md` na pasta da evidência ensina a gravar à mão.
+- Testes: 229/229.
+- Evidências em `progresso/etapa-4/4.2/`: 6 prints, `video.mp4` (mudo), `COMO-GRAVAR-COM-SOM.md`, `captura.txt`, `testes-node.txt`.
+- Próximo: 4.3 (efeitos visuais).
+
+## 2026-09-23 — Etapa 4, sub-passo 4.3: efeitos visuais
+- `src/ui/efeitos.js` ganhou separação de cores nas bordas e a distorção da TV; granulado, linhas de varredura e vinheta passaram a crescer com a tensão da cena, e o tremor virou constante (sub-pixel no começo, visível perto da morte).
+- A conta da tensão saiu para `src/ui/tensao.js`, puro e com 10 testes: o som (4.2) e os efeitos usam a mesma. A aposta pesa até 0,45 e a morte chegando até 0,75, então estar a um passo do fim já aperta quase tudo mesmo apostando pouco.
+- **Desempenho**: a separação de cores é a única parte cara, porque precisa de uma cópia do quadro; é montada em 1/3 da resolução e esticada de volta — o truque que o próprio PDF sugere. Medido na captura: **86 fps com os efeitos e 86 fps sem eles**.
+- **E** liga e desliga o pós-processamento, e a escolha é salva junto com o progresso. O `?efeitos=0` continua mandando mais que a tecla.
+- A TV rasga em nove fatias horizontais com uma barra de sincronismo subindo, só enquanto o anfitrião fala.
+- Testes: 239/239.
+- Evidências em `progresso/etapa-4/4.3/`: 6 prints, `comparacao-tensao.png` (as duas cenas lado a lado), `video.mp4`, `captura.txt`, `testes-node.txt`.
+- Próximo: 4.4a (as cartas trunfo que faltam).
+
+## 2026-09-23 — Etapa 4, sub-passo 4.4a: as cartas trunfo que faltavam
+- As 11 cartas que faltavam do jogador entraram: Two-Up+, Shield+, Exchange, Trump Switch, Trump Switch+, Destroy+, Destroy++, Perfect Draw+, Ultimate Draw, Harvest e Love Your Enemy. O catálogo do jogador passou de 16 para 27 cartas, e agora cobre todas as `player_cards` do arquivo.
+- Cinco tipos de efeito novos no motor: trocar a última carta virada dos dois lados, descartar cartas da mão no sorteio (com o gerador dos trunfos, então o descarte se repete com a mesma seed), limpar a mesa inteira do oponente, **trancar** os trunfos dele enquanto a carta estiver na mesa, e devolver uma carta a cada jogada (Harvest, que nunca paga a si mesma).
+- Cada carta nova ganhou símbolo desenhado à mão; as versões "+" reusam o símbolo da irmã menor com uma ou duas cruzinhas no canto.
+- 22 testes novos, um por carta mais os casos de borda. Total: 262.
+- **Regressão conferida depois de mexer no sorteio**: mesmo com 11 cartas a mais no monte, a seed 1617 continua dando 3 rodadas e 2×0 no nível 1 — porque no nível 1 ninguém joga trunfo, e o baralho tem gerador separado.
+- Evidências em `progresso/etapa-4/4.4a/`: 6 prints, `video.mp4`, `captura.txt`, `testes-node.txt`.
+- Próximo: 4.8 (a trapaça do Kaio). As partes b e c do 4.4 (variantes e Sobrevivência) ficaram para depois.
+
+## 2026-09-23 — Etapa 4, sub-passo 4.8: a trapaça do anfitrião
+- Novo `src/engine/trapaca.js`, puro: ao entrar no nível 3 o jogador recebe o **Love Your Enemy**, e quando a serra fica a uma derrota de encostar no Luiz Alberto o Kaio joga **Perfect Draw** e **Desperation** por ele — emprestando o turno, porque o anfitrião não espera a vez de ninguém.
+- A Desperation pediu dois efeitos novos no motor: aposta `both` (as duas sobem 100, então a próxima derrota mata) e `block_draw` (o jogador não pode mais comprar). O `prepararCatalogo` ganhou `extras`, para o motor conhecer uma carta de inimigo sem ela entrar no sorteio.
+- A saída já estava na mão: o Love Your Enemy obriga o Luiz a comprar mais uma carta, e a mão que o Perfect Draw tinha fechado estoura.
+- Na tela: a sala inteira vira vermelha, a TV rasga e grita (ruído descendo, que é o que sobra de uma voz num alto-falante velho), a música para e o tremor sobe.
+- 14 testes, os dois caminhos que o grupo pediu: a trapaça acontecendo e sendo virada, e a trapaça não acontecendo quando o Luiz morre antes.
+- Testes: 276/276.
+- Evidências em `progresso/etapa-4/4.8/`: 7 prints, `video.mp4` (velocidade normal), `captura.txt`, `testes-node.txt`. Na captura a trapaça arma na rodada 4, com a serra a 4 marcas do Luiz, e a virada fecha em 1000 pontos.
+- Próximo: o fechamento da Etapa 4 e do trabalho.
+
+## 2026-09-23 — Etapa 4 e trabalho fechados
+- Tudo rodado de novo: **276/276 testes** e todas as capturas finais.
+- **Quebrou uma coisa, e era previsível**: a captura final da Etapa 2 (seed 21) não se reproduz mais, porque as 11 cartas trunfo do 4.4a mudaram o sorteio e aquela partida agora termina no nível 2. O roteiro `2.final` foi marcado como histórico, como o `1.final` já tinha sido; a evidência original continua guardada.
+- **Não quebrou o que importa**: a partida de referência desde a Etapa 1 (seed 1617) continua dando 3 rodadas e 2×0 no nível 1, pela quarta etapa seguida, e o ciclo completo da Etapa 3 (seed 177) dá os mesmos 175 pontos e a mesma lista `JOA:175`.
+- **`progresso/index.html`**: a evolução etapa por etapa, com 136 prints e 24 vídeos em ordem, gerada por `tools/gerar_index_progresso.py` a partir das pastas de evidência e das datas desta linha do tempo. É a página para abrir na apresentação.
+- `progresso/etapa-4/RESUMO.md` escrito. Commit e tag `etapa-4`; o trabalho também foi publicado em github.com/Jgabriel7z/BlackJack.
+- Números finais: 16.673 linhas de código, 276 testes, 29 prompts registrados.

@@ -1,0 +1,43 @@
+Sub-passo: 4.1
+Roteiro: Persistência: partida, recarregar a página e o recorde continua lá (seed 44, nível 3)
+Data: 2026-09-23T18:27:02.630Z
+Duração: 40.2 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 8
+  - 01-recompensa-e-iniciais.png
+  - 02-antes-de-recarregar.png
+  - 03-titulo-depois-de-recarregar.png
+  - 04-melhores-depois-de-recarregar.png
+  - 05-titulo-com-os-dados-salvos.png
+  - 06-pergunta-antes-de-apagar.png
+  - 07-dados-apagados.png
+  - 08-titulo-limpo-depois-de-recarregar.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 4.1 — Persistência: partida, recarregar a página e o recorde continua lá (seed 44, nível 3)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-4\4.1
+Servidor: http://127.0.0.1:56720
+Navegador: Chrome instalado na máquina
+abrir /index.html?tela=jogando&seed=44&nivel=3&rapido=1
+nota   partida: 950 pontos, desbloqueios "trunfo_inicial_estourado"
+print  01-recompensa-e-iniciais.png
+nota   antes de recarregar: recorde 950, lista "JOA:950", 1 partida(s)
+print  02-antes-de-recarregar.png
+abrir /index.html?seed=44&nivel=3&rapido=1
+nota   depois de recarregar: recorde 950, lista "JOA:950", desbloqueios "trunfo_inicial_estourado", 1 partida(s)
+print  03-titulo-depois-de-recarregar.png
+print  04-melhores-depois-de-recarregar.png
+nota   a lista sobreviveu ao recarregar e à demonstração
+abrir /index.html?seed=44&nivel=3
+print  05-titulo-com-os-dados-salvos.png
+print  06-pergunta-antes-de-apagar.png
+print  07-dados-apagados.png
+nota   DEL duas vezes apagou recorde, lista, estatísticas e desbloqueios
+abrir /index.html?seed=44&nivel=3
+print  08-titulo-limpo-depois-de-recarregar.png
+nota   recarregando de novo, continua tudo zerado: o apagar foi para o disco
+vídeo  video.mp4 (convertido com ffmpeg)

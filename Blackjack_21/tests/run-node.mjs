@@ -8,6 +8,11 @@ import './trumps.test.js';
 import './niveis.test.js';
 import './telas.test.js';
 import './placar.test.js';
+import './progresso.test.js';
+import './audio.test.js';
+import './tensao.test.js';
+import './trumps-4-4a.test.js';
+import './trapaca.test.js';
 import { rodarTodos } from './testador.js';
 
 const resultados = rodarTodos();

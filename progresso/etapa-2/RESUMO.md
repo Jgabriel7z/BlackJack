@@ -25,7 +25,9 @@ São **144 testes automáticos** e capturas gravadas de cada sub-passo, sempre c
 | ![Nível 3](final/07-mesa-nivel-3.png) | ![Punição do nível 3](final/08-punicao-nivel-3.png) |
 | Nível 3, serra: trilho de 15 marcas entre os dois | A lâmina anda na direção de quem perdeu |
 | ![Tela final](final/09-tela-final.png) | |
-| Vitória nos três níveis, com a pontuação final | |
+| Fim da partida: João Gabriel **perde** no nível 3, na rodada 10, com 963 pontos | |
+
+_(Correção feita em 2026-09-23, durante o sub-passo 4.1: esta legenda dizia "vitória nos três níveis". O print e o `captura.txt` sempre disseram o contrário — a seed 21 atravessa os três níveis, mas termina em derrota. O roteiro `2.final` nunca chegou a conferir quem ganhou, só que a partida acabou e que houve duas trocas de nível.)_
 
 **Vídeo:** `final/video.mp4`, 44 s. As rodadas correm aceleradas e as trocas de nível ficam em velocidade normal, para dar tempo de ler o que Kaio fala.
 

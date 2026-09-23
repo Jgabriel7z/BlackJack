@@ -1,0 +1,36 @@
+Sub-passo: 4.3
+Roteiro: Efeitos visuais: a mesma mesa com pouca e com muita tensão, e a TV distorcendo (seeds 177 e 21)
+Data: 2026-09-23T18:53:30.652Z
+Duração: 25.2 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 6
+  - 01-tensao-baixa.png
+  - 02-tensao-alta.png
+  - 03-mesma-cena-sem-efeitos.png
+  - 04-efeitos-religados.png
+  - 05-tv-distorcendo-com-o-kaio.png
+  - 06-tv-distorcendo-outro-instante.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 4.3 — Efeitos visuais: a mesma mesa com pouca e com muita tensão, e a TV distorcendo (seeds 177 e 21)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-4\4.3
+Servidor: http://127.0.0.1:64877
+Navegador: Chrome instalado na máquina
+abrir /index.html?tela=jogando&seed=177&rapido=1
+nota   rodada 1: aposta 5 dedos inteiros, tensão 0
+print  01-tensao-baixa.png
+nota   perto do fim: 3 dedo(s), tensão 0.53
+print  02-tensao-alta.png
+print  03-mesma-cena-sem-efeitos.png
+nota   E desliga o pós-processamento: a mesma cena, limpa
+nota   desempenho: 40 fps com os efeitos, 43 fps sem eles
+print  04-efeitos-religados.png
+abrir /index.html?tela=jogando&seed=21&rapido=1
+print  05-tv-distorcendo-com-o-kaio.png
+print  06-tv-distorcendo-outro-instante.png
+nota   a imagem da TV rasga em fatias enquanto o anfitrião fala
+vídeo  video.mp4 (convertido com ffmpeg)
