@@ -1,0 +1,32 @@
+Sub-passo: 3.3
+Roteiro: Fim de jogo: derrota com GAME OVER e volta ao título; vitória com a despedida do anfitrião
+Data: 2026-09-23T16:37:30.375Z
+Duração: 149.4 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 5
+  - 01-game-over.png
+  - 02-voltou-ao-titulo.png
+  - 03-anfitriao-na-tv.png
+  - 04-anfitriao-segunda-fala.png
+  - 05-titulo-depois-da-vitoria.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 3.3 — Fim de jogo: derrota com GAME OVER e volta ao título; vitória com a despedida do anfitrião
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-3\3.3
+Servidor: http://127.0.0.1:62952
+Navegador: Chrome instalado na máquina
+abrir /index.html?tela=jogando&seed=31
+nota   derrota: 0 pontos, recorde 0
+print  01-game-over.png
+nota   o fim de jogo voltou ao título sozinho em 4.8 s
+print  02-voltou-ao-titulo.png
+abrir /index.html?tela=jogando&seed=44&nivel=3
+print  03-anfitriao-na-tv.png
+print  04-anfitriao-segunda-fala.png
+nota   depois da despedida o jogo voltou ao título, sem passar pelo GAME OVER
+print  05-titulo-depois-da-vitoria.png
+vídeo  video.mp4 (convertido com ffmpeg)

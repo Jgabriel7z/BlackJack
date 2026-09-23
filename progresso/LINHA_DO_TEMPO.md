@@ -171,3 +171,62 @@ Uma entrada por sub-passo concluído. Prints e vídeos ficam em `progresso/etapa
 - Evidências em `progresso/etapa-2/final/`: 9 prints da partida pelos três níveis, `video.mp4` (44 s), `captura.txt`, `testes-node.txt`. Resumo da etapa em `progresso/etapa-2/RESUMO.md`.
 - Commit e tag `etapa-2`.
 - Próximo: Etapa 3 (tela de abertura, GAME OVER e retorno, attract mode e high scores como opcionais).
+
+## 2026-09-23 — Etapa 3, sub-passo 3.1: o jogo organizado em telas
+- `src/ui/telas.js`: máquina das cinco telas do diagrama (título, jogando, fim de jogo, attract, pontuações), sem DOM.
+- Tempos em `config.js` e multiplicados pelo `?rapido`; 15 testes com relógio simulado, incluindo 10 minutos sem nenhuma tela travar.
+- Título, attract e pontuações são texto provisório sobre a mesa escurecida; o fim de jogo usa a tela do 1.5 e agora volta ao título sozinho.
+- O jogo passa a abrir no título: os 11 roteiros antigos ganharam `tela: 'jogando'`, e a regressão continua dando 3 rodadas e 2x0.
+- Testes: 161/161.
+- Evidências em `progresso/etapa-3/3.1/`: `01-tela-titulo.png`, `02-tela-attract.png`, `03-tela-high_scores.png`, `04-tela-jogando.png`, `video.mp4` (6 s, laço com 3 voltas), `captura.txt`, `testes-node.txt`.
+- Próximo: 3.2 (tela de título com cara própria).
+
+## 2026-09-23 — Etapa 3, sub-passo 3.2: a tela de título
+- A tela inteira acende como uma televisão de tubo: linha branca abrindo, imagem crescendo na vertical, chiado sumindo, título se firmando.
+- "21" com franja colorida, subtítulo "um jogo que decide se você vive ou não", convite piscando devagar, nomes da equipe no rodapé, mesa e lâmpada quase apagadas ao fundo.
+- Corrigido um bug do 3.1: o relógio da primeira tela partia de zero em vez do primeiro quadro, encurtando a primeira espera.
+- Chiado de tela cheia em resolução maior (320×180); a seed no rodapé só aparece com a mesa em jogo.
+- Testes: 162/162.
+- Evidências em `progresso/etapa-3/3.2/`: `01-tv-acendendo-linha.png`, `02-tv-acendendo-abrindo.png`, `03-tv-acendendo-surgindo.png`, `04-titulo-pronto.png`, `05-titulo-convite-no-outro-tempo.png`, `06-depois-da-tecla.png`, `video.mp4` (10 s), `captura.txt`, `testes-node.txt`.
+- Próximo: 3.3 (tela de GAME OVER).
+
+## 2026-09-23 — Etapa 3, sub-passo 3.3: a tela de GAME OVER
+- Novo `src/ui/fonte-pixel.js` com alfabeto 5×7 desenhado com quadrados cheios, sem sombra nem suavização.
+- Tela preta com "GAME OVER" em pixels, a frase de como acabou, a pontuação e o recorde; volta ao título em 5 s ou com qualquer tecla. Substituiu a tela provisória do 1.5; o botão "jogar de novo" saiu.
+- Vitória no nível 3 não passa pelo GAME OVER: a televisão acende e o anfitrião fala duas frases sugerindo outro jogo, e então o jogo volta ao título.
+- `tools/simular.mjs` ganhou o modo `--fiel`, que imita o que os roteiros fazem na interface; foi assim que se achou a seed 44 (vitória começando no nível 3).
+- Os roteiros `1.5`, `1.final` e `2.6` passaram a recomeçar pelo título, sem o botão removido. O `1.final` ficou marcado como histórico: desde a Etapa 2 ele atravessa os três níveis e não reproduz mais a Etapa 1.
+- Testes: 162/162.
+- Evidências em `progresso/etapa-3/3.3/`: `01-game-over.png`, `02-voltou-ao-titulo.png`, `03-anfitriao-na-tv.png`, `04-anfitriao-segunda-fala.png`, `05-titulo-depois-da-vitoria.png`, `video.mp4` (2min10), `captura.txt`, `testes-node.txt`.
+- Próximo: 3.4 (tela de melhores pontuações, opcional).
+
+## 2026-09-23 — Etapa 3, sub-passo 3.4: as cinco melhores da sessão
+- Novo `src/engine/placar.js`, lógica pura: tabela de cinco lugares, desempate pela ordem de chegada (quem empata entra abaixo), pontuação zero não entra, e a digitação das três letras como máquina de estados (letras do teclado, setas, Backspace, Enter).
+- Nova tela `iniciais` na máquina de telas, entre o GAME OVER e as melhores pontuações, e só quando a pontuação entra na lista. Ela não sai com "qualquer tecla" (ali as teclas são o nome) e não é encurtada pelo `?rapido=1`; 20 s sem ninguém digitar valem o que estiver escrito, para a máquina nunca travar.
+- A tela de melhores pontuações deixou de ser provisória: cinco linhas com posição, iniciais, pontos e até onde a partida chegou, a linha recém-gravada piscando, lugares vazios com tracinhos.
+- Vitória e derrota levam à mesma tela de assinar; a sala só reaparece quando o jogo volta ao título, então GAME OVER → iniciais → melhores acontece todo no escuro.
+- A fonte de pixels passou a arredondar as coordenadas: em escala grande as letras caíam em meio pixel e ficavam com costuras por dentro.
+- Testes: 186/186 (21 novos: 17 do placar e 7 da nova tela, menos os que já existiam).
+- Evidências em `progresso/etapa-3/3.4/`: `01-iniciais-em-branco.png`, `02-iniciais-digitadas.png`, `03-tabela-com-uma-linha.png`, `04-iniciais-lembram-a-partida-anterior.png`, `05-tabela-com-as-duas.png`, `06-tabela-linha-nova-piscando.png`, `07-tabela-de-volta-pelo-laco.png`, `video.mp4` (42 s), `captura.txt`, `testes-node.txt`.
+- Próximo: 3.5 (attract mode, opcional).
+
+## 2026-09-23 — Etapa 3, sub-passo 3.5: a demonstração (attract mode)
+- A vitrine usa a mesa, as animações e o motor da partida de verdade: o que muda é que os **dois lados** são a IA do nível 2, e o lado do jogador ganhou o espelho do que o oponente já tinha (pensar, jogar trunfo, comprar ou parar).
+- A "câmera" passeia: o zoom respira entre 1,06 e 1,28 e o alvo desliza, com os períodos escolhidos para o movimento demorar a repetir. O quanto ela pode deslizar sai do próprio zoom, então o passeio nunca mostra fora da tela.
+- Selo `DEMONSTRAÇÃO` numa tarja em cima e `PRESSIONE QUALQUER TECLA PARA JOGAR` piscando numa tarja embaixo; os dois ficam fora do passeio, parados como a tarja de um vídeo.
+- Nada da demonstração encosta no recorde nem na lista das melhores; a captura prova isso com a vitrine marcando 100 pontos enquanto o visor RECORDE segue em 0 e a lista, vazia.
+- Qualquer tecla ou clique devolve o título, com a mesa já limpa. `?tela=attract` abre direto na vitrine. As telas provisórias do 3.1 acabaram: todas as cinco são de verdade agora.
+- Na vitrine a mesa deixou de falar em segunda pessoa ("Você venceu" virou "João Gabriel venceu"), porque ali não há um "você".
+- Testes: 186/186.
+- Evidências em `progresso/etapa-3/3.5/`: `01-demonstracao-comeco.png`, `02-demonstracao-camera-em-outro-ponto.png`, `03-demonstracao-pontuando.png`, `04-a-tecla-cortou-a-demonstracao.png`, `05-titulo-de-volta.png`, `06-partida-de-verdade-depois-da-demonstracao.png`, `07-atalho-tela-attract.png`, `video.mp4` (1min), `captura.txt`, `testes-node.txt`.
+- Próximo: fechamento da Etapa 3 (roteiro `3.final`, `3.regressao`, `RESUMO.md`, commit e tag `etapa-3`), quando o grupo pedir.
+
+## 2026-09-23 — Etapa 3 fechada
+- Checklist de aceite verificado item a item, cada um com print e teste apontados: abre no título, GAME OVER com volta automática, laço fechando sozinho e vitória final com a despedida do anfitrião.
+- Captura final do **ciclo completo** (roteiro `3.final`, seed 177, velocidade normal, sem `?rapido` e sem `?tela`): título acendendo → partida → GAME OVER → três letras → melhores pontuações → título → demonstração → melhores → título. Depois de digitar as iniciais o roteiro larga o teclado: o resto acontece sozinho.
+- Regressão (`3.regressao`): a partida conhecida desde a Etapa 1 (seed 1617) continua dando 3 rodadas e dedos 2×0 no nível 1.
+- Capturas finais das Etapas 1 e 2 rodadas de novo, com `--sem-video`, e as evidências originais restauradas pelo git em seguida. A da Etapa 2 deu números idênticos (0 / 313 / 963 pontos, duas trocas). A da Etapa 1 continua sendo histórica: desde a Etapa 2 a partida atravessa três níveis.
+- Testes: 186/186.
+- Evidências em `progresso/etapa-3/`: `final/` (10 prints + `video.mp4` de 2min18), `regressao/` (3 prints) e `RESUMO.md`.
+- Commit e tag `etapa-3`.
+- Próximo: Etapa 4, começando pelo 4.1 (persistência), quando o grupo pedir.

@@ -48,7 +48,7 @@ export default {
     };
 
     const abrirJogo = async (parametrosDaUrl) => {
-      await abrir('/index.html', parametrosDaUrl);
+      await abrir('/index.html', { tela: 'jogando', ...parametrosDaUrl });
       await pagina.waitForSelector('body[data-pronto="1"]', { timeout: 10_000 });
       await esperarOcioso();
       await esperar(400);

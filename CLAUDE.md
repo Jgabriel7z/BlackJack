@@ -41,17 +41,25 @@ Necessários para a ferramenta de captura funcionar e os prints saírem sempre i
 - **`?efeitos=0` na URL** desliga o pós-processamento (granulado, linhas de varredura, vinheta de `efeitos.js`), útil para comparar prints ou depurar o desenho.
 - **`?trunfos=two_up,shield,go_for_24` na URL** fixa a mão de trunfos da primeira rodada, para a captura não depender de sorteio.
 - **`?nivel=2` ou `?nivel=3` na URL** começa direto no aparelho de choque ou na serra.
+- **`?tela=jogando` na URL** pula a tela de título e cai direto na mesa. O jogo normal começa no título (requisito da Etapa 3), então **todo roteiro que quer ir direto ao jogo precisa passar isso**. `?tela=attract` cai direto na demonstração, já jogando, sem esperar os 15 s do título.
 - **`<link rel="icon" href="data:,">`** em todo HTML, para o navegador não pedir `/favicon.ico`.
 - **Console limpo:** nenhum `console.error`, exceção ou requisição 404 durante o uso normal. A captura falha se houver.
 - **Layout pensado para 1280x720**, que é o viewport dos prints e do vídeo.
 - Ações do jogador acessíveis por elementos com `id` ou `data-acao` estáveis (ex.: `#botao-hit`, `#botao-stay`, `#botao-proxima`) para os roteiros clicarem sem depender de texto.
-- **Ganchos para roteiros:** `body[data-pronto="1"]` depois do primeiro desenho, `body[data-fase]` com a fase do jogo, `body[data-animacao]` com o passo atual, e `body[data-meu-total]`, `data-meus-dedos`, `data-dedos-dele`, `data-pontos`, `data-alvo`, `data-nivel`, `data-medidor-meu`, `data-medidor-dele`, `data-serra`, `data-trunfos-na-mesa` e `data-trunfo-slots` (`id@x,y` de cada carta da minha mão, para os roteiros clicarem) — tudo já visível na tela. Nunca expor as cartas do oponente nem o objeto `jogo` no DOM ou em `window`: a carta oculta dele não pode ser descoberta pelo inspetor nem pelo console.
+- **Ganchos para roteiros:** `body[data-pronto="1"]` depois do primeiro desenho, `body[data-fase]` com a fase do jogo, `body[data-animacao]` com o passo atual, e `body[data-meu-total]`, `data-meus-dedos`, `data-dedos-dele`, `data-pontos`, `data-alvo`, `data-nivel`, `data-medidor-meu`, `data-medidor-dele`, `data-serra`, `data-iniciais` (as três letras sendo digitadas), `data-placar` (`INI:pontos;...`), `data-demonstracao`, `data-trunfos-na-mesa` e `data-trunfo-slots` (`id@x,y` de cada carta da minha mão, para os roteiros clicarem) — tudo já visível na tela. Nunca expor as cartas do oponente nem o objeto `jogo` no DOM ou em `window`: a carta oculta dele não pode ser descoberta pelo inspetor nem pelo console.
 
 ## Arte em pixel art
 
 - Os sprites grandes (mão do João, Luiz Alberto) **não são digitados à mão**: vêm dos geradores em `tools/arte/gerar_*.py` (Python + Pillow), que rasterizam a forma, sombreiam e exportam grades de caracteres para `src/ui/sprites/*.js` mais um `preview_*.png`. Para mudar um sprite: editar o gerador, rodar `python tools/arte/gerar_<nome>.py`, abrir o preview, iterar. Retoques pixel a pixel podem ser feitos direto no `.js`, mas se o gerador rodar de novo eles se perdem.
 - Cada parte que pode sumir ou se mexer (dedo, cabeça) é uma **camada separada**; animação de personagem é por **quadros** (grades alternativas), não por rotação no canvas, para manter os pixels nítidos.
 - Python só é usado nas ferramentas de arte; o jogo continua sem dependências.
+
+## Telas (a partir da Etapa 3)
+
+- O laço é `título → attract → melhores pontuações → título`, com `jogando`, `fim de jogo` e `iniciais` entrando por fora. Quem manda é `src/ui/telas.js`, que é puro e testado com relógio de mentira.
+- **A máquina nunca pode travar numa tela.** Toda tela de espera sai sozinha com o tempo; a de digitar as iniciais também sai, valendo o que estiver escrito.
+- Telas que esperam alguém digitar **não são encurtadas pelo `?rapido=1`** (`RITMO_REAL` no `telas.js`), senão numa captura acelerada não dá tempo de escrever.
+- **A demonstração (attract) não pode mudar nada**: nem recorde, nem lista das melhores, nem a partida de verdade. Ela usa uma partida só dela, com seed tirada de um gerador próprio.
 
 ## Conteúdo e tom
 
@@ -72,9 +80,9 @@ Ao terminar qualquer sub-passo:
    - Salvar também a saída de `node tests/run-node.mjs` em `progresso/etapa-N/N.M/testes-node.txt`.
    - **Abrir as imagens geradas** (ferramenta Read) e conferir se mostram o que deveriam; se não, corrigir o roteiro ou o jogo e capturar de novo.
    - **Não recapturar sub-passos antigos** depois que o código mudou: a pasta `progresso/etapa-N/N.M/` é o retrato daquele momento. Para checar regressão de um roteiro antigo, rodar com `--sem-video` e depois restaurar os arquivos (ou, melhor, versionar com git e usar `git checkout` na pasta).
-   - **Animações têm nome:** cada passo da fila (`animacao.js`) aparece em `body[data-animacao]` (`distribuindo`, `comprando`, `pensando`, `passou`, `escurecendo`, `revelando`, `resultado`, `mensagem`, `aguardando`, `ocioso`). Os roteiros esperam por esses nomes em vez de usar tempos fixos.
+   - **Animações têm nome:** cada passo da fila (`animacao.js`) aparece em `body[data-animacao]` (`distribuindo`, `comprando`, `pensando`, `passou`, `escurecendo`, `revelando`, `resultado`, `punicao`, `trocando-nivel`, `jogando-trunfo`, `trocando-alvo`, `fim`, `despedida`, `proxima-rodada`, `mensagem`, `aguardando`, `ocioso`). Os roteiros esperam por esses nomes em vez de usar tempos fixos.
    - Prints saem sempre em 1280x720. Para o resultado ser igual em toda captura, o roteiro passa `{ seed: 123, rapido: 1 }` em `abrir()` (ver a seção "Requisitos para a interface").
-   - Para achar uma seed com um desfecho específico (vitória, derrota, empate, partida curta), usar `node tools/simular.mjs <quantidade> <seed inicial> [nível]`: joga IA×IA e lista as partidas mais curtas por desfecho. O roteiro reproduz a partida decidindo HIT/STAY pela mesma regra da IA a partir de `body[data-meu-total]`. A simulação só vale porque o baralho usa um gerador separado do sorteio de trunfos: a mesma seed dá o mesmo baralho com ou sem trunfos.
+   - Para achar uma seed com um desfecho específico (vitória, derrota, empate, partida curta), usar `node tools/simular.mjs <quantidade> <seed inicial> [nível] [--fiel]`: joga IA×IA e lista as partidas mais curtas por desfecho. **Use `--fiel` quando a seed for para um roteiro de captura**: ele liga as cartas trunfo, faz o oponente jogar como na interface e o jogador comprar abaixo de 17, que é o que o roteiro clica. Sem o flag os números não batem com o jogo real. Lembre também que começar num nível diferente muda o baralho: uma seed que vence os três níveis em sequência pode perder se a partida começar no nível 3. O roteiro reproduz a partida decidindo HIT/STAY pela mesma regra da IA a partir de `body[data-meu-total]`. A simulação só vale porque o baralho usa um gerador separado do sorteio de trunfos: a mesma seed dá o mesmo baralho com ou sem trunfos.
    - Um roteiro **nunca deve supor a ordem dos passos nem usar esperas fixas** entre eles: deve observar `body[data-animacao]` num laço até ver o que procura. A troca de nível, por exemplo, vem logo depois da punição e some rápido. Dê folga no número de passos: uma rodada no ritmo real leva uns 15 s.
    - Quando a captura falhar por tempo esgotado sem erro de console, use `node tools/depurar.mjs <seed> <nível>`: ele joga sozinho e imprime cada mudança de estado, mostrando onde parou.
 3. **Linha do tempo:** acrescentar uma entrada em `progresso/LINHA_DO_TEMPO.md` com data, sub-passo, o que mudou em 3 a 6 linhas, caminho dos prints/vídeo e resultado dos testes.

@@ -1,0 +1,39 @@
+Sub-passo: 3.5
+Roteiro: Demonstração: a IA jogando contra ela mesma com a câmera passeando (seed 153)
+Data: 2026-09-23T17:43:40.938Z
+Duração: 51.0 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 7
+  - 01-demonstracao-comeco.png
+  - 02-demonstracao-camera-em-outro-ponto.png
+  - 03-demonstracao-pontuando.png
+  - 04-a-tecla-cortou-a-demonstracao.png
+  - 05-titulo-de-volta.png
+  - 06-partida-de-verdade-depois-da-demonstracao.png
+  - 07-atalho-tela-attract.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 3.5 — Demonstração: a IA jogando contra ela mesma com a câmera passeando (seed 153)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-3\3.5
+Servidor: http://127.0.0.1:52128
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=153
+nota   o título chamou a demonstração sozinho depois de 15.2 s
+nota   demonstração: rodada 1, nível 1
+print  01-demonstracao-comeco.png
+print  02-demonstracao-camera-em-outro-ponto.png
+print  03-demonstracao-pontuando.png
+nota   na demonstração: 100 pontos na mesa, recorde 0, lista ""
+print  04-a-tecla-cortou-a-demonstracao.png
+nota   uma tecla devolveu o título, com a mesa limpa e a demonstração desligada
+print  05-titulo-de-volta.png
+print  06-partida-de-verdade-depois-da-demonstracao.png
+nota   a partida de verdade começa zerada, na rodada 1
+abrir /index.html?tela=attract&seed=153
+print  07-atalho-tela-attract.png
+nota   ?tela=attract abre direto na demonstração, já jogando
+vídeo  video.mp4 (convertido com ffmpeg)

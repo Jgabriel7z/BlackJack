@@ -24,7 +24,7 @@ export default {
       return { x, y };
     };
 
-    await abrir('/index.html', { seed: SEED, trunfos: MAO.join(',') });
+    await abrir('/index.html', { tela: 'jogando', seed: SEED, trunfos: MAO.join(',') });
     await pagina.waitForSelector('body[data-pronto="1"]', { timeout: 10_000 });
     await esperarOcioso();
     await esperar(300);

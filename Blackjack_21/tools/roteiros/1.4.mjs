@@ -10,7 +10,7 @@ export default {
   video: true,
 
   async executar({ abrir, print, esperar, anotar, falhar, pagina }) {
-    await abrir('/index.html', { seed: SEED });
+    await abrir('/index.html', { tela: 'jogando', seed: SEED });
     await pagina.waitForSelector('body[data-pronto="1"]', { timeout: 10_000 });
 
     const animacao = () => pagina.getAttribute('body', 'data-animacao');

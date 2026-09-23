@@ -24,7 +24,7 @@ export default {
       fotografados.add(nome);
     };
 
-    await abrir('/index.html', { seed: SEED, rapido: 1 });
+    await abrir('/index.html', { tela: 'jogando', seed: SEED, rapido: 1 });
     await pagina.waitForSelector('body[data-pronto="1"]', { timeout: 10_000 });
 
     // A troca é contada uma vez por bloco. Olhar só o nível daria duas

@@ -9,7 +9,7 @@ export default {
   video: true,
 
   async executar({ abrir, print, esperar, anotar, falhar, pagina }) {
-    await abrir('/index.html', { seed: SEED, rapido: 1 });
+    await abrir('/index.html', { tela: 'jogando', seed: SEED, rapido: 1 });
     await pagina.waitForSelector('body[data-pronto="1"]', { timeout: 10_000 });
     await esperar(250);
     await print('mesa-inicial');

@@ -42,9 +42,17 @@ import {
   atualizarRecorde,
   registrarPartida,
 } from '../engine/score.js';
+import {
+  criarPlacar,
+  posicaoNoPlacar,
+  registrar as registrarNoPlacar,
+  criarEntradaDeIniciais,
+  teclarIniciais,
+  textoDasIniciais,
+} from '../engine/placar.js';
 import { prepararCatalogo, aplicarTrunfo, podeJogarTrunfo } from '../engine/trumps.js';
 import catalogoJson from '../../data/trump_cards.js';
-import { NOMES } from '../config.js';
+import { NOMES, EQUIPE, TITULO, FALA_DA_VITORIA } from '../config.js';
 import { lerParametros } from './parametros.js';
 import {
   criarRenderizador,
@@ -54,9 +62,11 @@ import {
   POSICOES,
   TRUNFO,
   definirNomeDoAnfitriao,
+  definirTextosDoTitulo,
 } from './render.js';
 import { criarSequenciador, suavizar, interpolar, limitar, pausa } from './animacao.js';
 import { criarLampada } from './lampada.js';
+import { criarTelas, TELA } from './telas.js';
 
 // ---------------------------------------------------------------------
 //  Preparação
@@ -94,6 +104,29 @@ const recordeDaSessao = criarRecorde();
 /** Quanto tempo o visor de recorde fica piscando depois de ser batido. */
 const DURACAO_DO_PISCA = 5000;
 
+/**
+ * As cinco melhores da sessao (3.4). Como o recorde, vive fora da
+ * partida e some ao recarregar a pagina. `entradaIniciais` so existe
+ * enquanto o jogador esta digitando as tres letras.
+ */
+const placarDaSessao = criarPlacar();
+let entradaIniciais = null;
+
+/**
+ * Demonstração (attract mode, 3.5): a máquina joga contra ela mesma
+ * enquanto ninguém encosta. Usa a mesma mesa, as mesmas animações e o
+ * mesmo motor da partida de verdade — só que os dois lados são a IA, e
+ * nada do que acontece ali entra no recorde nem na lista das melhores.
+ */
+let demonstracao = false;
+/** A cabeça de IA usada nos DOIS lados na demonstração. */
+const NIVEL_DA_DEMO = 2;
+/** Gerador só das seeds da demonstração: com ?seed a vitrine também se repete. */
+const rngDemo = criarRng(((parametros.seed ?? seedAleatoria()) ^ 0xc2b2ae35) >>> 0);
+const proximaSeedDaDemo = () => Math.floor(rngDemo() * 0xffffffff) >>> 0;
+/** As letras da ultima vez, para a proxima partida ja vir com elas. */
+let ultimasIniciais = 'AAA';
+
 /** Tudo que aparece na tela. O render.js só lê este objeto. */
 const mesa = {
   eu: { nome: NOMES.jogador, cartas: [], dedos: 5, medidor: 0, aposta: 0, trunfosNaMao: [], trunfosNaMesa: [] },
@@ -126,6 +159,14 @@ const mesa = {
   pontos: { total: 0, multiplicador: 1, ultimo: null },
   // 2.6
   recorde: { valor: 0, piscando: false, piscandoDesde: null },
+  // 3.4
+  placar: { entradas: [], destaque: -1 },
+  iniciais: null,     // { letras, cursor, linha, pontos, restante } enquanto digita
+  // 3.1 e 3.2
+  tela: TELA.TITULO,
+  tempoNaTela: 0,
+  duracaoDoLigar: TITULO.ligarTv * parametros.fatorTempo,
+  piscaConvite: TITULO.piscaConvite,
   rodada: 0,
   alvo: 21,
   seed: null,
@@ -136,9 +177,9 @@ const mesa = {
  * Cria (ou recria) a partida e zera a mesa. Com ?seed na URL a mesma
  * partida se repete; sem seed, cada partida sorteia uma nova.
  */
-function novaPartida() {
+function novaPartida(opcoes = {}) {
   jogo = criarJogo({
-    seed: parametros.seed ?? seedAleatoria(),
+    seed: opcoes.seed ?? parametros.seed ?? seedAleatoria(),
     catalogoTrunfos: catalogo,
     nivel: parametros.nivel ?? 1,
   });
@@ -315,7 +356,7 @@ function adicionarRevelacao(resultado) {
       mesa.pontos.total = pontuacao.total;
       mesa.pontos.multiplicador = pontuacao.vitoriasSeguidas >= 2 ? detalhe.multiplicador : 1;
       mesa.pontos.ultimo = detalhe;
-      conferirRecorde();
+      if (!demonstracao) conferirRecorde();
       mesa.mensagem = descreverResultado(resultado) + descreverPontos(detalhe);
       mesa.mensagemVermelha = resultado.vencedor !== RESULTADO.JOGADOR;
     },
@@ -328,6 +369,10 @@ function adicionarRevelacao(resultado) {
 
   if (jogo.fase === FASE.FIM_DE_JOGO) adicionarFimDeJogo();
   else if (jogo.fase === FASE.NIVEL_CONCLUIDO) adicionarTrocaDeNivel();
+  // Na demonstração ninguém aperta "próxima rodada": ela vem sozinha.
+  else if (demonstracao) {
+    sequencia.adicionar({ nome: 'proxima-rodada', duracao: 1600, aoTerminar: comecarRodada });
+  }
 }
 
 /** Punição de quem perdeu, conforme o aparelho do nível (nos dois, no empate). */
@@ -335,7 +380,7 @@ function adicionarPunicao(resultado) {
   for (const punicao of resultado.punicoes) {
     if (punicao.quantidade === 0) continue;
     const lado = punicao.lado === LADO.JOGADOR ? 'eu' : 'adv';
-    const dono = lado === 'eu' ? 'a sua mão' : `a mão de ${NOMES.oponente}`;
+    const dono = lado === 'eu' ? maoDeCa() : `a mão de ${NOMES.oponente}`;
 
     if (punicao.tipo === 'dedos') adicionarGuilhotina(lado, dono, punicao);
     else if (punicao.tipo === 'choque') adicionarChoque(lado, dono, punicao);
@@ -432,9 +477,10 @@ function adicionarSerra(lado, punicao) {
     duracao: 400 + Math.abs(punicao.para - punicao.de) * 260,
     aoIniciar() {
       mesa.punicao = { tipo: 'serra', lado, progresso: 0, fase: 'andando' };
-      mesa.mensagem = lado === 'eu'
+      const alvoDaSerra = lado === 'eu' ? ladoDeCa() : NOMES.oponente;
+      mesa.mensagem = lado === 'eu' && !demonstracao
         ? 'A serra anda na sua direção.'
-        : `A serra anda na direção de ${NOMES.oponente}.`;
+        : `A serra anda na direção de ${alvoDaSerra}.`;
       mesa.mensagemVermelha = true;
     },
     aoAtualizar(p) {
@@ -532,7 +578,12 @@ function adicionarTrocaDeNivel() {
   });
 }
 
-/** Tela preta e um texto seco. O botão de jogar de novo aparece quando a fila esvazia. */
+/**
+ * A partida acabou. A sala apaga e então:
+ *   - perdeu: vai para a tela de fim de jogo, que volta ao título sozinha;
+ *   - venceu o último nível: antes de voltar ao título, o anfitrião
+ *     aparece na televisão sugerindo que vem outro jogo (como no 21).
+ */
 function adicionarFimDeJogo() {
   sequencia.adicionar(pausa('fim', 600));
   sequencia.adicionar({
@@ -545,8 +596,12 @@ function adicionarFimDeJogo() {
         pontuarNivel(pontuacao);
         mesa.pontos.total = pontuacao.total;
       }
-      conferirRecorde();
-      registrarPartida(recordeDaSessao);
+      // A demonstração não mexe no recorde nem na lista das melhores.
+      if (!demonstracao) {
+        conferirRecorde();
+        registrarPartida(recordeDaSessao);
+        prepararIniciais();
+      }
     },
     aoAtualizar(p) {
       mesa.telaPreta = suavizar.entradaSaida(p);
@@ -556,7 +611,78 @@ function adicionarFimDeJogo() {
       mesa.textoFinal = descreverFim();
     },
   });
-  sequencia.adicionar(pausa('fim', 900));
+
+  // Na demonstração a partida acabada simplesmente dá lugar a outra.
+  if (demonstracao) {
+    sequencia.adicionar({
+      nome: 'fim',
+      duracao: 1800,
+      aoTerminar() { comecarDemonstracao(); },
+    });
+    return;
+  }
+
+  if (jogo.vitoriaFinal) adicionarDespedidaDoAnfitriao();
+  else {
+    sequencia.adicionar({
+      nome: 'fim',
+      duracao: 0,
+      aoTerminar() {
+        // A máquina de telas assume: mostra o GAME OVER e, se a pontuação
+        // entrou nas cinco melhores, manda digitar as iniciais antes do título.
+        telas.fimDePartida(performance.now(), { paraIniciais: mesa.iniciais !== null });
+        mesa.tela = telas.atual;
+      },
+    });
+  }
+}
+
+/** A televisão acende e o anfitrião deixa claro que isto não acabou. */
+function adicionarDespedidaDoAnfitriao() {
+  sequencia.adicionar(pausa('despedida', 900));
+  sequencia.adicionar({
+    nome: 'despedida',
+    duracao: 1200,
+    ritmoReal: true,
+    aoIniciar() { mesa.textoFinal = ''; },
+    aoAtualizar(p) {
+      mesa.tvForte = suavizar.entradaSaida(p);
+      // A sala volta a aparecer um pouco: a televisão é a única luz, mas
+      // a mesa vazia atrás dela é parte da cena.
+      mesa.telaPreta = interpolar(1, 0.72, suavizar.entradaSaida(p));
+    },
+  });
+
+  for (const fala of FALA_DA_VITORIA) {
+    sequencia.adicionar({
+      nome: 'despedida',
+      duracao: 3000,
+      ritmoReal: true,
+      aoIniciar() {
+        mesa.kaio = fala;
+        mesa.tvForte = 1;
+      },
+    });
+  }
+
+  sequencia.adicionar({
+    nome: 'despedida',
+    duracao: 1400,
+    ritmoReal: true,
+    aoIniciar() { mesa.kaio = null; },
+    aoAtualizar(p) {
+      mesa.tvForte = 1 - suavizar.entradaSaida(p);
+      mesa.telaPreta = interpolar(0.72, 1, suavizar.entradaSaida(p));
+    },
+    aoTerminar() {
+      mesa.tvForte = 0;
+      mesa.telaPreta = 0;
+      // Vitória não passa pelo GAME OVER: vai assinar a lista, se entrou
+      // nela, e de lá para o início.
+      telas.ir(mesa.iniciais ? TELA.INICIAIS : TELA.TITULO, performance.now());
+      mesa.tela = telas.atual;
+    },
+  });
 }
 
 // ---------------------------------------------------------------------
@@ -726,6 +852,8 @@ function aoMoverMouse(evento) {
 }
 
 function aoClicarNoCanvas(evento) {
+  // Fora da mesa, o clique só serve para sair da tela em que está.
+  if (telas.atual !== TELA.JOGANDO) { aoInteragirComATela(); return; }
   const achado = trunfoSobOCursor(pontoNoCanvas(evento));
   if (achado?.origem.startsWith('mao-')) aoClicarEmTrunfo(achado.indice);
   atualizarBotoes();
@@ -734,6 +862,13 @@ function aoClicarNoCanvas(evento) {
 // ---------------------------------------------------------------------
 //  Textos
 // ---------------------------------------------------------------------
+
+/**
+ * Como a mesa se dirige ao lado de cá. Jogando, é "você"; na
+ * demonstração ninguém está jogando, então vale o nome.
+ */
+const ladoDeCa = () => (demonstracao ? NOMES.jogador : 'Você');
+const maoDeCa = () => (demonstracao ? `a mão de ${NOMES.jogador}` : 'a sua mão');
 
 function plural(n, singular, pluralTexto) {
   return `${n} ${n === 1 ? singular : pluralTexto}`;
@@ -760,10 +895,11 @@ function descreverResultado(r) {
   }
   if (r.vencedor === RESULTADO.JOGADOR) {
     const detalhe = r.estourou.oponente ? ' (ele estourou)' : '';
-    return `Você venceu: ${tj} contra ${to}${detalhe}. ${NOMES.oponente} ${verbo} ${custo}.`;
+    return `${ladoDeCa()} venceu: ${tj} contra ${to}${detalhe}. ${NOMES.oponente} ${verbo} ${custo}.`;
   }
-  const detalhe = r.estourou.jogador ? ' (você estourou)' : '';
-  return `${NOMES.oponente} venceu: ${to} contra ${tj}${detalhe}. Você ${verbo} ${custo}.`;
+  const quemEstourou = demonstracao ? `${NOMES.jogador} estourou` : 'você estourou';
+  const detalhe = r.estourou.jogador ? ` (${quemEstourou})` : '';
+  return `${NOMES.oponente} venceu: ${to} contra ${tj}${detalhe}. ${ladoDeCa()} ${verbo} ${custo}.`;
 }
 
 /**
@@ -774,6 +910,144 @@ function conferirRecorde() {
   const { bateu, melhor } = atualizarRecorde(recordeDaSessao, pontuacao.total);
   mesa.recorde.valor = melhor;
   if (bateu) mesa.recorde.piscandoDesde = performance.now();
+}
+
+// ---------------------------------------------------------------------
+//  Demonstração: a IA jogando pelos dois lados (3.5)
+// ---------------------------------------------------------------------
+
+/** Começa (ou recomeça) a vitrine, com uma partida nova só dela. */
+function comecarDemonstracao() {
+  demonstracao = true;
+  mesa.iniciais = null;
+  sequencia.limpar();
+  novaPartida({ seed: proximaSeedDaDemo() });
+}
+
+/**
+ * Sai da vitrine. A mesa volta ao estado de espera, como no carregamento
+ * da página: partida nova e fila vazia, para nada ficar animando por
+ * trás do título.
+ */
+function pararDemonstracao() {
+  demonstracao = false;
+  sequencia.limpar();
+  novaPartida();
+  sequencia.limpar();
+}
+
+/** Na demonstração o jogador também pensa antes de jogar. */
+function passoPensandoDoJogador() {
+  return {
+    nome: 'pensando',
+    duracao: 900 + rngVisual() * 1400,
+    aoIniciar() {
+      mesa.mensagem = `${NOMES.jogador} está pensando`;
+      mesa.mensagemVermelha = false;
+    },
+    aoTerminar() { jogadaDoJogador(); },
+  };
+}
+
+/** Carta trunfo pelo lado do jogador, quando a IA acha que vale. */
+function trunfoDoJogador() {
+  const id = decidirTrunfo(jogo, LADO.JOGADOR, NIVEL_DA_DEMO);
+  if (!id) return false;
+
+  const carta = descricaoDoTrunfo(id);
+  const indice = mesa.eu.trunfosNaMao.findIndex((c) => c.id === id);
+  const totalAntes = mesa.eu.trunfosNaMao.length;
+  const alvoAntes = mesa.alvo;
+
+  const relatorio = aplicarTrunfo(jogo, LADO.JOGADOR, id);
+  sincronizarTrunfos();
+  mesa.mensagem = `${NOMES.jogador} jogou ${carta.nome}. ${carta.texto}`;
+  mesa.mensagemVermelha = false;
+
+  if (relatorio.ficouNaMesa && indice >= 0) {
+    sequencia.adicionar(passoTrunfoVoando(carta, posicaoTrunfoNaMao(indice, totalAntes), 'eu'));
+  }
+  if (mesa.alvo !== alvoAntes) sequencia.adicionar(passoTrocaDeAlvo(alvoAntes, mesa.alvo));
+  sequencia.adicionar(pausa('jogando-trunfo', 700));
+  redesenharMinhasCartas(verMesa(jogo, LADO.JOGADOR));
+  return true;
+}
+
+/** O mesmo que `jogadaDoOponente`, só que do lado de cá da mesa. */
+function jogadaDoJogador() {
+  if (trunfoDoJogador()) {
+    sequencia.adicionar({ nome: 'jogando-trunfo', duracao: 0, aoTerminar: jogadaDoJogador });
+    return;
+  }
+
+  const querComprar = decidirAcao(jogo, LADO.JOGADOR, NIVEL_DA_DEMO) === ACAO.HIT;
+  if (querComprar && podeComprar(jogo, LADO.JOGADOR)) {
+    const { carta, trunfoGanho } = hit(jogo, LADO.JOGADOR);
+    mesa.mensagem = `${NOMES.jogador} compra uma carta.`;
+    sequencia.adicionar(passoCartaVoando({ nome: 'comprando', lado: 'eu', valor: carta, faceFinal: 'cima' }));
+    if (trunfoGanho) sequencia.adicionar({ nome: 'comprando', duracao: 0, aoTerminar: sincronizarTrunfos });
+    sequencia.adicionar(passoPensando());
+    return;
+  }
+
+  const { resultado } = stay(jogo, LADO.JOGADOR);
+  mesa.mensagem = `${NOMES.jogador} passou.`;
+  mesa.mensagemVermelha = false;
+  if (resultado) {
+    sequencia.adicionar(pausa('passou', 600));
+    adicionarRevelacao(resultado);
+  } else {
+    sequencia.adicionar(pausa('passou', 400));
+    sequencia.adicionar(passoPensando());
+  }
+}
+
+/** Devolve a vez: na demonstração quem joga é a IA, não os botões. */
+function devolverAVez() {
+  if (demonstracao) sequencia.adicionar(passoPensandoDoJogador());
+}
+
+// ---------------------------------------------------------------------
+//  As cinco melhores da sessão (3.4)
+// ---------------------------------------------------------------------
+
+/**
+ * Chamado quando a partida acaba: se a pontuação cabe nas cinco
+ * melhores, prepara as três letras. Devolve true se vai ter digitação.
+ */
+function prepararIniciais() {
+  const linha = posicaoNoPlacar(placarDaSessao, pontuacao.total);
+  if (linha < 0) {
+    entradaIniciais = null;
+    mesa.iniciais = null;
+    return false;
+  }
+  entradaIniciais = criarEntradaDeIniciais(ultimasIniciais);
+  mesa.iniciais = {
+    letras: entradaIniciais.letras,   // a mesma lista: o que for digitado já aparece
+    cursor: entradaIniciais.cursor,
+    linha,
+    pontos: pontuacao.total,
+    restante: null,
+  };
+  return true;
+}
+
+/**
+ * Sai da tela de digitar, por Enter ou porque o tempo acabou: o que
+ * estiver escrito entra na tabela. Passa por aqui nos dois casos.
+ */
+function gravarNoPlacar() {
+  if (!entradaIniciais) return;
+  const letras = textoDasIniciais(entradaIniciais);
+  ultimasIniciais = letras;
+  const { linha } = registrarNoPlacar(placarDaSessao, letras, mesa.iniciais.pontos, {
+    nivel: jogo.nivel,
+    venceu: jogo.vitoriaFinal,
+  });
+  mesa.placar = { entradas: placarDaSessao.entradas, destaque: linha };
+  entradaIniciais = null;
+  mesa.iniciais = null;
 }
 
 /** Sufixo da mensagem de resultado com os pontos da rodada. */
@@ -822,7 +1096,12 @@ function comecarRodada() {
   sequencia.adicionar(passoCartaVoando({ nome: 'distribuindo', lado: 'adv', valor: null, faceFinal: 'baixo' }));
   sequencia.adicionar(passoCartaVoando({ nome: 'distribuindo', lado: 'eu', valor: visao.eu.abertas[0], faceFinal: 'cima' }));
   sequencia.adicionar(passoCartaVoando({ nome: 'distribuindo', lado: 'adv', valor: visao.adversario.abertas[0], faceFinal: 'cima' }));
-  sequencia.adicionar(passoMensagem('Sua vez: comprar (HIT) ou parar (STAY)?', 150));
+  if (demonstracao) {
+    sequencia.adicionar(passoMensagem('A casa joga contra ela mesma.', 150));
+    sequencia.adicionar(passoPensandoDoJogador());
+  } else {
+    sequencia.adicionar(passoMensagem('Sua vez: comprar (HIT) ou parar (STAY)?', 150));
+  }
 }
 
 /**
@@ -863,6 +1142,7 @@ function jogadaDoOponente() {
     mesa.mensagem = `${NOMES.oponente} compra uma carta.`;
     sequencia.adicionar(passoCartaVoando({ nome: 'comprando', lado: 'adv', valor: carta, faceFinal: 'cima' }));
     sequencia.adicionar(passoMensagem('Sua vez.', 250));
+    devolverAVez();
     return;
   }
 
@@ -873,6 +1153,7 @@ function jogadaDoOponente() {
     adicionarRevelacao(resultado);
   } else {
     sequencia.adicionar(passoMensagem(`${NOMES.oponente} passou. Sua vez.`, 500));
+    devolverAVez();
   }
 }
 
@@ -910,9 +1191,11 @@ function aoClicarProxima() {
   comecarRodada();
 }
 
+/** Atalho de depuração: recomeçar sem passar pelo título. */
 function aoClicarReiniciar() {
-  if (sequencia.ocupado || jogo.fase !== FASE.FIM_DE_JOGO) return;
-  novaPartida();
+  if (jogo.fase !== FASE.FIM_DE_JOGO) return;
+  telas.ir(TELA.JOGANDO, performance.now());
+  mesa.tela = telas.atual;
 }
 
 // ---------------------------------------------------------------------
@@ -920,18 +1203,36 @@ function aoClicarReiniciar() {
 // ---------------------------------------------------------------------
 
 function atualizarBotoes() {
-  const jogando = jogo.fase === FASE.JOGANDO;
-  const livre = podeAgir();
-  const acabou = jogo.fase === FASE.FIM_DE_JOGO && !sequencia.ocupado;
+  // Fora da tela de jogo nenhum botão da mesa aparece.
+  const naMesa = telas.atual === TELA.JOGANDO || telas.atual === TELA.GAME_OVER;
+  const jogando = naMesa && jogo.fase === FASE.JOGANDO;
+  const livre = naMesa && podeAgir();
+  const acabou = naMesa && jogo.fase === FASE.FIM_DE_JOGO && !sequencia.ocupado;
   mesa.podeJogarTrunfo = livre;
 
   botaoHit.hidden = !jogando;
   botaoStay.hidden = !jogando;
   botaoHit.disabled = !livre || !podeComprar(jogo, LADO.JOGADOR);
   botaoStay.disabled = !livre;
-  botaoProxima.hidden = !(jogo.fase === FASE.RODADA_ENCERRADA && !sequencia.ocupado);
-  telaFinal.hidden = !acabou;
-  botaoReiniciar.hidden = !acabou;
+  botaoProxima.hidden = !(telas.atual === TELA.JOGANDO && jogo.fase === FASE.RODADA_ENCERRADA && !sequencia.ocupado);
+  // A tela de fim de jogo não tem botão: ela volta ao título sozinha ou
+  // com qualquer tecla. O `acabou` segue servindo para os roteiros.
+  telaFinal.hidden = true;
+  botaoReiniciar.hidden = true;
+  document.body.dataset.partidaAcabou = acabou ? '1' : '0';
+
+  document.body.dataset.tela = telas.atual;
+  // Em que ponto está a televisão acendendo, para os roteiros esperarem
+  // por fase em vez de cravar tempos.
+  if (telas.atual !== TELA.TITULO) {
+    document.body.dataset.tituloFase = 'fora';
+  } else {
+    const p = mesa.tempoNaTela / mesa.duracaoDoLigar;
+    document.body.dataset.tituloFase = p < 0.18 ? 'linha'
+      : p < 0.45 ? 'abrindo'
+        : p < 1 ? 'surgindo' : 'pronto';
+  }
+  document.body.dataset.tituloPronto = document.body.dataset.tituloFase === 'pronto' ? '1' : '0';
 
   // Para o DOM só vai o que os roteiros precisam e que já está na tela:
   // fase, nome da animação e o total do PRÓPRIO jogador. Nunca as cartas do oponente.
@@ -944,6 +1245,11 @@ function atualizarBotoes() {
   document.body.dataset.dedosDele = String(mesa.adv.dedos);
   document.body.dataset.pontos = String(mesa.pontos.total);
   document.body.dataset.recorde = String(mesa.recorde.valor);
+  // As três letras sendo digitadas e a tabela como ela está na tela (3.4).
+  document.body.dataset.iniciais = mesa.iniciais ? mesa.iniciais.letras.join('') : '';
+  document.body.dataset.demonstracao = demonstracao ? '1' : '0';
+  document.body.dataset.placar = placarDaSessao.entradas
+    .map((e) => `${e.iniciais}:${e.pontos}`).join(';');
   document.body.dataset.recordePiscando = mesa.recorde.piscando ? '1' : '0';
   document.body.dataset.alvo = String(mesa.alvo);
   document.body.dataset.nivel = String(mesa.nivel);
@@ -961,11 +1267,22 @@ function atualizarBotoes() {
 }
 
 function quadro(agora) {
+  // Qual tela está no ar. As de espera trocam sozinhas com o relógio.
+  telas.atualizar(agora);
+  mesa.tela = telas.atual;
+  mesa.tempoNaTela = telas.tempoNaTela(agora);
+
   // O visor do recorde pisca por alguns segundos depois de ser batido.
   if (mesa.recorde.piscandoDesde !== null) {
     const decorrido = agora - mesa.recorde.piscandoDesde;
     mesa.recorde.piscando = decorrido < DURACAO_DO_PISCA * parametros.fatorTempo;
     if (!mesa.recorde.piscando) mesa.recorde.piscandoDesde = null;
+  }
+
+  // Quanto falta para a tela de digitar sair sozinha, para o visor.
+  if (mesa.iniciais) {
+    const falta = (telas.duracaoDaTelaAtual() ?? 0) - telas.tempoNaTela(agora);
+    mesa.iniciais.restante = telas.atual === TELA.INICIAIS ? Math.max(0, falta) / 1000 : null;
   }
 
   lampada.atualizar(agora);
@@ -986,6 +1303,65 @@ botaoStay.addEventListener('click', () => { aoClicarStay(); atualizarBotoes(); }
 botaoProxima.addEventListener('click', () => { aoClicarProxima(); atualizarBotoes(); });
 botaoReiniciar.addEventListener('click', () => { aoClicarReiniciar(); atualizarBotoes(); });
 
+// ---------------------------------------------------------------------
+//  Telas (3.1)
+// ---------------------------------------------------------------------
+
+const telas = criarTelas({
+  inicial: parametros.tela ?? TELA.TITULO,
+  fatorTempo: parametros.fatorTempo,
+  aoTrocar(nova, anterior) {
+    mesa.tela = nova;
+    // Saiu da tela de digitar (pelo Enter ou pelo tempo): grava as letras.
+    if (anterior === TELA.INICIAIS) gravarNoPlacar();
+    // Entrou ou saiu da vitrine.
+    if (anterior === TELA.ATTRACT) pararDemonstracao();
+    if (nova === TELA.ATTRACT) comecarDemonstracao();
+    // A sala só volta a aparecer quando o jogo recomeça: a sequência
+    // GAME OVER → iniciais → melhores pontuações acontece toda no escuro.
+    if (nova === TELA.TITULO || nova === TELA.JOGANDO) {
+      mesa.telaPreta = 0;
+      mesa.textoFinal = '';
+      sequencia.limpar();
+    }
+    // Entrar no jogo vindo de fora sempre começa uma partida nova.
+    if (nova === TELA.JOGANDO && anterior !== TELA.JOGANDO) novaPartida();
+  },
+});
+mesa.tela = telas.atual;
+
+/** Tecla ou clique fora da mesa: só vale nas telas que não são a do jogo. */
+function aoInteragirComATela() {
+  if (telas.atual === TELA.JOGANDO) return false;
+  return telas.interagir(performance.now());
+}
+
+/**
+ * Na tela das iniciais as teclas são as letras do nome, e não um "pule a
+ * tela": elas vão para a entrada e o Enter confirma. Em qualquer outra
+ * tela, tecla é interação.
+ */
+function aoTeclar(evento) {
+  if (telas.atual === TELA.INICIAIS && entradaIniciais) {
+    const { mudou, confirmou } = teclarIniciais(entradaIniciais, evento.key);
+    if (mudou || confirmou) evento.preventDefault();
+    mesa.iniciais.cursor = entradaIniciais.cursor;
+    if (confirmou) {
+      telas.ir(TELA.HIGH_SCORES, performance.now());
+      mesa.tela = telas.atual;
+    }
+    return;
+  }
+  aoInteragirComATela();
+}
+
+window.addEventListener('keydown', aoTeclar);
+
 definirNomeDoAnfitriao(NOMES.anfitriao);
+definirTextosDoTitulo(TITULO.subtitulo, EQUIPE);
 novaPartida();
+// Abrir direto na vitrine (?tela=attract) precisa ligá-la na mão: no
+// carregamento ninguém "troca" de tela, então o aviso de troca não corre.
+if (telas.atual === TELA.ATTRACT) comecarDemonstracao();
+else if (telas.atual !== TELA.JOGANDO) sequencia.limpar();  // nada de animar por trás do título
 requestAnimationFrame(quadro);

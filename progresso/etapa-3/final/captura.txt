@@ -1,0 +1,47 @@
+Sub-passo: 3.final
+Roteiro: Ciclo completo: título, partida, GAME OVER, iniciais, melhores, título e o laço sozinho (seed 177)
+Data: 2026-09-23T17:54:50.490Z
+Duração: 138.0 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 10
+  - 01-titulo-acendendo.png
+  - 02-titulo-pronto.png
+  - 03-mesa-rodada-1.png
+  - 04-a-guilhotina-desce.png
+  - 05-game-over.png
+  - 06-digitando-as-iniciais.png
+  - 07-melhores-pontuacoes.png
+  - 08-de-volta-ao-titulo.png
+  - 09-demonstracao-no-laco.png
+  - 10-melhores-no-laco.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 3.final — Ciclo completo: título, partida, GAME OVER, iniciais, melhores, título e o laço sozinho (seed 177)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-3\final
+Servidor: http://127.0.0.1:62211
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=177
+print  01-titulo-acendendo.png
+print  02-titulo-pronto.png
+print  03-mesa-rodada-1.png
+nota   partida começou: rodada 1, 0 pontos
+print  04-a-guilhotina-desce.png
+nota   fim da partida: 175 pontos, 0 dedos
+print  05-game-over.png
+nota   o GAME OVER passou a vez para as iniciais em 4.4 s, sozinho
+print  06-digitando-as-iniciais.png
+nota   lista das melhores: JOA:175
+print  07-melhores-pontuacoes.png
+nota   a lista devolveu o título em 7.9 s, sozinha
+print  08-de-volta-ao-titulo.png
+nota   o título chamou a demonstração em 11.5 s
+print  09-demonstracao-no-laco.png
+nota   a demonstração passou a vez para a lista em 13.5 s
+print  10-melhores-no-laco.png
+nota   o laço fechou: a lista devolveu o título em 7.4 s
+nota   ciclo completo: título → partida → GAME OVER → iniciais → melhores → título → demonstração → melhores → título
+vídeo  video.mp4 (convertido com ffmpeg)

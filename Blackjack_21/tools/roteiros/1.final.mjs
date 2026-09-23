@@ -1,5 +1,12 @@
 // Captura final da Etapa 1 — uma partida inteira em velocidade normal,
 // do começo à tela final, com prints dos momentos principais.
+//
+// HISTÓRICO: este roteiro retrata o jogo como ele era no fim da Etapa 1,
+// quando havia um aparelho só. Da Etapa 2 em diante a partida atravessa
+// três níveis, então rodá-lo hoje dá outro resultado (a tela final vem
+// do nível 3, não da guilhotina). A evidência original está guardada em
+// progresso/etapa-1/final/. Para conferir que o NÍVEL 1 continua igual,
+// use `node tools/capturar.mjs 2.regressao`.
 // Seed 1617: João Gabriel vence em 3 rodadas perdendo 3 dedos no caminho,
 // então aparecem as duas guilhotinas. A regra da IA decide HIT/STAY por ele.
 // Saída: progresso/etapa-1/final/
@@ -14,7 +21,7 @@ export default {
     const atributo = (nome) => pagina.getAttribute('body', nome);
     const esperarSeletor = (seletor, timeout = 90_000) => pagina.waitForSelector(seletor, { timeout });
 
-    await abrir('/index.html', { seed: SEED });
+    await abrir('/index.html', { tela: 'jogando', seed: SEED });
     await esperarSeletor('body[data-pronto="1"]', 10_000);
 
     // 1) Mesa pronta na primeira rodada.
@@ -78,6 +85,6 @@ export default {
     await esperar(600);
     await print('tela-final');
     anotar(`seed ${SEED}: dedos João ${await atributo('data-meus-dedos')} x Luiz ${await atributo('data-dedos-dele')}`);
-    if (!(await pagina.locator('#botao-reiniciar').isVisible())) falhar('Botão "jogar de novo" não apareceu.');
+    if ((await atributo('data-partida-acabou')) !== '1') falhar('A partida deveria ter acabado.');
   },
 };

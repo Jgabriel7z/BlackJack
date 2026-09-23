@@ -48,6 +48,12 @@ export function criarSequenciador(fatorTempo = 1) {
       fila.push(passo);
     },
 
+    /** Joga fora tudo o que está na fila e o passo em andamento. */
+    limpar() {
+      fila.length = 0;
+      atual = null;
+    },
+
     /** True enquanto houver passo rodando ou esperando. */
     get ocupado() {
       return atual !== null || fila.length > 0;

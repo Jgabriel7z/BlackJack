@@ -34,11 +34,17 @@ export function lerParametros(search = '') {
   const nivelTexto = parametros.get('nivel');
   const nivel = /^[123]$/.test(nivelTexto ?? '') ? Number(nivelTexto) : null;
 
+  // ?tela=jogando pula a abertura e cai direto na mesa. Os roteiros de
+  // captura das Etapas 1 e 2 usam isso; o jogo normal começa no título.
+  const telaTexto = parametros.get('tela');
+  const tela = /^[a-z_]+$/.test(telaTexto ?? '') ? telaTexto : null;
+
   return {
     seed,
     rapido,
     efeitos,
     nivel,
+    tela,
     trunfos: trunfos && trunfos.length > 0 ? trunfos : null,
     fatorTempo: rapido ? FATOR_TEMPO_RAPIDO : FATOR_TEMPO_NORMAL,
   };

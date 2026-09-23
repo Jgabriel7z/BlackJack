@@ -6,6 +6,8 @@ import './animacao.test.js';
 import './score.test.js';
 import './trumps.test.js';
 import './niveis.test.js';
+import './telas.test.js';
+import './placar.test.js';
 import { rodarTodos } from './testador.js';
 
 const resultados = rodarTodos();

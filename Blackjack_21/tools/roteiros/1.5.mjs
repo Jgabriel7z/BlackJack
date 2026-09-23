@@ -20,7 +20,7 @@ export default {
     const esperarSeletor = (seletor, timeout = 90_000) => pagina.waitForSelector(seletor, { timeout });
 
     for (const partida of PARTIDAS) {
-      await abrir('/index.html', { seed: partida.seed });
+      await abrir('/index.html', { tela: 'jogando', seed: partida.seed });
       await esperarSeletor('body[data-pronto="1"]', 10_000);
 
       let jaFotografouGuilhotina = false;
@@ -56,11 +56,21 @@ export default {
       await esperar(500);
       await print(`fim-${partida.nome}`);
       anotar(`${partida.nome}: seed ${partida.seed}, dedos João ${await atributo('data-meus-dedos')} x Luiz ${await atributo('data-dedos-dele')}`);
-      if (!(await pagina.locator('#botao-reiniciar').isVisible())) falhar('Botão "jogar de novo" não apareceu.');
+      if ((await atributo('data-partida-acabou')) !== '1') falhar('A partida deveria ter acabado.');
     }
 
-    // "Jogar de novo" zera tudo.
-    await pagina.locator('#botao-reiniciar').click();
+    // A partir do 3.3 o recomeço passa pela tela de fim e pelo título, e
+    // desde o 3.4 pode parar antes na de digitar as iniciais, quando a
+    // pontuação entra nas cinco melhores: ali a tecla é ENTER.
+    await esperarSeletor('body[data-tela="game_over"]', 20_000);
+    for (let i = 0; i < 300; i++) {
+      const tela = await atributo('data-tela');
+      if (tela === 'titulo') break;
+      await pagina.keyboard.press(tela === 'iniciais' ? 'Enter' : 'Space');
+      await esperar(120);
+    }
+    await esperarSeletor('body[data-titulo-pronto="1"]', 20_000);
+    await pagina.keyboard.press('Space');
     await esperarSeletor('body[data-fase="jogando"]', 20_000);
     await esperarSeletor('body[data-animacao="ocioso"]', 20_000);
     await esperar(300);

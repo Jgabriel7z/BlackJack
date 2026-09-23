@@ -11,13 +11,22 @@
 // =====================================================================
 
 import { criarJogo, iniciarRodada, hit, stay, avancarNivel, FASE, LADO } from '../src/engine/game.js';
-import { decidirAcao, ACAO } from '../src/engine/ai.js';
+import { decidirAcao, decidirTrunfo, ACAO } from '../src/engine/ai.js';
+import { prepararCatalogo, aplicarTrunfo } from '../src/engine/trumps.js';
+import catalogoJson from '../data/trump_cards.js';
+
+// Com --fiel a simulação imita o que os roteiros de captura fazem na
+// interface: cartas trunfo ligadas, o oponente usando a cabeça do nível
+// (e jogando trunfos), e o jogador seguindo a regra simples de comprar
+// abaixo de 17. Sem o flag, roda a versão enxuta, sem trunfos.
+const FIEL = process.argv.includes('--fiel');
+const CATALOGO = FIEL ? prepararCatalogo(catalogoJson) : null;
 
 const quantidade = Number(process.argv[2] ?? 500);
 const seedInicial = Number(process.argv[3] ?? 1);
 
 function simular(seed, nivelInicial = 1) {
-  const jogo = criarJogo({ seed, nivel: nivelInicial });
+  const jogo = criarJogo({ seed, nivel: nivelInicial, catalogoTrunfos: CATALOGO });
   let acoes = 0;
   const rodadasPorNivel = {};
   while (jogo.fase !== FASE.FIM_DE_JOGO) {
@@ -26,7 +35,14 @@ function simular(seed, nivelInicial = 1) {
     iniciarRodada(jogo);
     while (jogo.fase === FASE.JOGANDO) {
       const lado = jogo.turno;
-      if (decidirAcao(jogo, lado) === ACAO.HIT) hit(jogo, lado);
+      // No modo fiel o oponente joga uma carta trunfo antes de decidir,
+      // e o jogador compra abaixo de 17, como o roteiro clica.
+      if (FIEL && lado === LADO.OPONENTE) {
+        const id = decidirTrunfo(jogo, lado);
+        if (id) { aplicarTrunfo(jogo, lado, id); if (++acoes > 5000) throw new Error(`seed ${seed} travou`); continue; }
+      }
+      const nivelDaCabeca = FIEL && lado === LADO.JOGADOR ? 1 : jogo.nivel;
+      if (decidirAcao(jogo, lado, nivelDaCabeca) === ACAO.HIT) hit(jogo, lado);
       else stay(jogo, lado);
       if (++acoes > 5000) throw new Error(`seed ${seed} travou`);
     }

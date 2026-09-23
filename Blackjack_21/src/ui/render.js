@@ -20,6 +20,7 @@ import {
   LINHA_DA_MESA_LUIZ_PX,
   MAO_DIREITA_LUIZ_PX,
 } from './pixelart.js';
+import { desenharTextoPixel } from './fonte-pixel.js';
 import { criarCenario } from './cenario.js';
 import { criarEfeitos } from './efeitos.js';
 import { LINHA_DOS_NOS } from './sprites/mao.js';
@@ -1102,6 +1103,282 @@ function desenharBaralho(ctx, restantes) {
  *   rodada, alvo, seed, rapido
  * }
  */
+// ---------------------------------------------------------------------
+//  Demonstração: a câmera e o selo (3.5)
+//
+//  A mesa é a mesma do jogo; o que muda é que a "câmera" passeia devagar
+//  por ela, como um vídeo de vitrine. O zoom respira e o alvo desliza;
+//  os períodos são números primos entre si, então o movimento demora
+//  muito para repetir e nunca fica parado.
+//
+//  O passeio nunca pode mostrar fora da tela: o quanto a câmera pode
+//  deslizar sai do próprio zoom (quanto mais perto, mais sobra), com uma
+//  folga de 10%.
+// ---------------------------------------------------------------------
+
+const CAMERA = {
+  zoomMinimo: 1.06,
+  zoomMaximo: 1.28,
+  periodoZoom: 19000,
+  periodoX: 23000,
+  periodoY: 15000,
+  folga: 0.9,
+};
+
+function aplicarCameraDaDemonstracao(ctx, tempo) {
+  const onda = (periodo, atraso = 0) => Math.sin(((tempo + atraso) / periodo) * Math.PI * 2);
+  const zoom = CAMERA.zoomMinimo
+    + ((onda(CAMERA.periodoZoom) + 1) / 2) * (CAMERA.zoomMaximo - CAMERA.zoomMinimo);
+
+  const sobraX = (LARGURA / 2) * (1 - 1 / zoom) * CAMERA.folga;
+  const sobraY = (ALTURA / 2) * (1 - 1 / zoom) * CAMERA.folga;
+  const focoX = LARGURA / 2 + onda(CAMERA.periodoX) * sobraX;
+  const focoY = ALTURA / 2 + onda(CAMERA.periodoY, CAMERA.periodoY / 3) * sobraY;
+
+  ctx.translate(LARGURA / 2, ALTURA / 2);
+  ctx.scale(zoom, zoom);
+  ctx.translate(-focoX, -focoY);
+}
+
+/**
+ * O selo por cima da mesa: o que é aquilo e como sair. Fica fora do
+ * passeio da câmera, parado nos cantos, como a tarja de um vídeo.
+ */
+function desenharSeloDaDemonstracao(ctx, mesa, agora) {
+  // Um véu leve, para o selo se ler sobre qualquer parte da mesa.
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
+  ctx.fillRect(0, 0, LARGURA, ALTURA);
+
+  const piscando = Math.floor(agora / 700) % 2 === 0;
+
+  // Tarja de cima: o que está acontecendo.
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.62)';
+  ctx.fillRect(0, 26, 470, 74);
+  texto(ctx, 'DEMONSTRAÇÃO', 40, 62, 24, piscando ? COR.texto : COR.textoApagado, 'left', true);
+  texto(ctx, `nível ${mesa.nivel}  ·  a casa joga contra ela mesma`, 40, 88, 14, COR.textoApagado, 'left');
+
+  // Tarja de baixo: como sair.
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.62)';
+  ctx.fillRect(0, ALTURA - 46, LARGURA, 46);
+  if (piscando) {
+    texto(ctx, 'PRESSIONE QUALQUER TECLA PARA JOGAR', LARGURA / 2, ALTURA - 16, 19, COR.texto, 'center', true);
+  }
+}
+
+// ---------------------------------------------------------------------
+//  Tela de título (3.2)
+//
+//  A tela inteira se comporta como uma televisão de tubo sendo ligada:
+//  primeiro uma linha branca fina que se abre na horizontal, depois a
+//  imagem crescendo na vertical, com chiado forte que vai sumindo. Só
+//  quando o tubo estabiliza é que o título aparece. A mesa e a lâmpada
+//  ficam lá atrás, bem escuras.
+// ---------------------------------------------------------------------
+
+/** Texto com franja colorida dos dois lados, como uma tela mal sintonizada. */
+function textoComAberracao(ctx, str, x, y, tamanho, cor, deslocamento, negrito = false) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  texto(ctx, str, x - deslocamento, y, tamanho, 'rgba(150, 20, 30, 0.75)', 'center', negrito);
+  texto(ctx, str, x + deslocamento, y, tamanho, 'rgba(20, 90, 150, 0.75)', 'center', negrito);
+  ctx.restore();
+  texto(ctx, str, x, y, tamanho, cor, 'center', negrito);
+}
+
+function desenharTelaDeTitulo(ctx, mesa, agora, cenario) {
+  const p = Math.max(0, Math.min(1, mesa.tempoNaTela / mesa.duracaoDoLigar));
+  const meio = ALTURA / 2;
+
+  // A sala fica quase apagada atrás do título.
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.86)';
+  ctx.fillRect(0, 0, LARGURA, ALTURA);
+
+  // Chiado forte no começo, sumindo conforme o tubo estabiliza.
+  cenario.desenharChiadoCheio(ctx, agora, p < 0.85 ? 0.42 * (1 - p / 0.85) + 0.05 : 0.04);
+
+  // 1) Até 18%: tudo preto, só uma linha branca abrindo na horizontal.
+  // 2) Até 45%: a imagem se abre na vertical a partir do centro.
+  if (p < 0.45) {
+    const alturaAberta = p < 0.18 ? 0 : ALTURA * ((p - 0.18) / 0.27) ** 1.4;
+    ctx.fillStyle = '#000';
+    ctx.fillRect(0, 0, LARGURA, meio - alturaAberta / 2);
+    ctx.fillRect(0, meio + alturaAberta / 2, LARGURA, ALTURA);
+
+    const larguraLinha = p < 0.18 ? LARGURA * (p / 0.18) ** 0.5 : LARGURA;
+    const brilho = p < 0.18 ? 1 : Math.max(0, 1 - (p - 0.18) / 0.2);
+    if (brilho > 0) {
+      ctx.save();
+      ctx.shadowColor = 'rgba(255,255,255,0.9)';
+      ctx.shadowBlur = 22 * brilho;
+      ctx.fillStyle = `rgba(255, 255, 255, ${brilho})`;
+      ctx.fillRect(LARGURA / 2 - larguraLinha / 2, meio - 1.5, larguraLinha, 3);
+      ctx.restore();
+    }
+  }
+
+  // 3) A partir de 55%, o título aparece.
+  const aparecendo = Math.max(0, Math.min(1, (p - 0.55) / 0.35));
+  if (aparecendo > 0) {
+    ctx.save();
+    ctx.globalAlpha = aparecendo;
+    const tremida = (1 - aparecendo) * 6;
+    const desloc = 2 + (1 - aparecendo) * 5;
+
+    textoComAberracao(ctx, '21', LARGURA / 2, meio - 30 + tremida, 128, '#f2ece0', desloc, true);
+    texto(ctx, TITULO_SUBTITULO, LARGURA / 2, meio + 26, 19, COR.textoApagado);
+    ctx.restore();
+  }
+
+  // 4) Com o tubo já estável: o convite piscando devagar e a assinatura.
+  if (p >= 1) {
+    const aceso = Math.floor(agora / mesa.piscaConvite) % 2 === 0;
+    if (aceso) {
+      texto(ctx, 'PRESSIONE QUALQUER TECLA', LARGURA / 2, meio + 108, 20, COR.texto, 'center', true);
+    }
+    texto(ctx, EQUIPE_NO_RODAPE, LARGURA / 2, ALTURA - 54, 13, COR.textoApagado);
+    texto(ctx, 'Atividade 02 · jogo feito com agente de codificação', LARGURA / 2, ALTURA - 34, 11, 'rgba(140, 132, 122, 0.75)');
+  }
+
+  // Linhas de varredura mais marcadas que as do jogo.
+  ctx.save();
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+  for (let y = 0; y < ALTURA; y += 3) ctx.fillRect(0, y, LARGURA, 1);
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------
+//  Tela de fim de jogo (3.3)
+//
+//  Tela preta, "GAME OVER" em pixels sem cor nem brilho, e embaixo o
+//  necessário: como acabou e quanto o jogador fez. Nada mais. O PDF
+//  (Parte B6) é explícito: "Morte: tela preta, som abafado, e um texto
+//  seco. Nada de 'Game Over' colorido."
+// ---------------------------------------------------------------------
+
+function desenharTelaDeGameOver(ctx, mesa) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, LARGURA, ALTURA);
+
+  const cinza = '#b9b4ab';
+  desenharTextoPixel(ctx, 'GAME OVER', LARGURA / 2, 250, 11, cinza, 'center');
+
+  if (mesa.textoFinal) {
+    texto(ctx, mesa.textoFinal, LARGURA / 2, 392, 17, COR.textoApagado);
+  }
+  desenharTextoPixel(ctx, `${mesa.pontos.total} PONTOS`, LARGURA / 2, 432, 4, cinza, 'center');
+  if (mesa.recorde.valor > mesa.pontos.total) {
+    desenharTextoPixel(ctx, `RECORDE ${mesa.recorde.valor}`, LARGURA / 2, 476, 3, '#6d685f', 'center');
+  }
+  texto(ctx, 'qualquer tecla volta ao início', LARGURA / 2, 560, 13, '#5d584f');
+}
+
+// ---------------------------------------------------------------------
+//  Digitar as iniciais e a tabela das melhores (3.4)
+//
+//  As duas herdam o tom da tela de fim de jogo: fundo preto e a fonte de
+//  pixels, sem cor e sem brilho. Aqui a máquina não está mais matando
+//  ninguém — está anotando quem passou por ela.
+// ---------------------------------------------------------------------
+
+const PLACAR = {
+  cinza: '#b9b4ab',
+  apagado: '#6d685f',
+  vazio: '#3b3832',
+  aceso: '#efe7d8',
+  // Linhas da tabela: onde fica o meio de cada uma e as três colunas.
+  linha0: 285,
+  passo: 70,
+  xPosicao: 300,
+  xIniciais: 380,
+  xPontos: 880,
+  xDetalhe: 916,
+};
+
+/** Ordinal curto: 1º, 2º... Só para a tela; a lógica não sabe disso. */
+function ordinal(linha) {
+  return `${linha + 1}º`;
+}
+
+/** O que a partida alcançou, em duas palavras, do lado da pontuação. */
+function detalheDaEntrada(entrada) {
+  if (entrada.venceu) return 'saiu inteiro';
+  return `parou no nível ${entrada.nivel}`;
+}
+
+function desenharTelaDeIniciais(ctx, mesa, agora) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, LARGURA, ALTURA);
+
+  const iniciais = mesa.iniciais;
+  if (!iniciais) return;
+
+  texto(ctx, `VOCÊ ENTROU NA LISTA · ${ordinal(iniciais.linha)} LUGAR`, LARGURA / 2, 152, 21, PLACAR.cinza, 'center', true);
+  desenharTextoPixel(ctx, `${iniciais.pontos} PONTOS`, LARGURA / 2, 186, 4, PLACAR.apagado, 'center');
+
+  // As três casas, bem grandes. A casa em que o cursor está pisca.
+  const escala = 15;
+  const passo = 150;
+  const y = 268;
+  const piscando = Math.floor(agora / 380) % 2 === 0;
+
+  iniciais.letras.forEach((letra, i) => {
+    const x = LARGURA / 2 + (i - 1) * passo;
+    const naVez = i === iniciais.cursor;
+    const cor = naVez && piscando ? PLACAR.aceso : PLACAR.cinza;
+    desenharTextoPixel(ctx, letra, x, y, escala, cor, 'center');
+
+    // Risco embaixo de cada casa; o da casa atual é mais forte.
+    ctx.fillStyle = naVez ? cor : PLACAR.vazio;
+    ctx.fillRect(x - 48, y + 7 * escala + 18, 96, naVez ? 7 : 4);
+  });
+
+  texto(ctx, 'digite as três letras  ·  as setas também mudam  ·  ENTER confirma',
+    LARGURA / 2, 506, 15, COR.textoApagado);
+  if (iniciais.restante !== null) {
+    texto(ctx, `${Math.ceil(iniciais.restante)} s`, LARGURA / 2, 556, 18, PLACAR.apagado);
+  }
+}
+
+function desenharTelaDeMelhores(ctx, mesa, agora) {
+  ctx.fillStyle = '#000';
+  ctx.fillRect(0, 0, LARGURA, ALTURA);
+
+  desenharTextoPixel(ctx, 'MELHORES', LARGURA / 2, 96, 8, PLACAR.cinza, 'center');
+  texto(ctx, 'as cinco maiores pontuações desta sessão', LARGURA / 2, 208, 16, COR.textoApagado);
+
+  const entradas = mesa.placar?.entradas ?? [];
+  const destaque = mesa.placar?.destaque ?? -1;
+  const piscando = Math.floor(agora / 420) % 2 === 0;
+
+  for (let linha = 0; linha < 5; linha++) {
+    const meio = PLACAR.linha0 + linha * PLACAR.passo;
+    const entrada = entradas[linha];
+    const realcada = linha === destaque && piscando;
+    const cor = !entrada ? PLACAR.vazio : realcada ? PLACAR.aceso : PLACAR.cinza;
+
+    desenharTextoPixel(ctx, ordinal(linha).replace('º', ''), PLACAR.xPosicao, meio - 14, 4, entrada ? PLACAR.apagado : PLACAR.vazio);
+    desenharTextoPixel(ctx, entrada?.iniciais ?? '---', PLACAR.xIniciais, meio - 21, 6, cor);
+    desenharTextoPixel(ctx, entrada ? String(entrada.pontos) : '----', PLACAR.xPontos, meio - 17, 5, cor, 'right');
+    if (entrada) {
+      texto(ctx, detalheDaEntrada(entrada), PLACAR.xDetalhe, meio + 6, 13, PLACAR.apagado, 'left');
+    }
+  }
+
+  if (entradas.length === 0) {
+    texto(ctx, 'ninguém saiu desta mesa ainda', LARGURA / 2, 632, 15, PLACAR.apagado);
+  } else {
+    texto(ctx, 'qualquer tecla volta ao início', LARGURA / 2, 632, 13, '#5d584f');
+  }
+}
+
+/** Preenchidos pelo main.js a partir do config. */
+let TITULO_SUBTITULO = '';
+let EQUIPE_NO_RODAPE = '';
+export function definirTextosDoTitulo(subtitulo, equipe) {
+  TITULO_SUBTITULO = subtitulo;
+  EQUIPE_NO_RODAPE = equipe.join('   ·   ');
+}
+
 /** Nome de quem fala na TV; preenchido pelo main.js a partir do config. */
 export let NOME_ANFITRIAO = 'Kaio';
 export function definirNomeDoAnfitriao(nome) { NOME_ANFITRIAO = nome; }
@@ -1127,6 +1404,10 @@ export function criarRenderizador(canvas, opcoes = {}) {
         Math.round((ruidoFixo(passo + 31) - 0.5) * 2 * forca * 0.7),
       );
     }
+
+    // Câmera da demonstração (3.5): entra aqui e sai no mesmo `restore` do
+    // tremor, então as telas e o pós-processamento ficam de fora do passeio.
+    if (mesa.tela === 'attract') aplicarCameraDaDemonstracao(ctx, mesa.tempoNaTela);
 
     cenario.desenharParede(ctx, lampada, POSICOES.pivoLampada.x);
     desenharConeDeLuz(ctx, lampada);
@@ -1261,7 +1542,8 @@ export function criarRenderizador(canvas, opcoes = {}) {
       const destacada = mesa.dica?.origem === `mao-${i}`;
       desenharCartaTrunfo(ctx, carta, p.x, p.y - (destacada ? 10 : 0), p.largura, p.altura, { destacada });
     });
-    if (mesa.eu.trunfosNaMao.length > 0) {
+    // A dica de clique não vale na demonstração: ali ninguém está esperando a vez.
+    if (mesa.eu.trunfosNaMao.length > 0 && mesa.tela !== 'attract') {
       const p = posicaoTrunfoNaMao(0, mesa.eu.trunfosNaMao.length);
       texto(ctx, mesa.podeJogarTrunfo ? 'clique para jogar' : 'aguarde sua vez',
         POSICOES.maoTrunfos.centroX, p.y - 12, 11, COR.textoApagado);
@@ -1302,16 +1584,22 @@ export function criarRenderizador(canvas, opcoes = {}) {
 
     ctx.restore(); // fim do tremor
 
-    // Fim de jogo: tela preta e um texto seco.
+    // Escurecimento total: a sala apaga antes da tela de fim de jogo.
     if (mesa.telaPreta > 0) {
       ctx.fillStyle = `rgba(0, 0, 0, ${mesa.telaPreta})`;
       ctx.fillRect(0, 0, LARGURA, ALTURA);
-      if (mesa.textoFinal) {
-        textoAjustado(ctx, mesa.textoFinal, LARGURA / 2, ALTURA / 2 - 10, 28, COR.texto, 1000);
-        texto(ctx, `rodada ${mesa.rodada}   ·   ${mesa.eu.nome.split(' ')[0]} ${mesa.eu.dedos}/5   ·   ${mesa.adv.nome.split(' ')[0]} ${mesa.adv.dedos}/5   ·   ${mesa.pontos.total} pontos`,
-          LARGURA / 2, ALTURA / 2 + 26, 13, COR.textoApagado);
-      }
     }
+
+    // A tela de fim de jogo, quando a máquina de telas chega nela (3.3),
+    // e o que vem depois dela quando a pontuação entrou na lista (3.4).
+    if (mesa.tela === 'game_over') desenharTelaDeGameOver(ctx, mesa);
+    else if (mesa.tela === 'iniciais') desenharTelaDeIniciais(ctx, mesa, agora);
+    else if (mesa.tela === 'high_scores') desenharTelaDeMelhores(ctx, mesa, agora);
+
+    // As duas telas que se desenham por cima da mesa, em vez de apagarem
+    // a sala: o título (3.2) e o selo da demonstração (3.5).
+    if (mesa.tela === 'titulo') desenharTelaDeTitulo(ctx, mesa, agora, cenario);
+    else if (mesa.tela === 'attract') desenharSeloDaDemonstracao(ctx, mesa, agora);
 
     // A TV continua acesa mesmo com a sala escurecida, quando o anfitrião fala.
     cenario.desenharTvAcesa(ctx, agora, mesa.tvForte);
@@ -1333,8 +1621,11 @@ export function criarRenderizador(canvas, opcoes = {}) {
     const perigoNaTela = (5 - folgaDaMao) / 5;
     efeitos.aplicar(ctx, agora, Math.max(mesa.escurecimento, perigoNaTela * 0.6));
 
-    const rodape = `seed ${mesa.seed ?? '?'}${mesa.rapido ? '   ·   rápido' : ''}${efeitos.ativos ? '' : '   ·   sem efeitos'}`;
-    texto(ctx, rodape, 16, ALTURA - 14, 12, 'rgba(120, 112, 105, 0.7)', 'left');
+    // A seed é informação de bastidor: só aparece com a mesa em jogo.
+    if (mesa.tela === 'jogando' || mesa.tela === 'game_over') {
+      const rodape = `seed ${mesa.seed ?? '?'}${mesa.rapido ? '   ·   rápido' : ''}${efeitos.ativos ? '' : '   ·   sem efeitos'}`;
+      texto(ctx, rodape, 16, ALTURA - 14, 12, 'rgba(120, 112, 105, 0.7)', 'left');
+    }
   }
 
   return { desenhar };

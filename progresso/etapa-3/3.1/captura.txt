@@ -1,0 +1,29 @@
+Sub-passo: 3.1
+Roteiro: Laço de telas sozinho: título, attract, pontuações e de volta ao título
+Data: 2026-09-23T16:05:19.345Z
+Duração: 12.4 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 4
+  - 01-tela-titulo.png
+  - 02-tela-attract.png
+  - 03-tela-high_scores.png
+  - 04-tela-jogando.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 3.1 — Laço de telas sozinho: título, attract, pontuações e de volta ao título
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-3\3.1
+Servidor: http://127.0.0.1:57818
+Navegador: Chrome instalado na máquina
+abrir /index.html?rapido=1
+print  01-tela-titulo.png
+print  02-tela-attract.png
+print  03-tela-high_scores.png
+nota   ordem das telas: titulo -> attract -> high_scores -> titulo -> attract -> high_scores -> titulo
+nota   voltas ao título: 3
+print  04-tela-jogando.png
+nota   uma tecla no título leva à mesa
+vídeo  video.mp4 (convertido com ffmpeg)

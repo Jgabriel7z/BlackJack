@@ -5,8 +5,14 @@ import { lerParametros, FATOR_TEMPO_NORMAL, FATOR_TEMPO_RAPIDO } from '../src/ui
 
 teste('parâmetros: sem nada na URL, seed null, ritmo normal e efeitos ligados', () => {
   assertIgual(lerParametros(''), {
-    seed: null, rapido: false, efeitos: true, nivel: null, trunfos: null, fatorTempo: FATOR_TEMPO_NORMAL,
+    seed: null, rapido: false, efeitos: true, nivel: null, tela: null, trunfos: null, fatorTempo: FATOR_TEMPO_NORMAL,
   });
+});
+
+teste('parâmetros: ?tela=jogando pula a abertura', () => {
+  assertIgual(lerParametros('?tela=jogando').tela, 'jogando');
+  assertIgual(lerParametros('?tela=high_scores').tela, 'high_scores');
+  assertIgual(lerParametros('?tela=<script>').tela, null);
 });
 
 teste('parâmetros: ?nivel=2 e ?nivel=3 escolhem o aparelho; valor inválido é ignorado', () => {

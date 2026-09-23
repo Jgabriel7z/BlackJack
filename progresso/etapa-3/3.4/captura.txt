@@ -1,0 +1,38 @@
+Sub-passo: 3.4
+Roteiro: Melhores pontuações: uma derrota e uma vitória, iniciais digitadas e a tabela no laço do título (seed 44, nível 3)
+Data: 2026-09-23T17:27:04.680Z
+Duração: 42.4 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 7
+  - 01-iniciais-em-branco.png
+  - 02-iniciais-digitadas.png
+  - 03-tabela-com-uma-linha.png
+  - 04-iniciais-lembram-a-partida-anterior.png
+  - 05-tabela-com-as-duas.png
+  - 06-tabela-linha-nova-piscando.png
+  - 07-tabela-de-volta-pelo-laco.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 3.4 — Melhores pontuações: uma derrota e uma vitória, iniciais digitadas e a tabela no laço do título (seed 44, nível 3)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-3\3.4
+Servidor: http://127.0.0.1:56278
+Navegador: Chrome instalado na máquina
+abrir /index.html?tela=jogando&seed=44&nivel=3&rapido=1
+nota   partida 1 (comprando abaixo de 14): 100 pontos, entrou na lista
+print  01-iniciais-em-branco.png
+print  02-iniciais-digitadas.png
+nota   tabela depois da partida 1: LUI:100
+print  03-tabela-com-uma-linha.png
+nota   partida 2 (comprando abaixo de 17): 950 pontos
+print  04-iniciais-lembram-a-partida-anterior.png
+nota   tabela depois da partida 2: JOA:950;LUI:100
+print  05-tabela-com-as-duas.png
+print  06-tabela-linha-nova-piscando.png
+nota   sem ninguém mexer, a tabela saiu e o título voltou
+print  07-tabela-de-volta-pelo-laco.png
+nota   laço observado: titulo → attract → high_scores
+vídeo  video.mp4 (convertido com ffmpeg)

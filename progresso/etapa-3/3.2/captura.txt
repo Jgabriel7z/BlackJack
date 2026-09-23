@@ -1,0 +1,32 @@
+Sub-passo: 3.2
+Roteiro: Tela de título: a televisão acendendo, o título pronto e a primeira tecla
+Data: 2026-09-23T16:13:36.172Z
+Duração: 22.9 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 6
+  - 01-tv-acendendo-linha.png
+  - 02-tv-acendendo-abrindo.png
+  - 03-tv-acendendo-surgindo.png
+  - 04-titulo-pronto.png
+  - 05-titulo-convite-no-outro-tempo.png
+  - 06-depois-da-tecla.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 3.2 — Tela de título: a televisão acendendo, o título pronto e a primeira tecla
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-3\3.2
+Servidor: http://127.0.0.1:61628
+Navegador: Chrome instalado na máquina
+abrir /index.html
+print  01-tv-acendendo-linha.png
+print  02-tv-acendendo-abrindo.png
+print  03-tv-acendendo-surgindo.png
+print  04-titulo-pronto.png
+print  05-titulo-convite-no-outro-tempo.png
+nota   título pronto: convite piscando, assinatura da equipe no rodapé
+nota   a tecla levou para a tela de jogo
+print  06-depois-da-tecla.png
+vídeo  video.mp4 (convertido com ffmpeg)

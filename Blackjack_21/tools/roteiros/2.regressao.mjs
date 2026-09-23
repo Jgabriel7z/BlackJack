@@ -17,7 +17,7 @@ export default {
   async executar({ abrir, print, esperar, anotar, falhar, pagina }) {
     const atributo = (nome) => pagina.getAttribute('body', nome);
 
-    await abrir('/index.html', { seed: SEED });
+    await abrir('/index.html', { tela: 'jogando', seed: SEED });
     await pagina.waitForSelector('body[data-pronto="1"]', { timeout: 10_000 });
 
     let viuGuilhotina = false;

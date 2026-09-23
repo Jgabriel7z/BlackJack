@@ -44,7 +44,7 @@ export default {
       return 0;
     };
 
-    await abrir('/index.html', { seed: SEED });
+    await abrir('/index.html', { tela: 'jogando', seed: SEED });
     await pagina.waitForSelector('body[data-pronto="1"]', { timeout: 10_000 });
     await esperarOcioso();
     await esperar(300);
@@ -64,7 +64,18 @@ export default {
     await print('fim-da-partida-1');
 
     // ---- Partida 2: jogando bem, para passar do recorde ----
-    await pagina.locator('#botao-reiniciar').click();
+    // A partir do 3.3 o recomeço passa pela tela de fim e pelo título, sem
+    // recarregar a página: assim o recorde da sessão continua valendo. E
+    // desde o 3.4 ainda passa pela de digitar as iniciais, se a pontuação
+    // entrou nas cinco melhores.
+    await pagina.waitForSelector('body[data-tela="game_over"]', { timeout: 20_000 });
+    for (let i = 0; i < 300; i++) {
+      const tela = await atributo('data-tela');
+      if (tela === 'jogando') break;
+      await pagina.keyboard.press(tela === 'iniciais' ? 'Enter' : 'Space');
+      await esperar(120);
+    }
+    await pagina.waitForSelector('body[data-tela="jogando"]', { timeout: 20_000 });
     await esperarOcioso();
     await esperar(300);
     if (Number(await atributo('data-recorde')) !== recorde1) {

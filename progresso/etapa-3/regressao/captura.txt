@@ -1,0 +1,25 @@
+Sub-passo: 3.regressao
+Roteiro: Regressão: a partida da Etapa 1 (seed 1617) continua dando 3 rodadas e 2x0 no nível 1
+Data: 2026-09-23T17:54:01.949Z
+Duração: 41.9 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 3
+  - 01-mesa-rodada-1.png
+  - 02-guilhotina-nivel-1.png
+  - 03-fim-do-nivel-1.png
+Vídeo: (não gravado)
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 3.regressao — Regressão: a partida da Etapa 1 (seed 1617) continua dando 3 rodadas e 2x0 no nível 1
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-3\regressao
+Servidor: http://127.0.0.1:59137
+Navegador: Chrome instalado na máquina
+abrir /index.html?tela=jogando&seed=1617
+print  01-mesa-rodada-1.png
+print  02-guilhotina-nivel-1.png
+nota   nível 1 com a seed 1617: 3 rodadas, dedos João 2 x Luiz 0, 250 pontos
+nota   registro da Etapa 1 (e conferido de novo ao fechar a Etapa 2): 3 rodadas, dedos João 2 x Luiz 0
+print  03-fim-do-nivel-1.png

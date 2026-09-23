@@ -643,26 +643,151 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
   - Nada de novo no jogo além do `ritmoReal`, que existia só para atender ao pedido do vídeo.
 - **Impressões da equipe:**
 
-### Prompt 23 — 
-- **Data:**
-- **Ferramenta:**
-- **Prompt (verbatim):**
-- **Resposta (resumo):**
-- **Arquivos gerados/alterados:**
-- **Observações (retrabalho, bugs, correções):**
-- **Impressões da equipe:**
-
----
-
-## Fase 3 — Etapa 2: níveis e pontuação
-
-_(preencher)_
-
 ---
 
 ## Fase 4 — Etapa 3: tela de abertura e GAME OVER
 
-_(preencher)_
+### Prompt 23 — Sub-passo 3.1: organizar o jogo em telas
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (VS Code), modelo Claude Opus 5 (1M context)
+- **Prompt (verbatim):**
+
+> Etapa 3, começando pelo 3.1. Quero organizar o jogo em telas: título, jogando, game over, attract e high scores, seguindo o diagrama que tá no plano. Nesse passo o título, o attract e o high scores podem ser só um texto provisório, o jogo que já existe vira a tela "jogando". Os tempos de cada tela ficam no config.js e o ?rapido acelera.
+>
+> Faz um teste da troca de telas sem precisar do navegador, simulando o relógio, pra garantir que nenhuma tela trava.
+>
+> Captura: vídeo do loop inteiro sem ninguém mexer (título, attract, high scores, título) com ?rapido. Fechamento e para no 3.1.
+
+- **Resposta (resumo):**
+  - **`src/ui/telas.js`**: máquina das cinco telas, sem DOM, com o diagrama do plano desenhado no cabeçalho. Duas tabelas mandam em tudo: para onde cada tela vai sozinha (e com que tempo do config) e para onde vai quando alguém mexe. A tela de jogo não tem saída por tempo, só `fimDePartida`. Um `aoTrocar` avisa quem estiver ouvindo.
+  - **Tempos em `config.js`** (`TEMPOS_DE_TELA`), multiplicados pelo fator do `?rapido`.
+  - **15 testes com relógio simulado**, nenhum navegador: o laço na ordem do diagrama, cada tela respeitando o tempo, **nenhuma tela travando em 10 minutos de relógio** (o laço fecha mais de 10 voltas), nenhuma tela passando do próprio limite, a tela de jogo nunca saindo sozinha, e a interação em cada tela.
+  - **Na tela**: título, attract e pontuações são texto provisório por cima da mesa bem escurecida, com a indicação de qual sub-passo vai dar cara a cada uma. O fim de jogo continua usando a tela do 1.5, agora com volta automática ao título.
+  - **Compatibilidade**: como o jogo passa a abrir no título, os 11 roteiros das Etapas 1 e 2 receberam `tela: 'jogando'` na chamada de abrir. Conferido rodando o roteiro de regressão, que segue dando 3 rodadas e 2x0.
+  - **Captura**: o roteiro só observa, sem mexer em nada, e confere que a ordem é título → attract → pontuações → título e que o laço fecha 3 voltas. No fim aperta uma tecla no título para mostrar que a mesa continua ali.
+  - Fechamento: **161/161 testes**, captura sem erros, 4 prints conferidos, vídeo de 6 s.
+- **Arquivos gerados/alterados:** `Blackjack_21/src/ui/telas.js`, `tests/telas.test.js`, `tools/roteiros/3.1.mjs` (novos); `src/config.js` (`TEMPOS_DE_TELA`), `src/ui/main.js`, `src/ui/render.js` (telas provisórias), `src/ui/parametros.js` (`?tela`), `src/ui/animacao.js` (`limpar`), `tests/{parametros,animacao}.test.js`, os 11 roteiros antigos, `progresso/etapa-3/3.1/*`, `PLANO_DE_DESENVOLVIMENTO.md`, `CLAUDE.md`, `progresso/LINHA_DO_TEMPO.md`, este arquivo.
+- **Observações (retrabalho, bugs, correções):**
+  - Nenhum retrabalho: testes e captura passaram na primeira execução.
+  - O ponto que exigiu cuidado foi a compatibilidade: abrir no título quebraria todos os roteiros anteriores. Em vez de um comportamento implícito (por exemplo, "se tem seed, vai direto ao jogo"), ficou um parâmetro explícito `?tela=jogando`, e os roteiros antigos foram atualizados de uma vez.
+  - Decisão do agente: `telas.js` ficou em `src/ui/` e não em `src/engine/`, porque é lógica de interface; como não toca em DOM, roda no Node igual a `animacao.js` e `parametros.js`.
+  - O sequenciador ganhou `limpar()`, para o título não ficar animando uma partida invisível por trás.
+  - Fora do escopo de propósito: cara de verdade do título (3.2), tela de GAME OVER (3.3), pontuações (3.4) e attract com IA contra IA (3.5).
+- **Impressões da equipe:**
+
+### Prompt 24 — Sub-passo 3.2: a tela de título
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (VS Code), modelo Claude Opus 5 (1M context)
+- **Prompt (verbatim):**
+
+> 3.2, a tela de título de verdade. Uma TV de tubo ligando (aquela linha branca que abre, chiado, linhas de varredura), aparece o "21" com "um jogo que decide se você vive ou não" embaixo, e "pressione qualquer tecla" piscando devagar. A mesa e a lâmpada ficam no fundo, bem escuras. Qualquer tecla ou clique começa. Coloca nossos nomes pequenos no rodapé.
+>
+> Captura: vídeo da TV ligando em velocidade normal, print do título pronto e print logo depois de apertar uma tecla. Fechamento e para no 3.2.
+
+- **Resposta (resumo):**
+  - **Bug do 3.1 corrigido antes de começar**: o relógio da primeira tela partia de zero, mas no navegador `performance.now()` já vale centenas de milissegundos no carregamento, então a primeira espera saía encurtada. Agora o relógio começa no primeiro quadro. Virou teste.
+  - **A tela inteira acende como um tubo**, em quatro momentos: linha branca fina que se abre na horizontal, imagem crescendo na vertical a partir do centro, chiado forte que vai sumindo, e o título se firmando. Depois disso o convite pisca devagar.
+  - **O título** tem franja vermelha e azul dos dois lados, como tela mal sintonizada, mais forte enquanto está surgindo. Subtítulo e nomes da equipe vêm do `config.js`, sem duplicar texto.
+  - **Chiado**: a textura da TV pequena foi generalizada para aceitar outro tamanho, e a tela cheia usa uma de 320×180, porque ampliar a de 64×48 deixava blocos do tamanho de uma carta.
+  - **Detalhe corrigido**: a seed no rodapé só aparece com a mesa em jogo; na tela de título ela não faz sentido.
+  - Fechamento: **162/162 testes**, captura sem erros, 6 prints conferidos, vídeo de 10 s.
+- **Arquivos gerados/alterados:** `Blackjack_21/tools/roteiros/3.2.mjs` (novo); `src/config.js` (`TITULO`, `EQUIPE`), `src/ui/telas.js` (relógio), `src/ui/render.js` (tela de título), `src/ui/cenario.js` (chiado reaproveitável), `src/ui/main.js`, `tests/telas.test.js`, `progresso/etapa-3/3.2/*`, `PLANO_DE_DESENVOLVIMENTO.md`, `progresso/LINHA_DO_TEMPO.md`, este arquivo.
+- **Observações (retrabalho, bugs, correções):**
+  - Uma correção no roteiro: a primeira versão cravava tempos fixos para pegar as fases do acendimento e pegava todas tarde, porque entre o carregamento da página e o primeiro quadro passa um tempo que varia. Passou a esperar por `body[data-titulo-fase]`, como manda a regra do `CLAUDE.md`. O acendimento também foi de 1,8 s para 2,6 s, o que melhorou o efeito.
+  - Decisão do agente: o acendimento é da tela inteira, não da TV pequena do cenário. Fica mais forte e é o que a referência do grupo (Buckshot Roulette) faz.
+  - Fora do escopo de propósito: tela de GAME OVER (3.3), pontuações (3.4) e attract com IA contra IA (3.5).
+- **Impressões da equipe:**
+
+### Prompt 25 — Sub-passo 3.3: a tela de GAME OVER
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (VS Code), modelo Claude Opus 5 (1M context)
+- **Prompt (verbatim):**
+
+> 3.3, o GAME OVER. Perdeu em qualquer nível: tela preta, "GAME OVER" seco numa fonte de pixel, sem cor e sem brilho (o PDF pede isso na parte B6), a pontuação embaixo, e volta pro título sozinho em uns 3 a 5 segundos ou apertando uma tecla. Isso substitui a tela provisória do 1.5.
+>
+> Se ganhar o nível 3 também volta pro título, mas antes o Kaio aparece na TV dando a entender que vai ter "outro jogo", igual no final do 21 original.
+>
+> Captura: uma derrota no nível 1 (print do GAME OVER e vídeo até voltar pro título) e uma vitória começando do ?nivel=3 (vídeo do Kaio). Fechamento e para no 3.3.
+
+- **Resposta (resumo):**
+  - **`src/ui/fonte-pixel.js`**: alfabeto 5×7 completo (A–Z, 0–9, espaço e alguns sinais), desenhado com quadrados cheios, sem sombra e sem suavização. Era preciso: a função de texto normal do jogo põe sombra em tudo, e o PDF pede um "GAME OVER" seco.
+  - **Tela de fim**: preta de verdade, "GAME OVER" em pixels cinza, a frase de como a partida acabou (que muda conforme o aparelho), a pontuação em pixels e o recorde quando ele é maior. Volta ao título em 5 s ou com qualquer tecla. A tela provisória do 1.5 saiu, e com ela o botão "jogar de novo": o caminho de volta agora é o título, como o guia da atividade pede.
+  - **Vitória no nível 3**: não passa pelo GAME OVER. A sala volta a aparecer parcialmente, a televisão acende e o anfitrião diz duas frases (no config) sugerindo que virá outro jogo, como no fim do 21 original; depois o jogo vai direto ao título.
+  - **Roteiros antigos**: três dependiam do botão removido (`1.5`, `1.final`, `2.6`) e passaram a usar o caminho novo, com tecla no GAME OVER e tecla no título. O `2.6` foi rodado inteiro para confirmar que o recorde ainda atravessa duas partidas sem recarregar.
+  - Fechamento: **162/162 testes**, captura sem erros, 5 prints conferidos, vídeo de 2min10.
+- **Arquivos gerados/alterados:** `Blackjack_21/src/ui/fonte-pixel.js`, `tools/roteiros/3.3.mjs` (novos); `src/config.js` (`FALA_DA_VITORIA`), `src/ui/render.js`, `src/ui/main.js`, `src/ui/cenario.js`, `tools/simular.mjs` (modo `--fiel`), `tools/roteiros/{1.5,1.final,2.6}.mjs`, `progresso/etapa-3/3.3/*`, `PLANO_DE_DESENVOLVIMENTO.md`, `CLAUDE.md`, `progresso/LINHA_DO_TEMPO.md`, este arquivo.
+- **Observações (retrabalho, bugs, correções):**
+  - **A seed da vitória não serviu de primeira.** A 21 vence os três níveis em sequência, mas começando direto no nível 3 o baralho é outro e ela perde. Para achar a seed certa foi preciso deixar o simulador fiel ao que o roteiro faz: cartas trunfo ligadas, o oponente jogando trunfos e o jogador comprando abaixo de 17. Com `--fiel`, a seed 44 vence o nível 3 em 4 rodadas. A lição virou regra no `CLAUDE.md`.
+  - **Descoberta ao verificar os roteiros antigos:** o `1.final` não reproduz mais a Etapa 1, porque desde a Etapa 2 a partida atravessa três níveis (ele agora termina no nível 3, com 5x5 dedos). Não é um defeito novo: o jogo evoluiu. O roteiro ganhou um aviso de que é histórico, e a regressão do nível 1 continua sendo feita pelo `2.regressao`. A evidência original da Etapa 1 foi restaurada com o git depois das verificações.
+  - Primeira versão da cena de vitória ficou vazia demais, só a televisão num vazio preto; agora a sala volta a aparecer parcialmente e dá para ver a mesa com a serra no fim do trilho.
+  - Fora do escopo de propósito: tela de pontuações (3.4) e attract com IA contra IA (3.5).
+- **Impressões da equipe:**
+
+### Prompt 26 — Sub-passos 3.4 e 3.5 (os dois opcionais da Etapa 3)
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> 3.4 (opcional): tela com as 5 maiores pontuações da sessão. Quem entrar no top 5 digita 3 letras, estilo fliperama. Essa tela aparece no loop do título. Ainda sem salvar.
+>
+> Captura: duas partidas, digitando as iniciais, depois espera o loop e tira print da tela de recordes. Fechamento e para no 3.4.
+>
+> 3.5 (opcional): o attract mode. A IA joga contra ela mesma (os dois lados com a IA do nível 2), com a "câmera" passeando devagar pela mesa (um zoom ou movimento lento) e escrito DEMONSTRAÇÃO num canto. Apertou qualquer coisa volta pro título. A demonstração não pode mexer nos recordes.
+>
+> Captura: uns 20 segundos de vídeo do attract e um print na hora que aperta uma tecla. Fechamento e para aqui.
+
+- **Observação sobre o formato:** este foi o primeiro prompt com **dois sub-passos de uma vez**, cada um com o seu próprio pedido de fechamento. Foram tratados em sequência, com testes, captura e registro separados, como se fossem dois prompts.
+
+#### Parte 1 — sub-passo 3.4: as cinco melhores da sessão
+
+- **Resposta (resumo):** a lógica da tabela virou um módulo puro do motor (`placar.js`): cinco lugares, ordem decrescente, empate resolvido pela ordem de chegada (quem empata entra **abaixo** de quem já estava), pontuação zero não entra, e a digitação das três letras como uma máquina de estados testável — letra do teclado escreve e anda, setas cima/baixo trocam a letra, setas laterais andam entre as casas, Backspace volta e apaga, Enter confirma. Na interface nasceu uma tela nova, `iniciais`, encaixada entre o GAME OVER e a lista e visitada só por quem entra no top 5; a tela de melhores pontuações, que era um texto provisório do 3.1, virou a tabela de verdade, com posição, iniciais, pontos e até onde a partida chegou. Vitória (com a despedida do anfitrião) e derrota (com o GAME OVER) desembocam na mesma porta de assinar.
+- **Arquivos gerados/alterados:** `src/engine/placar.js` (novo), `tests/placar.test.js` (novo), `tools/roteiros/3.4.mjs` (novo); alterados `src/ui/telas.js`, `src/ui/main.js`, `src/ui/render.js`, `src/ui/fonte-pixel.js`, `src/config.js`, `tests/telas.test.js`, `tests/run-node.mjs`, `tests/tests.html`, `tools/roteiros/1.5.mjs`, `tools/roteiros/2.6.mjs`, `tools/roteiros/3.3.mjs`, `PLANO_DE_DESENVOLVIMENTO.md`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **Duas decisões para a tela não travar o fliperama.** A primeira: as teclas da tela de iniciais são o nome, então ela não pode sair "com qualquer tecla" como as outras — mas, se ninguém digitar, ela sai sozinha em 20 s valendo o que estiver escrito. A segunda: esse tempo **não** é encurtado pelo `?rapido=1`, senão numa captura acelerada a tela duraria 1 s e não daria para digitar. Virou uma exceção explícita no `telas.js`, com teste.
+  - **A tabela começa vazia, com tracinhos.** Fliperama de verdade vem com nomes de fábrica; aqui seria inventar dado. Decisão de design registrada: os cinco lugares aparecem vazios até alguém pontuar.
+  - **A captura precisou de duas partidas na mesma página**, porque a tabela vive na memória e recarregar apagaria tudo. Como a seed é fixa, o que diferencia as partidas é o jeito de jogar, truque herdado do roteiro do 2.6: a primeira compra abaixo de 14 e morre, a segunda compra abaixo de 17 e vence.
+  - **Primeira tentativa desperdiçada:** com a seed 21 as duas partidas terminavam em derrota, e o caminho da vitória → iniciais ficava sem prova. Trocando para a seed 44 começando no nível 3 (a mesma do 3.3), a partida 1 morre na serra e a partida 2 sai inteira, e a captura passa a exercitar os dois caminhos. A tabela final mostra isso: `JOA 950 · saiu inteiro` e `LUI 100 · parou no nível 3`.
+  - **Bug de meio pixel na fonte.** Em escala grande as letras apareciam com costuras por dentro: os quadrados caíam em coordenadas fracionárias e o canvas suavizava a borda. Arredondar o cursor e o topo resolveu — e de quebra melhorou o "GAME OVER" do 3.3, que tinha o mesmo defeito sem que ninguém tivesse notado.
+  - **Corrida no roteiro.** Com `?rapido=1` o laço do título anda tão rápido que "esperar o título e apertar uma tecla" às vezes acertava o attract. O roteiro passou a apertar e conferir num laço até a partida começar, em vez de supor em que tela a tecla vai cair.
+  - **Roteiros antigos ajustados** (sem recapturar): `1.5`, `2.6` e `3.3` recomeçavam pelo título e agora podem parar antes na tela de assinar; os três passaram a apertar ENTER quando é o caso. O `1.5` e o `2.6` foram rodados com `--sem-video` só para conferir, e as evidências originais foram restauradas com o git.
+  - **Achado sem relação com o pedido:** o `1.5` deixou de fotografar a guilhotina em algum ponto da Etapa 2, quando o passo de animação foi renomeado de `guilhotina` para `punicao`. O roteiro não falha, só pula esses prints. Ficou anotado; consertar não era deste sub-passo.
+  - Ficou de fora de propósito: salvar a tabela em disco (4.1) e o attract com IA contra IA (3.5, feito na parte 2 deste mesmo prompt).
+- **Impressões da equipe:**
+
+#### Parte 2 — sub-passo 3.5: a demonstração (attract mode)
+
+- **Resposta (resumo):** em vez de escrever uma vitrine à parte, a demonstração reaproveita tudo o que já existe — a mesa, as animações, o motor, os níveis. Um sinalizador `demonstracao` muda três coisas: os dois lados passam a ser decididos pela IA do nível 2, a rodada seguinte vem sozinha (ninguém aperta "próxima") e, quando a partida acaba, outra começa no lugar em vez de ir para o GAME OVER. O lado do jogador ganhou o espelho do que o oponente já tinha: pensar, jogar carta trunfo, comprar ou parar. Por cima disso, uma "câmera" passeia devagar pela mesa, e duas tarjas paradas dizem o que é aquilo e como sair.
+- **Arquivos gerados/alterados:** `tools/roteiros/3.5.mjs` (novo); alterados `src/ui/main.js`, `src/ui/render.js`, `CLAUDE.md`, `PLANO_DE_DESENVOLVIMENTO.md`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **A câmera não pode mostrar fora da tela.** A primeira ideia era um passeio com alcance fixo; com zoom baixo isso deixaria a borda preta aparecer. O alcance passou a sair do próprio zoom (quanto mais perto, mais sobra de imagem para deslizar), com 10% de folga. É uma linha de conta que resolve o problema inteiro, em vez de ficar calibrando números no olho.
+  - **A vitrine falava em segunda pessoa.** Ela dizia "Você venceu: 19 contra 18" com ninguém jogando, e "A lâmina desce sobre a sua mão". As frases passaram a trocar "você" pelo nome do jogador quando é demonstração. Só se percebe isso olhando o print — foi a leitura das imagens que pegou.
+  - **Provar que a demonstração não suja o recorde deu trabalho.** Na primeira seed a rodada terminou empatada, a vitrine marcou 0 e a conferência não provava nada ("0 não virou recorde" é vazio). Foi preciso um script de busca que replica a seed derivada da vitrine e simula a primeira rodada com a IA dos dois lados, até achar a seed 153: nela a vitrine marca 100 pontos enquanto o visor RECORDE fica em 0 e a lista, vazia — e isso aparece num print só, nos dois visores lado a lado.
+  - **A tarja de baixo batia no texto da mesa.** O primeiro lugar escolhido para o "pressione qualquer tecla" caiu em cima do total do jogador; virou uma faixa escura colada no rodapé. A dica "aguarde sua vez", da mão de trunfos, também saiu da vitrine: ali ninguém está esperando a vez.
+  - **`?tela=attract` não funcionava.** Abrir direto numa tela não dispara o aviso de troca, então a vitrine ficava congelada. O carregamento passou a ligar a demonstração na mão quando a tela inicial é essa, e o roteiro confere isso no último print — serve para a Etapa 4 mexer na vitrine sem esperar 15 s a cada tentativa.
+  - **As telas provisórias do 3.1 acabaram.** Com a vitrine pronta, o último texto de "em construção" saiu do `render.js` junto com a função que os desenhava: as cinco telas do diagrama têm cara própria.
+  - Ficou de fora de propósito: som (4.2), e o fechamento da Etapa 3 (roteiro `3.final`, `3.regressao`, resumo, commit e tag), que o grupo ainda não pediu.
+- **Impressões da equipe:**
+
+### Prompt 27 — Fechamento da Etapa 3
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> Fechando a etapa 3, sem coisa nova:
+> - checklist da etapa 3 com prova, e roda de novo as capturas finais das etapas 1 e 2 pra ver se nada quebrou
+> - vídeo do ciclo completo: título, partida, game over, volta pro título e o loop sem ninguém mexer, em progresso/etapa-3/final/, mais o RESUMO.md
+> - se passou tudo, commit e tag etapa-3
+
+- **Resposta (resumo):** nenhuma regra nova no jogo. Foram escritos dois roteiros de captura — `3.final`, que grava o ciclo inteiro de uma vez, e `3.regressao`, que repete a partida conhecida desde a Etapa 1 —, verificado o checklist item a item com print e teste apontados, e escrito o `progresso/etapa-3/RESUMO.md`. As capturas finais das Etapas 1 e 2 foram rodadas de novo com `--sem-video` e as evidências originais restauradas pelo git logo depois.
+- **Arquivos gerados/alterados:** `tools/roteiros/3.final.mjs` e `3.regressao.mjs` (novos), `progresso/etapa-3/RESUMO.md` (novo), `progresso/etapa-3/final/` e `regressao/` (evidências), `PLANO_DE_DESENVOLVIMENTO.md`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **A seed do vídeo final precisava de uma derrota que pontuasse.** Uma derrota qualquer serve para mostrar o GAME OVER, mas quem termina com zero não entra na lista e o ciclo pularia as telas do 3.4. A seed 31, a mais curta, fecha com 0 pontos. Um script de busca que replica o que o roteiro clica achou a seed 177: perde no nível 1 em 3 rodadas, mas vence uma delas e fecha com 175 pontos — curta e com as duas telas no caminho.
+  - **A captura final é a única que não usa `?rapido` nem `?tela`.** O jogo abre como abre para quem chega nele, e o roteiro só toca no teclado duas vezes: a tecla que começa a partida e as três letras do nome. O resto do vídeo (2min18) é a máquina andando sozinha.
+  - **A Etapa 2 passou idêntica.** Rodada de novo, a captura final deu os mesmos números em todos os pontos: 0 / 313 / 963 pontos, duas trocas de nível, vitória nos três. As únicas diferenças no `captura.txt` são a data, a porta do servidor e o `?tela=jogando` que o 3.1 passou a exigir.
+  - **A Etapa 1 continua histórica, e isso foi confirmado em vez de suposto.** Rodando o `1.final` hoje, a partida termina no nível 3 com 5×5 dedos em vez de 2×0, e o print da guilhotina não sai porque o passo de animação virou `punicao` na Etapa 2. Não é defeito: é o jogo ter crescido. Quem prova que o nível 1 não mudou é a regressão com a seed 1617, que deu 3 rodadas e 2×0 pela terceira etapa seguida.
+  - **Faxina no próprio relatório:** este arquivo tinha, no fim, seções vazias "_(preencher)_" duplicando as Fases 3 e 4, que já estavam preenchidas acima. Foram removidas; a da Fase 5 (Etapa 4) continua, porque essa ainda não começou.
+  - Ficou de fora de propósito: tudo da Etapa 4 (persistência, som, efeitos, trunfos que faltam, modos extras).
+- **Impressões da equipe:**
 
 ---
 
@@ -680,5 +805,5 @@ _(preencher)_
 | Fase 1 — Planejamento | 1 | 0 | 1 |
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
 | Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
-| Etapa 3 — Abertura | | | |
+| Etapa 3 — Abertura | 4 (sub-passos 3.1 a 3.5; o prompt 26 trouxe 3.4 e 3.5 juntos) | 1 (fechamento) | 5 |
 | Etapa 4 — Extras | | | |

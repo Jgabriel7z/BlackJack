@@ -21,7 +21,7 @@ export default {
       falhar('A fila de animações não esvaziou.');
     };
 
-    await abrir('/index.html', { seed: SEED, nivel: 3, trunfos: MINHA_MAO.join(',') });
+    await abrir('/index.html', { tela: 'jogando', seed: SEED, nivel: 3, trunfos: MINHA_MAO.join(',') });
     await pagina.waitForSelector('body[data-pronto="1"]', { timeout: 10_000 });
     await esperarOcioso();
     await esperar(300);

@@ -176,9 +176,31 @@ function criarTampo() {
 
 export const TV = { x: 205, y: 48, largura: 150, altura: 118 };
 
-function criarTvEstatica() {
-  const tela = novoCanvas(64, 48); // resolução baixa do chiado, ampliada sem suavização
-  return { tela, ctx: tela.getContext('2d'), imagem: tela.getContext('2d').createImageData(64, 48) };
+function criarTvEstatica(largura = 64, altura = 48) {
+  const tela = novoCanvas(largura, altura);
+  const ctx = tela.getContext('2d');
+  return { tela, ctx, imagem: ctx.createImageData(largura, altura), largura, altura };
+}
+
+/** Redesenha a textura de chiado, que muda a cada ~50 ms. */
+function atualizarChiado(ruido, agora) {
+  const quadro = Math.floor(agora / 50);
+  const { largura, altura } = ruido;
+  const dados = ruido.imagem.data;
+  const rolo = Math.floor(ruidoFixo(quadro * 0.37) * altura); // faixa escura rolando
+  for (let py = 0; py < altura; py++) {
+    for (let px = 0; px < largura; px++) {
+      let v = 40 + ruidoFixo(quadro * 3071 + py * largura + px) * 180;
+      if (Math.abs(((py - rolo + altura) % altura) - altura / 8) < altura / 10) v *= 0.55;
+      if (py % 2 === 0) v *= 0.8; // linhas de varredura
+      const i = (py * largura + px) * 4;
+      dados[i] = v * 0.95;
+      dados[i + 1] = v;
+      dados[i + 2] = v * 1.05;
+      dados[i + 3] = 255;
+    }
+  }
+  ruido.ctx.putImageData(ruido.imagem, 0, 0);
 }
 
 function desenharTv(ctx, ruido, agora, intensidadeLampada, forca = 0) {
@@ -208,23 +230,7 @@ function desenharTv(ctx, ruido, agora, intensidadeLampada, forca = 0) {
   ctx.arc(x + largura - 16, y + altura - 22, 6, 0, Math.PI * 2);
   ctx.fill();
 
-  // Chiado: ruído em função do quadro (muda a cada ~50 ms).
-  const quadro = Math.floor(agora / 50);
-  const dados = ruido.imagem.data;
-  const rolo = Math.floor(ruidoFixo(quadro * 0.37) * 48); // faixa mais escura rolando
-  for (let py = 0; py < 48; py++) {
-    for (let px = 0; px < 64; px++) {
-      let v = 40 + ruidoFixo(quadro * 3071 + py * 64 + px) * 180;
-      if (Math.abs(((py - rolo + 48) % 48) - 6) < 5) v *= 0.55;
-      if (py % 2 === 0) v *= 0.8; // linhas de varredura
-      const i = (py * 64 + px) * 4;
-      dados[i] = v * 0.95;
-      dados[i + 1] = v;
-      dados[i + 2] = v * 1.05;
-      dados[i + 3] = 255;
-    }
-  }
-  ruido.ctx.putImageData(ruido.imagem, 0, 0);
+  atualizarChiado(ruido, agora);
 
   const telaX = x + 12;
   const telaY = y + 12;
@@ -468,6 +474,9 @@ export function criarCenario() {
   const parede = criarParede();
   const tampo = criarTampo();
   const ruidoTv = criarTvEstatica();
+  // O chiado de tela cheia tem resolução maior: ampliado de 64x48 os
+  // blocos ficariam do tamanho de uma carta.
+  const ruidoCheio = criarTvEstatica(320, 180);
 
   return {
     /** Parede iluminada pela lâmpada. Desenhar logo depois do fundo, antes do cone. */
@@ -519,11 +528,12 @@ export function criarCenario() {
 
       ctx.save();
       ctx.globalAlpha = forca;
-      const halo = ctx.createRadialGradient(x + largura / 2, y + altura / 2, 30, x + largura / 2, y + altura / 2, 460);
-      halo.addColorStop(0, 'rgba(150, 175, 210, 0.5)');
+      const alcance = 330;
+      const halo = ctx.createRadialGradient(x + largura / 2, y + altura / 2, 30, x + largura / 2, y + altura / 2, alcance);
+      halo.addColorStop(0, 'rgba(150, 175, 210, 0.42)');
       halo.addColorStop(1, 'rgba(150, 175, 210, 0)');
       ctx.fillStyle = halo;
-      ctx.fillRect(x - 460, y - 460, largura + 920, altura + 920);
+      ctx.fillRect(x - alcance, y - alcance, largura + alcance * 2, altura + alcance * 2);
 
       retanguloArredondado(ctx, telaX, telaY, telaL, telaA, 10);
       ctx.save();
@@ -531,6 +541,20 @@ export function criarCenario() {
       ctx.imageSmoothingEnabled = false;
       ctx.drawImage(ruidoTv.tela, telaX - 2, telaY - 2, telaL + 4, telaA + 4);
       ctx.restore();
+      ctx.restore();
+    },
+
+    /**
+     * Chiado de televisão na tela inteira, usado pela tela de título
+     * quando o tubo está acendendo. `alpha` 0..1 controla a força.
+     */
+    desenharChiadoCheio(ctx, agora, alpha) {
+      if (alpha <= 0) return;
+      atualizarChiado(ruidoCheio, agora);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(ruidoCheio.tela, 0, 0, LARGURA, ALTURA);
       ctx.restore();
     },
 

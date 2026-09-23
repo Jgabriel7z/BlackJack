@@ -13,7 +13,7 @@ export default {
     const atributo = (nome) => pagina.getAttribute('body', nome);
     const esperarSeletor = (seletor, timeout = 90_000) => pagina.waitForSelector(seletor, { timeout });
 
-    await abrir('/index.html', { seed: SEED });
+    await abrir('/index.html', { tela: 'jogando', seed: SEED });
     await esperarSeletor('body[data-pronto="1"]', 10_000);
     await esperarSeletor('body[data-animacao="ocioso"]');
     await esperar(400);
