@@ -330,3 +330,8 @@ Primeira rodada de mudanças pedidas jogando, não planejando.
 - A regra ficou no módulo puro (`cartasDoSorteio` e `vagasAMaisNaMao` em `progresso.js`), com três testes, em vez de espalhada pela interface.
 - O rodapé do título passou a dizer o que o difícil muda, em três partes: oponente no máximo, monte inteiro, nenhuma recompensa.
 - Testes: 327/327.
+
+## 2026-09-23 — A mensagem de trunfo do oponente durava 0,7 s
+- Jogando, o grupo viu que a explicação da carta trunfo que o Luiz Alberto joga sumia antes de dar para ler: a pausa era fixa em 700 ms e logo em seguida a mensagem era trocada pela jogada seguinte dele.
+- A pausa passou a acompanhar o tamanho do texto da carta: de 1,1 s (carta curta) a 4,2 s (as mais longas, como o Destroy++). Vale para os dois lados, inclusive na demonstração.
+- Conferida de quebra a mesa do print que o grupo mandou: 313 pontos = 125 (vitória com o oponente estourado) + 188 (a mesma coisa ×1,5 pela segunda vitória seguida), e a aposta de 3 dedos na rodada 3 = 3 de base +1 do One-Up dele −1 do Shield do jogador. O motor estava certo.

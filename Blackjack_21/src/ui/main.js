@@ -1171,7 +1171,9 @@ function trunfoDoJogador() {
     sequencia.adicionar(passoTrunfoVoando(carta, posicaoTrunfoNaMao(indice, totalAntes), 'eu'));
   }
   if (mesa.alvo !== alvoAntes) sequencia.adicionar(passoTrocaDeAlvo(alvoAntes, mesa.alvo));
-  sequencia.adicionar(pausa('jogando-trunfo', 700));
+  // A pausa acompanha o tamanho do texto da carta: antes era fixa em
+  // 700 ms e a explicação do que a carta faz sumia antes de dar para ler.
+  sequencia.adicionar(pausa('jogando-trunfo', tempoDeLeitura(carta)));
   redesenharMinhasCartas(verMesa(jogo, LADO.JOGADOR));
   return true;
 }
@@ -1554,6 +1556,17 @@ function adicionarTrapacaDoAnfitriao() {
 }
 
 /**
+ * Quanto tempo a mesa segura a mensagem de uma carta trunfo jogada. Ela
+ * cresce com o texto, porque quem está do outro lado precisa ler o que a
+ * carta fez com ele — é a única chance de entender a jogada. Antes era
+ * fixa em 700 ms e sumia antes de dar tempo.
+ */
+function tempoDeLeitura(carta) {
+  const letras = `${carta.nome}. ${carta.texto}`.length;
+  return Math.min(4200, 1100 + letras * 26);
+}
+
+/**
  * A partir do nível 2 o oponente joga uma carta trunfo antes de decidir
  * comprar ou parar. Devolve true se jogou (e a vez dele continua depois).
  */
@@ -1574,7 +1587,9 @@ function trunfoDoOponente() {
     sequencia.adicionar(passoTrunfoVoando(carta, { x: POSICOES.luizCentroX - 33, y: 150 }, 'adv'));
   }
   if (mesa.alvo !== alvoAntes) sequencia.adicionar(passoTrocaDeAlvo(alvoAntes, mesa.alvo));
-  sequencia.adicionar(pausa('jogando-trunfo', 700));
+  // A pausa acompanha o tamanho do texto da carta: antes era fixa em
+  // 700 ms e a explicação do que a carta faz sumia antes de dar para ler.
+  sequencia.adicionar(pausa('jogando-trunfo', tempoDeLeitura(carta)));
   redesenharMinhasCartas(verMesa(jogo, LADO.JOGADOR));
   return true;
 }
