@@ -1,0 +1,21 @@
+Sub-passo: 1.2
+Roteiro: Página de testes com motor de regras + IA básica (tests/tests.html)
+Data: 2026-09-23T12:19:43.902Z
+Duração: 13.1 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 1
+  - 01-testes.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 1.2 — Página de testes com motor de regras + IA básica (tests/tests.html)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-1\1.2
+Servidor: http://127.0.0.1:60155
+Navegador: Chrome instalado na máquina
+abrir /tests/tests.html
+nota   resumo dos testes: 49/49 passaram
+print  01-testes.png
+vídeo  video.mp4 (convertido com ffmpeg)

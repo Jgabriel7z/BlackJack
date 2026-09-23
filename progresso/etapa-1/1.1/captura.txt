@@ -1,0 +1,20 @@
+Sub-passo: 1.1
+Roteiro: Página de testes do motor de regras (tests/tests.html)
+Data: 2026-09-23T12:16:36.894Z
+Duração: 9.3 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 1
+  - 01-testes.png
+Vídeo: (não gravado)
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 1.1 — Página de testes do motor de regras (tests/tests.html)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-1\1.1
+Servidor: http://127.0.0.1:60813
+Navegador: Chrome instalado na máquina
+abrir /tests/tests.html
+nota   resumo dos testes: 40/40 passaram
+print  01-testes.png

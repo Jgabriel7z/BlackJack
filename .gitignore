@@ -1,0 +1,9 @@
+# Dependências do Node (só o Playwright, usado pela ferramenta de captura)
+Blackjack_21/node_modules/
+
+# A pasta progresso/ NÃO entra aqui de propósito: prints e vídeos são versionados
+# para acompanhar a evolução do jogo e usar na apresentação.
+
+# Lixo de sistema
+Thumbs.db
+.DS_Store

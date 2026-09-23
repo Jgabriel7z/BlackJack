@@ -1,0 +1,55 @@
+  ok   rng: mesma seed gera a mesma sequência
+  ok   rng: seeds diferentes geram sequências diferentes
+  ok   rng: valores ficam em [0, 1) e a seed fica guardada
+  ok   rng: seed inválida lança erro; seedAleatoria devolve inteiro de 32 bits
+  ok   baralho novo tem 11 cartas únicas de 1 a 11
+  ok   embaralhar não perde nem repete cartas e não altera o original
+  ok   embaralhar com função aleatória fixa é previsível
+  ok   mesma seed dá o mesmo baralho; seed diferente dá baralho diferente
+  ok   embaralhar sem gerador ainda funciona (seed sorteada)
+  ok   comprar tira a carta do topo e falha com baralho vazio
+  ok   somarMao soma oculta + abertas
+  ok   estourou só acima do alvo
+  ok   vencedor: nenhum estourou, maior total vence
+  ok   vencedor: um estourou, o outro vence
+  ok   vencedor: os dois estouraram, menor total vence
+  ok   vencedor: totais iguais é empate (abaixo e acima do alvo)
+  ok   vencedor respeita alvo diferente de 21
+  ok   jogo novo começa aguardando, com 5 dedos cada e nomes vindos do config
+  ok   jogo sem seed sorteia uma e guarda em jogo.seed
+  ok   mesma seed reproduz a mesma partida inteira
+  ok   iniciarRodada dá 1 oculta + 1 aberta para cada e deixa 7 no baralho
+  ok   aposta começa em 1 e sobe 1 por rodada para os dois
+  ok   não dá para iniciar rodada com outra em andamento
+  ok   hit compra uma carta aberta, zera stays e passa a vez
+  ok   agir fora do turno lança erro
+  ok   agir sem rodada em andamento lança erro
+  ok   um stay só passa a vez; hit no meio zera a contagem
+  ok   dois stays seguidos resolvem a rodada
+  ok   com baralho vazio não dá para comprar, só passar
+  ok   vitória normal: perdedor perde dedos = aposta, vencedor conta rodada
+  ok   estouro: quem passa de 21 perde
+  ok   duplo estouro: menor total vence
+  ok   empate: os dois perdem dedos
+  ok   resumo da rodada expõe as cartas ocultas dos dois
+  ok   dedos nunca ficam negativos
+  ok   partida termina quando alguém perde todos os dedos
+  ok   empate final: os dois zerados, ninguém vence
+  ok   verMesa esconde a oculta do adversário durante a rodada
+  ok   verMesa revela tudo depois da rodada resolvida
+  ok   verMesa não altera o estado
+  ok   IA: limite de compra é 17
+  ok   IA: com 16 compra
+  ok   IA: com 17 para
+  ok   IA: com mais de 17 (inclusive estourado) para
+  ok   IA: com baralho vazio para, mesmo com total baixo
+  ok   IA: decidir não altera o estado
+  ok   IA: funciona para qualquer lado (também decide pelo jogador)
+  ok   IA contra IA: 200 partidas com seeds diferentes terminam sem erro nem travar
+  ok   IA contra IA: mesma seed dá a mesma partida
+  ok   parâmetros: sem nada na URL, seed null e ritmo normal
+  ok   parâmetros: ?seed=123 vira número
+  ok   parâmetros: seed inválida é ignorada
+  ok   parâmetros: ?rapido=1 encurta o tempo; outro valor não
+
+53/53 testes passaram.

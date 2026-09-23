@@ -1,0 +1,29 @@
+Sub-passo: 1.final
+Roteiro: Partida inteira em velocidade normal (seed 1617) até a tela final
+Data: 2026-09-23T14:06:11.057Z
+Duração: 57.5 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 5
+  - 01-mesa-rodada-1.png
+  - 02-oponente-pensando.png
+  - 03-revelacao.png
+  - 04-guilhotina.png
+  - 05-tela-final.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 1.final — Partida inteira em velocidade normal (seed 1617) até a tela final
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-1\final
+Servidor: http://127.0.0.1:64251
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=1617
+print  01-mesa-rodada-1.png
+print  02-oponente-pensando.png
+print  03-revelacao.png
+print  04-guilhotina.png
+print  05-tela-final.png
+nota   seed 1617: dedos João 2 x Luiz 0
+vídeo  video.mp4 (convertido com ffmpeg)

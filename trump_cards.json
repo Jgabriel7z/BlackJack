@@ -1,0 +1,705 @@
+{
+  "player_cards": [
+    {
+      "id": "one_up",
+      "name": "One-Up",
+      "text_en": "Your opponent's bet increases by 1 while this card is on the table. Also, draw 1 trump card.",
+      "text_pt": "A aposta do oponente aumenta em 1 enquanto esta carta estiver na mesa. Além disso, compre 1 carta trunfo.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "bet_mod",
+          "target": "opponent",
+          "amount": 1,
+          "persistent": true
+        },
+        {
+          "type": "draw_trump",
+          "target": "self",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "two_up",
+      "name": "Two-Up",
+      "text_en": "Your opponent's bet increases by 2 while this card is on the table. Also, draw 1 trump card.",
+      "text_pt": "A aposta do oponente aumenta em 2 enquanto esta carta estiver na mesa. Além disso, compre 1 carta trunfo.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "bet_mod",
+          "target": "opponent",
+          "amount": 2,
+          "persistent": true
+        },
+        {
+          "type": "draw_trump",
+          "target": "self",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "two_up_plus",
+      "name": "Two-Up+",
+      "text_en": "Return your opponent's last face-up card to the deck. Also, your opponent's bet increases by 2 while this card is on the table.",
+      "text_pt": "Devolve ao baralho a última carta virada para cima do oponente. Além disso, a aposta do oponente aumenta em 2 enquanto esta carta estiver na mesa.",
+      "usable_by": "any",
+      "unlock": "Defeat a total of 15 opponents.",
+      "effects": [
+        {
+          "type": "return_last_faceup",
+          "target": "opponent"
+        },
+        {
+          "type": "bet_mod",
+          "target": "opponent",
+          "amount": 2,
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "card_2",
+      "name": "2 Card",
+      "text_en": "Draw the 2 card. If it is no longer in the deck, nothing happens.",
+      "text_pt": "Compra a carta 2. Se ela não estiver mais no baralho, nada acontece.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "draw_specific",
+          "target": "self",
+          "value": 2
+        }
+      ]
+    },
+    {
+      "id": "card_3",
+      "name": "3 Card",
+      "text_en": "Draw the 3 card. If it is no longer in the deck, nothing happens.",
+      "text_pt": "Compra a carta 3. Se ela não estiver mais no baralho, nada acontece.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "draw_specific",
+          "target": "self",
+          "value": 3
+        }
+      ]
+    },
+    {
+      "id": "card_4",
+      "name": "4 Card",
+      "text_en": "Draw the 4 card. If it is no longer in the deck, nothing happens.",
+      "text_pt": "Compra a carta 4. Se ela não estiver mais no baralho, nada acontece.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "draw_specific",
+          "target": "self",
+          "value": 4
+        }
+      ]
+    },
+    {
+      "id": "card_5",
+      "name": "5 Card",
+      "text_en": "Draw the 5 card. If it is no longer in the deck, nothing happens.",
+      "text_pt": "Compra a carta 5. Se ela não estiver mais no baralho, nada acontece.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "draw_specific",
+          "target": "self",
+          "value": 5
+        }
+      ]
+    },
+    {
+      "id": "card_6",
+      "name": "6 Card",
+      "text_en": "Draw the 6 card. If it is no longer in the deck, nothing happens.",
+      "text_pt": "Compra a carta 6. Se ela não estiver mais no baralho, nada acontece.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "draw_specific",
+          "target": "self",
+          "value": 6
+        }
+      ]
+    },
+    {
+      "id": "card_7",
+      "name": "7 Card",
+      "text_en": "Draw the 7 card. If it is no longer in the deck, nothing happens.",
+      "text_pt": "Compra a carta 7. Se ela não estiver mais no baralho, nada acontece.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "draw_specific",
+          "target": "self",
+          "value": 7
+        }
+      ]
+    },
+    {
+      "id": "remove",
+      "name": "Remove",
+      "text_en": "Return the last face-up card your opponent drew to the deck",
+      "text_pt": "Devolve ao baralho a última carta virada para cima que o oponente comprou.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "return_last_faceup",
+          "target": "opponent"
+        }
+      ]
+    },
+    {
+      "id": "return",
+      "name": "Return",
+      "text_en": "Return the last face-up card you drew to the deck.",
+      "text_pt": "Devolve ao baralho a última carta virada para cima que você comprou.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "return_last_faceup",
+          "target": "self"
+        }
+      ]
+    },
+    {
+      "id": "exchange",
+      "name": "Exchange",
+      "text_en": "Swap the last cards drawn by you and your opponent. (Face-down cards cannot be swapped.)",
+      "text_pt": "Troca as últimas cartas compradas por você e pelo oponente. (Cartas viradas para baixo não podem ser trocadas.)",
+      "usable_by": "Clancy",
+      "unlock": "Use a total of 10 trump cards.",
+      "effects": [
+        {
+          "type": "swap_last_faceup"
+        }
+      ]
+    },
+    {
+      "id": "trump_switch",
+      "name": "Trump Switch",
+      "text_en": "Discard two of your trump cards at random, then draw three more trump cards. This card can be used even if you posses less than 2 other trump cards.",
+      "text_pt": "Descarta 2 das suas cartas trunfo aleatoriamente e depois compra mais 3. Pode ser usada mesmo se você tiver menos de 2 outras cartas trunfo.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "discard_random_trumps",
+          "target": "self",
+          "count": 2
+        },
+        {
+          "type": "draw_trump",
+          "target": "self",
+          "count": 3
+        }
+      ]
+    },
+    {
+      "id": "trump_switch_plus",
+      "name": "Trump Switch+",
+      "text_en": "Discard one of your trump cards at random, then draw four more trump cards. This card can be used even if you posses less than 1 other trump cards",
+      "text_pt": "Descarta 1 das suas cartas trunfo aleatoriamente e depois compra mais 4. Pode ser usada mesmo se você não tiver outras cartas trunfo.",
+      "usable_by": "any",
+      "unlock": "Win a round having used at least 15 trump cards.",
+      "effects": [
+        {
+          "type": "discard_random_trumps",
+          "target": "self",
+          "count": 1
+        },
+        {
+          "type": "draw_trump",
+          "target": "self",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "id": "shield",
+      "name": "Shield",
+      "text_en": "Your bet is reduced by 1 while this card is on the table.",
+      "text_pt": "Sua aposta é reduzida em 1 enquanto esta carta estiver na mesa.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "bet_mod",
+          "target": "self",
+          "amount": -1,
+          "persistent": true,
+          "tag": "shield"
+        }
+      ]
+    },
+    {
+      "id": "shield_plus",
+      "name": "Shield+",
+      "text_en": "Your bet is reduced by 2 while this card is on the table.",
+      "text_pt": "Sua aposta é reduzida em 2 enquanto esta carta estiver na mesa.",
+      "usable_by": "any",
+      "unlock": "Defeat 2 opponents in a row without being tortured once.",
+      "effects": [
+        {
+          "type": "bet_mod",
+          "target": "self",
+          "amount": -2,
+          "persistent": true,
+          "tag": "shield"
+        }
+      ]
+    },
+    {
+      "id": "destroy",
+      "name": "Destroy",
+      "text_en": "Remove the last trump card your opponent places on the table.",
+      "text_pt": "Remove a última carta trunfo que o oponente colocou na mesa.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "destroy_last_trump",
+          "target": "opponent"
+        }
+      ]
+    },
+    {
+      "id": "destroy_plus",
+      "name": "Destroy+",
+      "text_en": "Remove all your opponent's trump cards from the table.",
+      "text_pt": "Remove todas as cartas trunfo do oponente da mesa.",
+      "usable_by": "any",
+      "unlock": "Remove a total of 10 trump cards from the opponents' side.",
+      "effects": [
+        {
+          "type": "destroy_all_trumps",
+          "target": "opponent"
+        }
+      ]
+    },
+    {
+      "id": "destroy_plus_plus",
+      "name": "Destroy++",
+      "text_en": "Remove all of your opponent's trump cards from the table. Your opponent cannot use trump cards while this is on the table.",
+      "text_pt": "Remove todas as cartas trunfo do oponente da mesa. O oponente não pode usar cartas trunfo enquanto esta estiver na mesa.",
+      "usable_by": "Clancy",
+      "unlock": "Remove a total of 20 trump cards from the opponents' side.",
+      "effects": [
+        {
+          "type": "destroy_all_trumps",
+          "target": "opponent"
+        },
+        {
+          "type": "block_trumps",
+          "target": "opponent",
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "perfect_draw",
+      "name": "Perfect Draw",
+      "text_en": "Draw the best possible card from the deck.",
+      "text_pt": "Compra a melhor carta possível do baralho.",
+      "usable_by": "any",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "draw_best",
+          "target": "self"
+        }
+      ]
+    },
+    {
+      "id": "perfect_draw_plus",
+      "name": "Perfect Draw+",
+      "text_en": "Draw the best possible card from the deck. Also, your opponent's bet increases by 5 while this card is on the table.",
+      "text_pt": "Compra a melhor carta possível do baralho. Além disso, a aposta do oponente aumenta em 5 enquanto esta carta estiver na mesa.",
+      "usable_by": "any",
+      "unlock": "Complete \"Survival.\"",
+      "effects": [
+        {
+          "type": "draw_best",
+          "target": "self"
+        },
+        {
+          "type": "bet_mod",
+          "target": "opponent",
+          "amount": 5,
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "ultimate_draw",
+      "name": "Ultimate Draw",
+      "text_en": "Draw the best possible card from the deck. Also, draw two trump cards.",
+      "text_pt": "Compra a melhor carta possível do baralho. Além disso, compra 2 cartas trunfo.",
+      "usable_by": "any",
+      "unlock": "Complete \"Survival\" without being tortured once.",
+      "effects": [
+        {
+          "type": "draw_best",
+          "target": "self"
+        },
+        {
+          "type": "draw_trump",
+          "target": "self",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "id": "go_for_17",
+      "name": "Go for 17",
+      "text_en": "The closest to 17 wins while this card is on the table. Replaces other \"Go For\" cards that are already on the table.",
+      "text_pt": "Enquanto esta carta estiver na mesa, vence quem chegar mais perto de 17. Substitui outras cartas \"Go For\" que já estejam na mesa.",
+      "usable_by": "Hoffman",
+      "unlock": "default",
+      "effects": [
+        {
+          "type": "set_target",
+          "value": 17,
+          "persistent": true,
+          "replaces_tag": "go_for"
+        }
+      ]
+    },
+    {
+      "id": "go_for_24",
+      "name": "Go for 24",
+      "text_en": "The closest to 24 wins while this card is on the table. Replaces other \"Go For\" cards that are already on the table.",
+      "text_pt": "Enquanto esta carta estiver na mesa, vence quem chegar mais perto de 24. Substitui outras cartas \"Go For\" que já estejam na mesa.",
+      "usable_by": "any",
+      "unlock": "Defeat a total of 5 opponents.",
+      "effects": [
+        {
+          "type": "set_target",
+          "value": 24,
+          "persistent": true,
+          "replaces_tag": "go_for"
+        }
+      ]
+    },
+    {
+      "id": "go_for_27",
+      "name": "Go for 27",
+      "text_en": "The closest to 27 wins while this card is on the table. Replaces other \"Go For\" cards that are already on the table.",
+      "text_pt": "Enquanto esta carta estiver na mesa, vence quem chegar mais perto de 27. Substitui outras cartas \"Go For\" que já estejam na mesa.",
+      "usable_by": "Clancy",
+      "unlock": "Reach 21 at least of 3 times in a row.",
+      "effects": [
+        {
+          "type": "set_target",
+          "value": 27,
+          "persistent": true,
+          "replaces_tag": "go_for"
+        }
+      ]
+    },
+    {
+      "id": "harvest",
+      "name": "Harvest",
+      "text_en": "You draw a trump card after every trump card use while this card is on the table.",
+      "text_pt": "Enquanto esta carta estiver na mesa, você compra uma carta trunfo depois de cada uso de carta trunfo.",
+      "usable_by": "Clancy",
+      "unlock": "Defeat the elusive Mr. Big Head 2 times.",
+      "effects": [
+        {
+          "type": "on_trump_use_draw_trump",
+          "target": "self",
+          "count": 1,
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "love_your_enemy",
+      "name": "Love Your Enemy",
+      "text_en": "Your opponent draws the best possible card for them from the deck.",
+      "text_pt": "O oponente compra do baralho a melhor carta possível para ele.",
+      "usable_by": "Clancy",
+      "unlock": "Story-exclusive",
+      "effects": [
+        {
+          "type": "draw_best",
+          "target": "opponent"
+        }
+      ]
+    }
+  ],
+  "enemy_cards": [
+    {
+      "id": "shield_assault",
+      "name": "Shield Assault",
+      "text_en": "Remove three Shield-type cards from your side of the table. Your opponent's bet is raised by 3 while this card is on the table.",
+      "text_pt": "Remove 3 cartas do tipo Shield do seu lado da mesa. A aposta do oponente aumenta em 3 enquanto esta carta estiver na mesa.",
+      "used_by": "Barbed-Wire",
+      "effects": [
+        {
+          "type": "remove_own_tagged",
+          "tag": "shield",
+          "count": 3
+        },
+        {
+          "type": "bet_mod",
+          "target": "opponent",
+          "amount": 3,
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "shield_assault_plus",
+      "name": "Shield Assault+",
+      "text_en": "Remove two Shield-type cards from your side of the table. Your opponent's bet is raised by 5 while this card is on the table.",
+      "text_pt": "Remove 2 cartas do tipo Shield do seu lado da mesa. A aposta do oponente aumenta em 5 enquanto esta carta estiver na mesa.",
+      "used_by": "Barbed-Wire",
+      "effects": [
+        {
+          "type": "remove_own_tagged",
+          "tag": "shield",
+          "count": 2
+        },
+        {
+          "type": "bet_mod",
+          "target": "opponent",
+          "amount": 5,
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "happiness",
+      "name": "Happiness",
+      "text_en": "Both players draw one trump card.",
+      "text_pt": "Os dois jogadores compram 1 carta trunfo.",
+      "used_by": "Bloody-Handprints",
+      "effects": [
+        {
+          "type": "draw_trump",
+          "target": "both",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "desire",
+      "name": "Desire",
+      "text_en": "Your opponent's bet is raised by half the number of trump cards they are holding while this card is on the table.",
+      "text_pt": "Enquanto esta carta estiver na mesa, a aposta do oponente aumenta em metade do número de cartas trunfo que ele tem na mão.",
+      "used_by": "Bloody-Handprints",
+      "effects": [
+        {
+          "type": "bet_mod_dynamic",
+          "target": "opponent",
+          "formula": "opponent.trump_hand_size / 2",
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "desire_plus",
+      "name": "Desire+",
+      "text_en": "Your opponent's bet is raised by the number of trump cards they are holding while this card is on the table.",
+      "text_pt": "Enquanto esta carta estiver na mesa, a aposta do oponente aumenta no número de cartas trunfo que ele tem na mão.",
+      "used_by": "Bloody-Handprints",
+      "effects": [
+        {
+          "type": "bet_mod_dynamic",
+          "target": "opponent",
+          "formula": "opponent.trump_hand_size",
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "mind_shift",
+      "name": "Mind Shift",
+      "text_en": "Your opponent loses half of their trump cards at the end of the round. This card is removed if they use two trump cards in one turn.",
+      "text_pt": "O oponente perde metade das cartas trunfo no fim da rodada. Esta carta é removida se ele usar 2 cartas trunfo em um mesmo turno.",
+      "used_by": "Bloody-Handprints",
+      "effects": [
+        {
+          "type": "end_of_round_lose_trumps",
+          "target": "opponent",
+          "fraction": 0.5,
+          "persistent": true,
+          "removed_if": "opponent uses 2 trumps in one turn"
+        }
+      ]
+    },
+    {
+      "id": "mind_shift_plus",
+      "name": "Mind Shift+",
+      "text_en": "Your opponent loses all of their trump cards at the end of the round. This card is removed if they use three trump cards in one turn.",
+      "text_pt": "O oponente perde todas as cartas trunfo no fim da rodada. Esta carta é removida se ele usar 3 cartas trunfo em um mesmo turno.",
+      "used_by": "Bloody-Handprints",
+      "effects": [
+        {
+          "type": "end_of_round_lose_trumps",
+          "target": "opponent",
+          "fraction": 1.0,
+          "persistent": true,
+          "removed_if": "opponent uses 3 trumps in one turn"
+        }
+      ]
+    },
+    {
+      "id": "conjure",
+      "name": "Conjure",
+      "text_en": "Draw three trump cards. However, your bet is raised by 1 while this card is on the table.",
+      "text_pt": "Compra 3 cartas trunfo. Porém, sua aposta aumenta em 1 enquanto esta carta estiver na mesa.",
+      "used_by": "Molded Hoffman",
+      "effects": [
+        {
+          "type": "draw_trump",
+          "target": "self",
+          "count": 3
+        },
+        {
+          "type": "bet_mod",
+          "target": "self",
+          "amount": 1,
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "curse",
+      "name": "Curse",
+      "text_en": "Discard one of your trump cards at random, and force your opponent to draw the highest number card from the deck.",
+      "text_pt": "Descarta 1 das suas cartas trunfo aleatoriamente e obriga o oponente a comprar a carta de maior número do baralho.",
+      "used_by": "Molded Hoffman",
+      "effects": [
+        {
+          "type": "discard_random_trumps",
+          "target": "self",
+          "count": 1
+        },
+        {
+          "type": "draw_highest",
+          "target": "opponent"
+        }
+      ]
+    },
+    {
+      "id": "black_magic",
+      "name": "Black Magic",
+      "text_en": "Dicard half your trump cards and draw the best possible number card. Opponent's bet is raise by 10 when this is on table.",
+      "text_pt": "Descarta metade das suas cartas trunfo e compra a melhor carta numérica possível. A aposta do oponente aumenta em 10 enquanto esta carta estiver na mesa.",
+      "used_by": "Molded Hoffman",
+      "effects": [
+        {
+          "type": "discard_fraction_trumps",
+          "target": "self",
+          "fraction": 0.5
+        },
+        {
+          "type": "draw_best",
+          "target": "self"
+        },
+        {
+          "type": "bet_mod",
+          "target": "opponent",
+          "amount": 10,
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "escape",
+      "name": "Escape",
+      "text_en": "Provided this card is still on the table, you run for your life at the end of the round.",
+      "text_pt": "Se esta carta ainda estiver na mesa, você foge para salvar a vida no fim da rodada.",
+      "used_by": "Mr. Big Head Hoffman",
+      "effects": [
+        {
+          "type": "flee_at_end_of_round",
+          "target": "self",
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "twenty_one_up",
+      "name": "Twenty-One-Up",
+      "text_en": "Provided your card total is 21, the opponent's bet is raised by 21 while this card is on the table.",
+      "text_pt": "Se a soma das suas cartas for 21, a aposta do oponente aumenta em 21 enquanto esta carta estiver na mesa.",
+      "used_by": "Tally Mark Hoffman",
+      "effects": [
+        {
+          "type": "bet_mod_conditional",
+          "target": "opponent",
+          "amount": 21,
+          "condition": "self.total == 21",
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "oblivion",
+      "name": "Oblivion",
+      "text_en": "Cancels this round, and begins a new round instead.",
+      "text_pt": "Cancela esta rodada e começa uma nova rodada no lugar.",
+      "used_by": "Undead Hoffman",
+      "effects": [
+        {
+          "type": "cancel_round"
+        }
+      ]
+    },
+    {
+      "id": "dead_silence",
+      "name": "Dead Silence",
+      "text_en": "Your opponent cannot draw cards, even via trump card effects, while this is card on the table.",
+      "text_pt": "O oponente não pode comprar cartas, nem mesmo por efeito de cartas trunfo, enquanto esta carta estiver na mesa.",
+      "used_by": "Undead Hoffman",
+      "effects": [
+        {
+          "type": "block_draw",
+          "target": "opponent",
+          "persistent": true
+        }
+      ]
+    },
+    {
+      "id": "desperation",
+      "name": "Desperation",
+      "text_en": "Both players' bets are raised by 100 while this card is on the table. Opponent cannot draw cards, even via trump card effects.",
+      "text_pt": "As apostas dos dois jogadores aumentam em 100 enquanto esta carta estiver na mesa. O oponente não pode comprar cartas, nem mesmo por efeito de cartas trunfo.",
+      "used_by": "(não especificado; usada por Lucas no modo História)",
+      "effects": [
+        {
+          "type": "bet_mod",
+          "target": "both",
+          "amount": 100,
+          "persistent": true
+        },
+        {
+          "type": "block_draw",
+          "target": "opponent",
+          "persistent": true
+        }
+      ]
+    }
+  ]
+}

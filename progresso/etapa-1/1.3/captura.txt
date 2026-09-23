@@ -1,0 +1,25 @@
+Sub-passo: 1.3
+Roteiro: Mesa visual: inicial, após HIT e resultado da rodada (seed 123)
+Data: 2026-09-23T13:03:41.521Z
+Duração: 5.5 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 3
+  - 01-mesa-inicial.png
+  - 02-apos-hit.png
+  - 03-resultado-rodada.png
+Vídeo: (não gravado)
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 1.3 — Mesa visual: inicial, após HIT e resultado da rodada (seed 123)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-1\1.3
+Servidor: http://127.0.0.1:58899
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=123&rapido=1
+print  01-mesa-inicial.png
+nota   fase após HIT: jogando
+print  02-apos-hit.png
+print  03-resultado-rodada.png
+nota   fase final: rodada_encerrada; botão "próxima rodada" visível

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <title>21</title>
+  <style>
+    :root {
+      --fundo: #060505;
+      --texto: #d8d2c8;
+      --texto-apagado: #77706a;
+      --borda: #6e6354;
+      --fonte: "Courier New", Courier, "Lucida Console", monospace;
+    }
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: var(--fundo);
+      color: var(--texto);
+      font-family: var(--fonte);
+      overflow: hidden;
+    }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Palco fixo em 1280x720: o mesmo tamanho dos prints e do vídeo. */
+    #palco {
+      position: relative;
+      width: 1280px;
+      height: 720px;
+    }
+    #mesa {
+      display: block;
+      width: 1280px;
+      height: 720px;
+    }
+    #controles {
+      position: absolute;
+      right: 48px;
+      bottom: 88px;
+      display: flex;
+      gap: 14px;
+    }
+    #controles button {
+      font-family: var(--fonte);
+      font-size: 18px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--texto);
+      background: rgba(10, 8, 7, 0.85);
+      border: 1px solid var(--borda);
+      padding: 12px 26px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+    }
+    #controles button:hover:not(:disabled) {
+      background: rgba(40, 28, 22, 0.95);
+      border-color: var(--texto);
+    }
+    #controles button:disabled {
+      opacity: 0.3;
+      cursor: default;
+    }
+    #controles button[hidden] {
+      display: none;
+    }
+    /* Fim de jogo: botão centralizado abaixo do texto seco desenhado no canvas. */
+    #tela-final {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 430px;
+      display: flex;
+      justify-content: center;
+    }
+    #tela-final[hidden] {
+      display: none;
+    }
+    #tela-final button {
+      font-family: var(--fonte);
+      font-size: 16px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--texto-apagado);
+      background: transparent;
+      border: 1px solid var(--texto-apagado);
+      padding: 12px 30px;
+      cursor: pointer;
+    }
+    #tela-final button:hover {
+      color: var(--texto);
+      border-color: var(--texto);
+    }
+  </style>
+</head>
+<body>
+  <div id="palco">
+    <canvas id="mesa" width="1280" height="720" aria-label="Mesa do jogo 21"></canvas>
+    <div id="controles">
+      <button id="botao-hit" type="button" data-acao="hit">Hit</button>
+      <button id="botao-stay" type="button" data-acao="stay">Stay</button>
+      <button id="botao-proxima" type="button" data-acao="proxima" hidden>Próxima rodada</button>
+    </div>
+    <div id="tela-final" hidden>
+      <button id="botao-reiniciar" type="button" data-acao="reiniciar" hidden>Jogar de novo</button>
+    </div>
+  </div>
+  <script type="module" src="src/ui/main.js"></script>
+</body>
+</html>

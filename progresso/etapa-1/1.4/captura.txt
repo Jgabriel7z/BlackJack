@@ -1,0 +1,34 @@
+Sub-passo: 1.4
+Roteiro: Rodada inteira com animações no ritmo real (seed 123, sem rapido)
+Data: 2026-09-23T13:34:38.164Z
+Duração: 21.2 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 7
+  - 01-distribuindo-carta.png
+  - 02-mesa-pronta.png
+  - 03-carta-deslizando.png
+  - 04-oponente-pensando.png
+  - 05-escurecendo.png
+  - 06-revelando-oculta.png
+  - 07-resultado.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 1.4 — Rodada inteira com animações no ritmo real (seed 123, sem rapido)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-1\1.4
+Servidor: http://127.0.0.1:50636
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=123
+print  01-distribuindo-carta.png
+print  02-mesa-pronta.png
+print  03-carta-deslizando.png
+nota   HIT desabilitado enquanto pensa: true
+print  04-oponente-pensando.png
+print  05-escurecendo.png
+print  06-revelando-oculta.png
+print  07-resultado.png
+nota   fase final: rodada_encerrada
+vídeo  video.mp4 (convertido com ffmpeg)

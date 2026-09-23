@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <title>21 — testes do motor</title>
+  <style>
+    :root {
+      --fundo: #0b0a0a;
+      --texto: #d8d2c8;
+      --ok: #6fbf73;
+      --falha: #d43a3a;
+      --apagado: #6e675f;
+    }
+    body {
+      margin: 0;
+      padding: 24px 16px;
+      background: var(--fundo);
+      color: var(--texto);
+      font-family: ui-monospace, Consolas, "Courier New", monospace;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    .resumo { margin-bottom: 20px; color: var(--apagado); }
+    .resumo strong { color: var(--texto); }
+    .resumo.tudo-ok strong { color: var(--ok); }
+    .resumo.tem-falha strong { color: var(--falha); }
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { padding: 4px 0; border-bottom: 1px solid #1c1a1a; }
+    li.ok::before { content: "✔ "; color: var(--ok); }
+    li.falha::before { content: "✘ "; color: var(--falha); }
+    li.falha { color: var(--falha); }
+    .erro { display: block; color: var(--apagado); padding-left: 24px; white-space: pre-wrap; }
+    .aviso { color: var(--falha); }
+  </style>
+</head>
+<body>
+  <h1>21 — testes do motor de regras (1.1) e da IA básica (1.2)</h1>
+  <p class="resumo" id="resumo">Rodando...</p>
+  <ul id="lista"></ul>
+  <p id="aviso" class="aviso" hidden>
+    Os módulos não carregaram. O Chrome bloqueia <code>import</code> em arquivos abertos
+    direto (file://). Abra esta página por um servidor local: rode <code>node tools/servidor.mjs</code>
+    na pasta Blackjack_21 e acesse <code>http://127.0.0.1:8080/tests/tests.html</code>
+    (ou use o "Live Server" do VS Code). No terminal, <code>node tests/run-node.mjs</code>
+    também roda os mesmos testes.
+  </p>
+
+  <script type="module">
+    import './engine.test.js';
+    import './ai.test.js';
+    import './parametros.test.js';
+    import './animacao.test.js';
+    import { rodarTodos } from './testador.js';
+
+    const resultados = rodarTodos();
+    const lista = document.getElementById('lista');
+    const resumo = document.getElementById('resumo');
+
+    for (const r of resultados) {
+      const li = document.createElement('li');
+      li.className = r.ok ? 'ok' : 'falha';
+      li.textContent = r.nome;
+      if (!r.ok) {
+        const erro = document.createElement('span');
+        erro.className = 'erro';
+        erro.textContent = r.erro;
+        li.appendChild(erro);
+      }
+      lista.appendChild(li);
+    }
+
+    const falhas = resultados.filter((r) => !r.ok).length;
+    resumo.className = 'resumo ' + (falhas === 0 ? 'tudo-ok' : 'tem-falha');
+    resumo.innerHTML = `<strong>${resultados.length - falhas}/${resultados.length} passaram</strong>`
+      + (falhas ? ` — ${falhas} falha(s)` : '');
+    document.title = `${falhas === 0 ? '✔' : '✘'} 21 — testes`;
+  </script>
+  <script>
+    // Se o módulo acima não rodou em ~1 s, mostra a dica do servidor local.
+    setTimeout(() => {
+      if (document.getElementById('resumo').textContent === 'Rodando...') {
+        document.getElementById('aviso').hidden = false;
+      }
+    }, 1000);
+  </script>
+</body>
+</html>

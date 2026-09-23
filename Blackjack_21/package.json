@@ -1,0 +1,15 @@
+{
+  "name": "jogo-21",
+  "version": "0.1.0",
+  "description": "21 - um jogo de cartas que decide se voce vive ou nao (Atividade 02). O jogo em si nao tem build nem dependencias; o Playwright e usado so pela ferramenta de captura em tools/.",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "node tests/run-node.mjs",
+    "servir": "node tools/servidor.mjs",
+    "capturar": "node tools/capturar.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.63.0"
+  }
+}
