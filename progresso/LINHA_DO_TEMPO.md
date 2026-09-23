@@ -335,3 +335,10 @@ Primeira rodada de mudanças pedidas jogando, não planejando.
 - Jogando, o grupo viu que a explicação da carta trunfo que o Luiz Alberto joga sumia antes de dar para ler: a pausa era fixa em 700 ms e logo em seguida a mensagem era trocada pela jogada seguinte dele.
 - A pausa passou a acompanhar o tamanho do texto da carta: de 1,1 s (carta curta) a 4,2 s (as mais longas, como o Destroy++). Vale para os dois lados, inclusive na demonstração.
 - Conferida de quebra a mesa do print que o grupo mandou: 313 pontos = 125 (vitória com o oponente estourado) + 188 (a mesma coisa ×1,5 pela segunda vitória seguida), e a aposta de 3 dedos na rodada 3 = 3 de base +1 do One-Up dele −1 do Shield do jogador. O motor estava certo.
+
+## 2026-09-23 — Os visores de aposta mentiam
+- O grupo disse que os trunfos "não pareciam funcionar" porque a aposta nunca mudava na tela. Estava certo: **os visores mostravam a aposta BASE**, ignorando as cartas na mesa, e só eram atualizados no começo da rodada.
+- O motor sempre esteve certo — `resolverRodada` cobra pela `apostaEfetiva` desde a Etapa 2. O erro era só de vitrine, mas escondia justamente o efeito das cartas que o jogador acabou de jogar.
+- Duas correções: os visores passam a mostrar a aposta **efetiva**, e `sincronizarTrunfos` (chamado a cada carta jogada, dos dois lados) atualiza os dois números na hora.
+- E um aviso visual: o visor **pisca por 2,4 s** quando o número muda, senão a troca acontecia em silêncio.
+- Conferido na tela: Shield leva a aposta do jogador de 1 para 0; Two-Up leva a dele de 1 para 3, com os dois visores acendendo.

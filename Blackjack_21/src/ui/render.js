@@ -1333,6 +1333,17 @@ function desenharComentarioDoAnfitriao(ctx, fala, agora) {
   ctx.restore();
 }
 
+/**
+ * True nos primeiros segundos depois de a aposta daquele lado mudar. É o
+ * que faz o visor piscar quando uma carta trunfo mexe no valor — sem
+ * isso o número trocava em silêncio e ninguém via.
+ */
+const DURACAO_DO_PISCA_DA_APOSTA = 2400;
+function apostaAcabouDeMudar(lado, agora) {
+  if (lado.apostaMudouEm === null || lado.apostaMudouEm === undefined) return false;
+  return agora - lado.apostaMudouEm < DURACAO_DO_PISCA_DA_APOSTA;
+}
+
 /** A linha de recompensa nova, no fim da partida. */
 function desenharDesbloqueios(ctx, mesa, y) {
   if (!mesa.desbloqueios || mesa.desbloqueios.length === 0) return;
@@ -1634,13 +1645,16 @@ export function criarRenderizador(canvas, opcoes = {}) {
     const aflito = mesa.nivel === 1 ? mesa.adv.dedos <= 2
       : mesa.nivel === 2 ? mesa.adv.medidor >= 8 : (15 - mesa.serraPos) <= 3;
     texto(ctx, estadoDele, maoDir.x + 84, maoDir.y + 8, 13, aflito ? COR.vermelho : COR.texto, 'left');
-    cenario.desenharPlacar(ctx, 1020, 176, 74, 40, mesa.adv.aposta, { digitos: 2, rotulo: 'APOSTA DELE', agora });
+    cenario.desenharPlacar(ctx, 1020, 176, 74, 40, mesa.adv.aposta, {
+      digitos: 2, rotulo: 'APOSTA DELE', agora, destaque: apostaAcabouDeMudar(mesa.adv, agora),
+    });
 
     // --- Lado do jogador ---
     for (const c of mesa.eu.cartas) desenharCarta(ctx, c);
     texto(ctx, mesa.eu.nome.toUpperCase(), 640, 536, 15, COR.textoApagado);
     cenario.desenharPlacar(ctx, 1010, 470, 112, 62, mesa.eu.aposta, {
-      digitos: 2, rotulo: 'SUA APOSTA', destaque: mesa.eu.aposta >= 3, agora,
+      digitos: 2, rotulo: 'SUA APOSTA', agora,
+      destaque: mesa.eu.aposta >= 3 || apostaAcabouDeMudar(mesa.eu, agora),
     });
 
     const total = mesa.eu.cartas.reduce((s, c) => s + (c.valor ?? 0), 0);

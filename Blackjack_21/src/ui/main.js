@@ -199,8 +199,8 @@ let ultimasIniciais = 'AAA';
 
 /** Tudo que aparece na tela. O render.js só lê este objeto. */
 const mesa = {
-  eu: { nome: NOMES.jogador, cartas: [], dedos: 5, medidor: 0, aposta: 0, trunfosNaMao: [], trunfosNaMesa: [] },
-  adv: { nome: NOMES.oponente, cartas: [], dedos: 5, medidor: 0, aposta: 0, trunfosNaMao: [], trunfosNaMesa: [] },
+  eu: { nome: NOMES.jogador, cartas: [], dedos: 5, medidor: 0, aposta: 0, apostaMudouEm: null, trunfosNaMao: [], trunfosNaMesa: [] },
+  adv: { nome: NOMES.oponente, cartas: [], dedos: 5, medidor: 0, aposta: 0, apostaMudouEm: null, trunfosNaMao: [], trunfosNaMesa: [] },
   // 2.4
   nivel: 1,
   serraPos: SERRA_INICIAL,
@@ -842,6 +842,24 @@ function sincronizarTrunfos() {
   mesa.eu.trunfosNaMesa = visao.eu.trunfosNaMesa.map((c) => descricaoDoTrunfo(c.id));
   mesa.adv.trunfosNaMesa = visao.adversario.trunfosNaMesa.map((c) => descricaoDoTrunfo(c.id));
   mesa.alvo = visao.alvo;
+  // As cartas na mesa mexem na aposta AGORA, não só na rodada seguinte.
+  atualizarApostas(visao);
+}
+
+/**
+ * Passa para os visores a aposta EFETIVA — a base mais o que as cartas
+ * na mesa fizeram com ela. É esse o número que o motor usa na hora de
+ * cobrar, e era o que faltava aparecer: o visor mostrava a aposta base e
+ * não se mexia quando uma carta entrava.
+ */
+function atualizarApostas(visao) {
+  for (const [lado, dados] of [['eu', visao.eu], ['adv', visao.adversario]]) {
+    const nova = dados.apostaEfetiva;
+    if (nova !== mesa[lado].aposta) {
+      mesa[lado].aposta = nova;
+      mesa[lado].apostaMudouEm = performance.now();
+    }
+  }
 }
 
 /**
@@ -1425,8 +1443,7 @@ function comecarRodada() {
   const visao = verMesa(jogo, LADO.JOGADOR);
 
   mesa.rodada = visao.rodada;
-  mesa.eu.aposta = visao.eu.aposta;
-  mesa.adv.aposta = visao.adversario.aposta;
+  atualizarApostas(visao);
   mesa.eu.cartas = [];
   mesa.adv.cartas = [];
   mesa.alvo = visao.alvo;
@@ -1534,8 +1551,7 @@ function adicionarTrapacaDoAnfitriao() {
         carta.x = pos.x;
         carta.y = pos.y;
       });
-      mesa.eu.aposta = visao.eu.aposta;
-      mesa.adv.aposta = visao.adversario.aposta;
+      atualizarApostas(visao);
       mesa.mensagem = `${NOMES.anfitriao} jogou ${relatorios.map((r) => r.nome).join(' e ')} por ${NOMES.oponente}.`;
       mesa.mensagemVermelha = true;
     },

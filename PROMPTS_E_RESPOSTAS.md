@@ -977,6 +977,25 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
   - O rodapé do título passou a dizer as três coisas que o difícil muda, porque um modo que altera o monte sem avisar seria uma surpresa desagradável.
 - **Impressões da equipe:**
 
+### Prompt 35 — Os visores de aposta mentiam
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> tá certo oq aconteceu nessa mesa? A mensagem de trunfo do luiz alberto tá muito rapida.
+
+> Senti que esses trunfos não estavam funcionado, não senti que o numero da minha aposta mudou em nenhum lugar
+
+- **Resposta (resumo):** o print mandado pelo grupo batia com o motor — 313 pontos é exatamente 125 + 188, as duas vitórias com o oponente estourado. Mas a segunda pergunta achou um bug de verdade: os visores de aposta mostravam a aposta **base**, ignorando as cartas na mesa.
+- **Arquivos gerados/alterados:** alterados `src/ui/main.js`, `src/ui/render.js`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **"Não senti que mudou" era diagnóstico, não impressão.** `verMesa` devolve `aposta` (base) e `apostaEfetiva` (com as cartas); a interface lia a primeira. Some-se a isso que ela só era lida no começo da rodada, e o número **nunca** refletia carta nenhuma.
+  - **O motor estava certo o tempo todo.** A punição sempre foi cobrada pela `apostaEfetiva`, desde a Etapa 2. As cartas funcionavam; a tela é que escondia o efeito delas — que é pior do que parecer, porque tira do jogador a leitura da própria jogada.
+  - **Minha análise do print estava certa no resultado e errada no motivo.** Eu expliquei o "aposta: 3 dedos" como 3 de base +1 do One-Up −1 do Shield. A conta fecha, mas por coincidência: o visor estava mostrando os 3 da base e ignorando as duas cartas. Foi a desconfiança do grupo, e não a minha conferência, que achou o problema.
+  - **O número mudando em silêncio ainda seria pouco**, então o visor pisca por 2,4 s quando o valor troca.
+  - Na mesma leva, a mensagem da carta que o oponente joga deixou de durar 700 ms fixos e passou a acompanhar o tamanho do texto (1,1 s a 4,2 s).
+- **Impressões da equipe:**
+
 ---
 
 ## Contagem de prompts por etapa
@@ -988,4 +1007,4 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
 | Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
 | Etapa 3 — Abertura | 4 (sub-passos 3.1 a 3.5; o prompt 26 trouxe 3.4 e 3.5 juntos) | 1 (fechamento) | 5 |
-| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 6 (29 a 34: fechamento e os ajustes feitos jogando) | 7 |
+| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 7 (29 a 35: fechamento e os ajustes feitos jogando) | 8 |
