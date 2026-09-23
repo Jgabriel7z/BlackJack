@@ -1290,7 +1290,7 @@ function desenharRodapeDosDados(ctx, mesa) {
 
   if (dados.salvando) {
     const efeitos = mesa.efeitos?.ligados === false ? 'E liga os efeitos' : 'E desliga os efeitos';
-    texto(ctx, `M liga e desliga o som   ·   ${efeitos}   ·   DEL apaga os dados salvos`,
+    texto(ctx, `R joga direto   ·   M som   ·   ${efeitos}   ·   DEL apaga os dados salvos`,
       LARGURA / 2, y + 22, 12, 'rgba(140, 132, 122, 0.75)');
   } else {
     texto(ctx, 'este navegador não está guardando nada; o que você jogar some ao recarregar',
@@ -1459,7 +1459,8 @@ function desenharTelaDeGameOver(ctx, mesa) {
     desenharTextoPixel(ctx, `RECORDE ${mesa.recorde.valor}`, LARGURA / 2, 476, 3, '#6d685f', 'center');
   }
   desenharDesbloqueios(ctx, mesa, 510);
-  texto(ctx, 'qualquer tecla volta ao início', LARGURA / 2, 606, 13, '#5d584f');
+  texto(ctx, 'qualquer tecla volta ao início   ·   R joga de novo agora',
+    LARGURA / 2, 606, 13, '#5d584f');
 }
 
 // ---------------------------------------------------------------------
@@ -1525,6 +1526,8 @@ function desenharTelaDeIniciais(ctx, mesa, agora) {
   desenharDesbloqueios(ctx, mesa, 436);
   texto(ctx, 'digite as três letras  ·  as setas também mudam  ·  ENTER confirma',
     LARGURA / 2, 506, 15, COR.textoApagado);
+  texto(ctx, 'ESC pula e volta ao início, sem entrar na lista',
+    LARGURA / 2, 530, 13, '#6d685f');
   if (iniciais.restante !== null) {
     texto(ctx, `${Math.ceil(iniciais.restante)} s`, LARGURA / 2, 556, 18, PLACAR.apagado);
   }
@@ -1558,7 +1561,8 @@ function desenharTelaDeMelhores(ctx, mesa, agora) {
   if (entradas.length === 0) {
     texto(ctx, 'ninguém saiu desta mesa ainda', LARGURA / 2, 632, 15, PLACAR.apagado);
   } else {
-    texto(ctx, 'qualquer tecla volta ao início', LARGURA / 2, 632, 13, '#5d584f');
+    texto(ctx, 'qualquer tecla volta ao início   ·   R joga de novo agora',
+      LARGURA / 2, 632, 13, '#5d584f');
   }
 }
 

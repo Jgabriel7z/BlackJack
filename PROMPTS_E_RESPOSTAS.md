@@ -1011,6 +1011,21 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
   - O `?rapido=1` continua por cima do multiplicador, então as capturas não ficaram mais lentas — conferido: a captura do ciclo completo continua em torno de dois minutos e com os mesmos números.
 - **Impressões da equipe:**
 
+### Prompt 37 — Pular o nome e reiniciar rápido
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> Quero a opção de não colocar meu nome ao final ir direto ao menu, e a opção de reinicio rapido que não precisa do nome tbm
+
+- **Resposta (resumo):** duas saídas para quem tem pressa. **ESC** na tela de assinar pula o nome e volta ao título; **R** começa outra partida na hora, de qualquer tela que não seja a mesa.
+- **Arquivos gerados/alterados:** alterados `src/ui/main.js`, `src/ui/render.js`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **O que "pular" faz com a pontuação precisou ser decidido.** Quem pula não entra na lista das melhores — ela é uma lista de nomes, e não assinar é justamente não querer estar nela. Mas o **recorde continua contando**, porque ele é só um número. Conferido: pulando com 175 pontos, a lista fica vazia e o visor de recorde marca 175.
+  - **R não vale na tela de assinar**, onde ele é uma letra do nome. É a mesma regra que já valia para M, E e H, e por isso o reinício rápido mora no GAME OVER: morreu, apertou R, está jogando — sem nem ver a tela de assinar.
+  - As telas passaram a dizer a saída que têm, senão seria atalho secreto.
+- **Impressões da equipe:**
+
 ---
 
 ## Contagem de prompts por etapa
@@ -1022,4 +1037,4 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
 | Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
 | Etapa 3 — Abertura | 4 (sub-passos 3.1 a 3.5; o prompt 26 trouxe 3.4 e 3.5 juntos) | 1 (fechamento) | 5 |
-| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 8 (29 a 36: fechamento e os ajustes feitos jogando) | 9 |
+| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 9 (29 a 37: fechamento e os ajustes feitos jogando) | 10 |

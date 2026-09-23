@@ -1295,6 +1295,16 @@ function alternarEfeitos() {
   salvarProgresso();
 }
 
+/**
+ * Começa outra partida agora, sem passar pelo título nem pela tela de
+ * assinar. A pontuação que estava esperando assinatura é descartada.
+ */
+function reiniciarRapido() {
+  desistirDasIniciais();
+  telas.ir(TELA.JOGANDO, performance.now());
+  mesa.tela = telas.atual;
+}
+
 /** Liga ou desliga o modo difícil e guarda a escolha. */
 function alternarDificil() {
   mesa.dificil = !mesa.dificil;
@@ -1368,6 +1378,16 @@ function prepararIniciais() {
     restante: null,
   };
   return true;
+}
+
+/**
+ * Larga a digitação sem gravar nada: a pontuação não entra na lista.
+ * É o que o ESC faz na tela das iniciais, e o que o reinício rápido faz
+ * por baixo — quem tem pressa não devia ser obrigado a assinar.
+ */
+function desistirDasIniciais() {
+  entradaIniciais = null;
+  mesa.iniciais = null;
 }
 
 /**
@@ -1900,6 +1920,25 @@ function aoInteragirComATela() {
  */
 function aoTeclar(evento) {
   garantirSom();
+
+  // R começa outra partida na hora, de qualquer tela que não seja a mesa
+  // nem a de digitar (onde R é uma letra do nome). Serve principalmente
+  // para o GAME OVER: morreu, R, está jogando de novo.
+  if ((evento.key === 'r' || evento.key === 'R')
+    && telas.atual !== TELA.JOGANDO && telas.atual !== TELA.INICIAIS) {
+    evento.preventDefault();
+    reiniciarRapido();
+    return;
+  }
+
+  // ESC na tela das iniciais desiste de assinar e volta ao início.
+  if (evento.key === 'Escape' && telas.atual === TELA.INICIAIS) {
+    evento.preventDefault();
+    desistirDasIniciais();
+    telas.ir(TELA.TITULO, performance.now());
+    mesa.tela = telas.atual;
+    return;
+  }
 
   // M liga e desliga o som, em qualquer tela — menos enquanto o jogador
   // digita as iniciais, onde M é uma letra do nome.

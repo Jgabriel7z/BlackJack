@@ -349,3 +349,9 @@ Primeira rodada de mudanças pedidas jogando, não planejando.
 - E entrou um respiro novo de 1,2 s **entre o resultado da rodada e a punição** — antes a mensagem de quem ganhou era trocada por "a lâmina desce..." quase na hora.
 - O `?rapido=1` das capturas continua encurtando tudo por cima disso, então os roteiros não ficaram mais lentos.
 - Calibrar a leitura inteira do jogo agora é mexer num número só.
+
+## 2026-09-23 — Duas saídas rápidas
+- **ESC na tela de assinar**: pula o nome e volta ao título. A pontuação não entra na lista das melhores, mas o **recorde continua contando** — ele é um número, não um nome.
+- **R joga de novo agora**, de qualquer tela que não seja a mesa: GAME OVER, melhores pontuações e título. Morreu, apertou R, está jogando. A pontuação que estava esperando assinatura é descartada.
+- R não vale na tela de assinar, onde ele é uma letra do nome — a mesma regra que já valia para M, E e H.
+- As três telas passaram a dizer a saída que têm: "ESC pula e volta ao início, sem entrar na lista" e "R joga de novo agora".
