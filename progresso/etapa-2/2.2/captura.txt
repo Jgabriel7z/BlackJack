@@ -1,0 +1,21 @@
+Sub-passo: 2.2
+Roteiro: Página de testes com motor, IA, animação, pontuação e cartas trunfo (tests/tests.html)
+Data: 2026-09-23T14:34:20.109Z
+Duração: 2.0 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 1
+  - 01-testes.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 2.2 — Página de testes com motor, IA, animação, pontuação e cartas trunfo (tests/tests.html)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-2\2.2
+Servidor: http://127.0.0.1:63282
+Navegador: Chrome instalado na máquina
+abrir /tests/tests.html
+nota   resumo dos testes: 106/106 passaram
+print  01-testes.png
+vídeo  video.mp4 (convertido com ffmpeg)

@@ -100,3 +100,74 @@ Uma entrada por sub-passo concluído. Prints e vídeos ficam em `progresso/etapa
 - Evidências em `progresso/etapa-1/final/`: `01-mesa-rodada-1.png`, `02-oponente-pensando.png`, `03-revelacao.png`, `04-guilhotina.png`, `05-tela-final.png`, `video.mp4` (partida inteira, seed 1617), `captura.txt`, `testes-node.txt`. Resumo para a apresentação em `progresso/etapa-1/RESUMO.md`.
 - Repositório git iniciado; commit e tag `etapa-1`.
 - **Etapa 1 fechada.** Próximo: Etapa 2 (pontuação, trunfos, níveis), só quando o grupo pedir.
+
+## 2026-09-23 — Etapa 2, sub-passo 2.1: pontuação (+ ajustes visuais)
+- Visual: mão do João refeita saindo da borda de baixo (pulso algemado, dedos para cima, 7 tons com dithering); guilhotina virou aparelho de madeira com lâmina diagonal, um em cada mão.
+- `src/engine/score.js` com as regras do plano (100 / +50 / +25 / +10 por trunfo / ×1, ×1,5, ×2 / +500 por nível) e 12 testes.
+- Visor de sete segmentos de 6 dígitos ao lado da mão do João; mensagem mostra "+N pontos ×M".
+- Testes: 72/72.
+- Evidências em `progresso/etapa-2/2.1/`: `01-visor-zerado.png`, `02-primeira-vitoria.png` (+150), `03-segunda-vitoria-multiplicador.png` (+225 ×1,5 = 375), `video.mp4`, `captura.txt`, `testes-node.txt`.
+- Pendência visual: Luiz Alberto em resolução maior (ou PNG do grupo).
+- Próximo: 2.2 (trunfos básicos no motor).
+
+## 2026-09-23 — Etapa 2, sub-passo 2.2: cartas trunfo (só lógica)
+- `src/engine/trumps.js` com 16 cartas (One-Up, Two-Up, 2–7 Card, Remove, Return, Shield, Destroy, Perfect Draw, Go for 17/24/27). O catálogo chega pronto de fora; o motor nunca lê arquivo.
+- Carta com efeito persistente fica na mesa do lado de quem jogou; Destroy a remove e a aposta volta ao normal.
+- `game.js` ganhou `apostaEfetiva` (nunca negativa) e `alvoAtual`; trunfo inicial por rodada e 30% de chance ao comprar.
+- Números do C7 (30%, máximo 8, 1 inicial) em `config.js`; `data/trump_cards.js` gerado de `../trump_cards.json` por `tools/gerar_dados.mjs`.
+- Testes: 106/106 (34 novos, um por carta mais as bordas pedidas pelo grupo).
+- Evidências em `progresso/etapa-2/2.2/`: `01-testes.png` (106/106 em verde), `video.mp4`, `captura.txt`, `testes-node.txt`.
+- Sem tela de trunfos ainda: isso é o 2.3.
+- Próximo: 2.3 (trunfos na interface).
+
+## 2026-09-23 — Etapa 2, sub-passo 2.3: cartas trunfo na tela
+- Mão de trunfos embaixo, com fundo escuro e símbolo desenhado à mão (traço trêmulo) diferente por carta; clique joga.
+- A carta voa da mão para a mesa e fica do lado de quem jogou; passar o mouse mostra nome e texto em português.
+- Placa do alvo troca com "estalo": tranco, número virando de lado e clarão, quando uma Go For entra.
+- `?trunfos=two_up,shield,go_for_24` fixa a mão inicial, para a captura não depender de sorteio.
+- Correção de layout vista nos prints: placa e cartas jogadas saíram de trás da coluna da guilhotina.
+- Testes: 107/107.
+- Evidências em `progresso/etapa-2/2.3/`: `01-mao-de-trunfos.png`, `02-dica-no-mouse.png`, `03-jogou-two-up.png`, `04-jogou-shield.png`, `05-estalo-da-placa.png`, `06-jogou-go-for-24.png`, `video.mp4`, `captura.txt`, `testes-node.txt`.
+- Próximo: 2.4 (níveis 2 e 3: choque e serra).
+
+## 2026-09-23 — Etapa 2, sub-passo 2.4: níveis 2 (choque) e 3 (serra)
+- `src/engine/niveis.js` com os três aparelhos; `game.js` ganhou a fase `NIVEL_CONCLUIDO` e `avancarNivel`.
+- Nível 2: braçadeira de taser sobre as mãos, arco elétrico na descarga, medidor de ponteiro 0–10, flash branco e tremor; 2 trunfos iniciais; empate choca os dois.
+- Nível 3: trilho de metal com 15 marcas riscadas, serra circular grande girando; empate não mexe a serra; chegada corta para preto.
+- Troca de nível: escurece, a TV acende por cima e o Kaio fala duas frases como legenda.
+- `?nivel=2` e `?nivel=3` começam direto no aparelho.
+- Correções: `perigo` declarado duas vezes travava a página; geradores de baralho e de trunfos separados (a mesma seed volta a dar o mesmo baralho, e a simulação prevê a partida real); roteiro passou a observar `data-animacao` em vez de supor a ordem dos passos. Número do canto de baixo das cartas vazava para fora; corrigido. Serra aumentada a pedido do grupo.
+- Nova ferramenta: `tools/depurar.mjs`, que joga sozinho e imprime cada mudança de estado.
+- Testes: 125/125 (18 novos de níveis).
+- Evidências em `progresso/etapa-2/2.4/`: `01-nivel-2-choque.png`, `02-nivel-2-punicao.png`, `03-nivel-3-serra.png`, `04-nivel-3-punicao.png`, `05-nivel-1-guilhotina.png`, `06-kaio-falando.png`, `07-mesa-do-nivel-2.png`, `video.mp4` (1min47), `captura.txt`, `testes-node.txt`.
+- Pendência: o grupo pediu sangue na serra, o que contraria a regra de violência sem sangue do projeto; aguarda confirmação.
+- Próximo: 2.5 (IA por nível).
+
+## 2026-09-23 — Etapa 2, sub-passo 2.5: IA diferente por nível
+- `ai.js` reescrito com a ideia de cada nível comentada em português: nível 1 conta até 17; nível 2 soma Shield e Two-Up; nível 3 compara o risco de estourar com o risco de perder parado, guarda o Destroy e usa Go For quando o alvo novo ajuda.
+- A IA só usa `verMesa`, então nunca enxerga a carta oculta do jogador.
+- Na tela, o oponente joga uma carta trunfo antes de comprar ou parar.
+- Números (1000 rodadas, mesmo baralho, só a cabeça do oponente muda): estouros 31,5% → 19,2%, vitórias 45,7% → 48,7%. Em `comparacao-ia.txt`.
+- Iteração: a primeira versão estourava menos mas não ganhava mais; passou a ganhar ao prever que o adversário compra até 17.
+- Textos clareados a pedido do grupo: cores mais vivas, sombra atrás de todo texto, vinheta e granulado mais fracos.
+- Testes: 138/138 (14 novos de IA).
+- Evidências em `progresso/etapa-2/2.5/`: `01-nivel-3-antes.png`, `02-joguei-two-up.png`, `03-luiz-jogando-trunfo.png`, `04-depois-do-trunfo-dele.png`, `video.mp4` (12 s), `comparacao-ia.txt`, `captura.txt`, `testes-node.txt`.
+- Próximo: 2.6 (high score na tela, opcional) ou fechar a Etapa 2.
+
+## 2026-09-23 — Etapa 2, sub-passo 2.6: recorde da sessão
+- `score.js` ganhou `criarRecorde`, `atualizarRecorde` e `registrarPartida`; o recorde vive fora da partida e atravessa o "jogar de novo", mas some ao recarregar.
+- Segundo visor de sete segmentos, menor, escrito RECORDE, ao lado do de PONTOS; pisca por 5 s com "NOVO RECORDE" quando um recorde anterior é superado. Na primeira partida só acompanha.
+- Captura com duas partidas seguidas: a primeira jogando mal (125 pontos), a segunda com a regra da IA (313), com o visor piscando.
+- Testes: 143/143 (5 novos de recorde).
+- Evidências em `progresso/etapa-2/2.6/`: `01-visores-zerados.png`, `02-fim-da-partida-1.png`, `03-partida-2-comecando.png`, `04-visor-piscando.png`, `05-visor-piscando-outro-instante.png`, `video.mp4` (2min12), `captura.txt`, `testes-node.txt`.
+- **Etapa 2 completa**: os seis sub-passos e o opcional. Falta a captura final da etapa e o `RESUMO.md` para fechar formalmente, quando o grupo pedir.
+
+## 2026-09-23 — Fechamento da Etapa 2
+- Checklist da Etapa 2 verificado item a item com prova.
+- Regressão: a partida da Etapa 1 (seed 1617) termina igual, 3 rodadas e 2x0, em `progresso/etapa-2/regressao/`. A evidência original da Etapa 1 não foi tocada.
+- Trunfos: 16 implementados, 16 com teste próprio (meta era 14).
+- Ajuste pequeno para o vídeo: passos de animação podem levar `ritmoReal: true` e ignorar o `?rapido`; as trocas de nível usam isso.
+- Testes: 144/144.
+- Evidências em `progresso/etapa-2/final/`: 9 prints da partida pelos três níveis, `video.mp4` (44 s), `captura.txt`, `testes-node.txt`. Resumo da etapa em `progresso/etapa-2/RESUMO.md`.
+- Commit e tag `etapa-2`.
+- Próximo: Etapa 3 (tela de abertura, GAME OVER e retorno, attract mode e high scores como opcionais).

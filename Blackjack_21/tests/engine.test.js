@@ -13,6 +13,7 @@ import {
   podeComprar,
   podePassar,
   verMesa,
+  avancarNivel,
   FASE,
   LADO,
   DEDOS_INICIAIS,
@@ -187,6 +188,7 @@ teste('mesma seed reproduz a mesma partida inteira', () => {
     const jogo = criarJogo({ seed });
     const historico = [];
     while (jogo.fase !== FASE.FIM_DE_JOGO) {
+      if (jogo.fase === FASE.NIVEL_CONCLUIDO) { avancarNivel(jogo); continue; }
       iniciarRodada(jogo);
       // roteiro fixo: jogador compra uma vez, depois os dois passam
       if (podeComprar(jogo, LADO.JOGADOR)) hit(jogo, LADO.JOGADOR);
@@ -301,7 +303,11 @@ teste('vitória normal: perdedor perde dedos = aposta, vencedor conta rodada', (
   assertIgual(r.vencedor, RESULTADO.JOGADOR);
   assertIgual(r.totais, { jogador: 18, oponente: 16 });
   assertIgual(r.estourou, { jogador: false, oponente: false });
-  assertIgual(r.punicoes, [{ lado: 'oponente', dedosPerdidos: 1, dedosRestantes: 4 }]);
+  assertIgual(r.punicoes.length, 1);
+  assertIgual(r.punicoes[0].lado, 'oponente');
+  assertIgual(r.punicoes[0].tipo, 'dedos');
+  assertIgual(r.punicoes[0].dedosPerdidos, 1);
+  assertIgual(r.punicoes[0].dedosRestantes, 4);
   assertIgual(jogo.jogadores.jogador.dedos, 5);
   assertIgual(jogo.jogadores.oponente.dedos, 4);
   assertIgual(jogo.jogadores.jogador.rodadasVencidas, 1);
@@ -363,18 +369,30 @@ teste('dedos nunca ficam negativos', () => {
 //  game.js — fim de jogo
 // ---------------------------------------------------------------------
 
-teste('partida termina quando alguém perde todos os dedos', () => {
+teste('nível 1 termina quando o oponente perde todos os dedos', () => {
   // Ordem fixa: jogador vence toda rodada (18 x 16). Apostas 1, 2, 3 -> 6 >= 5.
   const jogo = jogoComBaralho([10, 9, 8, 7]);
   let rodadas = 0;
-  while (jogo.fase !== FASE.FIM_DE_JOGO) {
+  while (jogo.fase !== FASE.NIVEL_CONCLUIDO && jogo.fase !== FASE.FIM_DE_JOGO) {
     iniciarRodada(jogo);
     encerrarComDoisStays(jogo);
     rodadas++;
   }
   assertIgual(rodadas, 3);
   assertIgual(jogo.jogadores.oponente.dedos, 0);
-  assertIgual(jogo.vencedorDoJogo, LADO.JOGADOR);
+  // O oponente caiu, mas ainda há aparelho novo: o jogo não acabou.
+  assertIgual(jogo.fase, FASE.NIVEL_CONCLUIDO);
+  assertLanca(() => iniciarRodada(jogo), 'precisa avançar de nível antes de outra rodada');
+});
+
+teste('o jogador perder encerra o jogo, sem próximo nível', () => {
+  const jogo = jogoComBaralho([9, 10, 7, 8]); // jogador 16, oponente 18: o jogador perde
+  while (jogo.fase !== FASE.FIM_DE_JOGO) {
+    iniciarRodada(jogo);
+    encerrarComDoisStays(jogo);
+  }
+  assertIgual(jogo.jogadores.jogador.dedos, 0);
+  assertIgual(jogo.vencedorDoJogo, LADO.OPONENTE);
   assertLanca(() => iniciarRodada(jogo), 'não deveria iniciar rodada após o fim');
 });
 

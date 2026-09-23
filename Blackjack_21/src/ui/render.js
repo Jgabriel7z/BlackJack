@@ -22,6 +22,7 @@ import {
 } from './pixelart.js';
 import { criarCenario } from './cenario.js';
 import { criarEfeitos } from './efeitos.js';
+import { LINHA_DOS_NOS } from './sprites/mao.js';
 
 export const LARGURA = 1280;
 export const ALTURA = 720;
@@ -30,9 +31,9 @@ const FONTE = '"Courier New", Courier, "Lucida Console", monospace';
 
 const COR = {
   fundo: '#060505',
-  texto: '#d8d2c8',
-  textoApagado: '#77706a',
-  vermelho: '#b8342a',
+  texto: '#ece6da',
+  textoApagado: '#b0a89a',
+  vermelho: '#e0554a',
   carta: '#d9cfb8',
   cartaBorda: '#8f8570',
   cartaTinta: '#2a241f',
@@ -41,14 +42,25 @@ const COR = {
 };
 
 export const CARTA = { largura: 78, altura: 110, espaco: 14 };
+/** Carta trunfo na mão (embaixo) e já jogada (menor, na mesa). */
+export const TRUNFO = { largura: 66, altura: 92 };
+export const TRUNFO_MESA = { largura: 40, altura: 56, passo: 20 };
 
 /** Posições fixas da mesa. As fileiras crescem para a direita a partir de fileiraX0. */
 export const POSICOES = {
   fileiraX0: 470,
   advY: 228,
-  euY: 420,
+  euY: 400,
   baralho: { x: 1090, y: 300 },
-  maoEu: { x: 30, y: 430 },
+  maoEu: { x: 60, y: 504 }, // 64 linhas x 4 = 256 px: o antebraço sai pela borda de baixo
+  // Dois visores lado a lado, à direita da mão e à esquerda dos trunfos.
+  visorPontos: { x: 248, y: 590, largura: 156, altura: 58 },
+  visorRecorde: { x: 414, y: 590, largura: 112, altura: 58 },
+  // Trunfos (2.3): mão do jogador embaixo; cartas jogadas na mesa, cada uma do lado de quem jogou.
+  maoTrunfos: { centroX: 762, largura: 470, y: 614 },
+  // À direita da coluna de madeira da guilhotina (que termina em x≈276) e à
+  // esquerda das cartas numéricas (que começam em x=470).
+  mesaTrunfos: { eu: { x: 316, y: 440 }, adv: { x: 316, y: 172 } },
   pivoLampada: { x: 545, y: 0 }, // a lâmpada pende à esquerda do oponente, como na referência
   bordaMesaY: 165,
   luizCentroX: 680,
@@ -77,6 +89,33 @@ function interpolar(a, b, t) {
   return a + (b - a) * t;
 }
 
+/** Onde fica a carta `indice` de uma mão de `total` trunfos. Elas se sobrepõem quando são muitas. */
+export function posicaoTrunfoNaMao(indice, total) {
+  const area = POSICOES.maoTrunfos;
+  const passoIdeal = TRUNFO.largura + 10;
+  const passo = total <= 1
+    ? 0
+    : Math.min(passoIdeal, (area.largura - TRUNFO.largura) / (total - 1));
+  const larguraTotal = TRUNFO.largura + passo * (total - 1);
+  return {
+    x: area.centroX - larguraTotal / 2 + indice * passo,
+    y: area.y,
+    largura: TRUNFO.largura,
+    altura: TRUNFO.altura,
+  };
+}
+
+/** Onde fica a carta `indice` já jogada na mesa por `lado` ('eu' | 'adv'). */
+export function posicaoTrunfoNaMesa(lado, indice) {
+  const base = POSICOES.mesaTrunfos[lado];
+  return {
+    x: base.x + indice * TRUNFO_MESA.passo,
+    y: base.y,
+    largura: TRUNFO_MESA.largura,
+    altura: TRUNFO_MESA.altura,
+  };
+}
+
 // ---------------------------------------------------------------------
 //  Utilidades
 // ---------------------------------------------------------------------
@@ -101,12 +140,51 @@ function ruidoFixo(i) {
   return v - Math.floor(v);
 }
 
+/**
+ * Escreve na mesa. Cada texto leva uma sombra escura atrás: a mesa é
+ * quase preta em uns pontos e clara em outros, e sem a sombra as letras
+ * somem no granulado e na vinheta.
+ */
 function texto(ctx, str, x, y, tamanho, cor = COR.texto, alinhamento = 'center', negrito = false) {
+  ctx.save();
   ctx.font = `${negrito ? 'bold ' : ''}${tamanho}px ${FONTE}`;
   ctx.fillStyle = cor;
   ctx.textAlign = alinhamento;
   ctx.textBaseline = 'alphabetic';
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+  ctx.shadowBlur = 5;
   ctx.fillText(str, x, y);
+  ctx.restore();
+}
+
+/**
+ * Texto centralizado que cabe em `larguraMaxima`: quebra em até `maxLinhas`
+ * linhas por palavra e, se ainda não couber, reduz a fonte.
+ */
+function textoAjustado(ctx, str, x, y, tamanho, cor, larguraMaxima, maxLinhas = 2) {
+  let fonte = tamanho;
+  let linhas;
+  for (;;) {
+    ctx.font = `${fonte}px ${FONTE}`;
+    linhas = [];
+    let atual = '';
+    for (const palavra of str.split(' ')) {
+      const tentativa = atual ? `${atual} ${palavra}` : palavra;
+      if (ctx.measureText(tentativa).width <= larguraMaxima || !atual) {
+        atual = tentativa;
+      } else {
+        linhas.push(atual);
+        atual = palavra;
+      }
+    }
+    if (atual) linhas.push(atual);
+    const cabe = linhas.length <= maxLinhas && linhas.every((l) => ctx.measureText(l).width <= larguraMaxima);
+    if (cabe || fonte <= 11) break;
+    fonte -= 1;
+  }
+  const alturaLinha = fonte + 6;
+  const yInicial = y - ((linhas.length - 1) * alturaLinha) / 2;
+  linhas.forEach((l, i) => texto(ctx, l, x, yInicial + i * alturaLinha, fonte, cor));
 }
 
 // ---------------------------------------------------------------------
@@ -226,71 +304,463 @@ function desenharBracosDoOponente(ctx, mesa, agora) {
   desenharLuizBracos(ctx, origem.x, origem.y + respiracaoOponente(agora), mesa.adv.dedos, { escala: ESCALA_LUIZ });
 }
 
-/**
- * A lâmina da guilhotina. Para a mão do jogador (deitada, dedos para a
- * direita) a lâmina é uma barra vertical que cai sobre a base dos dedos;
- * para a mão do oponente (dedos para baixo) é uma barra horizontal.
- * `g.progresso` 0 = fora da tela, 1 = encostada na mão.
- */
-function desenharGuilhotina(ctx, g, agora) {
-  let alvo;
-  if (g.lado === 'eu') {
-    const x = POSICOES.maoEu.x + 40 * ESCALA_MAO;      // base dos dedos (sprite espelhado)
-    alvo = { x, y: POSICOES.maoEu.y - 30, largura: 34, altura: TAMANHO_MAO.altura * ESCALA_MAO + 60, vertical: true };
-  } else {
-    const origem = origemLuiz();
-    const cx = origem.x + MAO_DIREITA_LUIZ_PX.x * ESCALA_LUIZ;
-    const y = origem.y + (MAO_DIREITA_LUIZ_PX.y + 2) * ESCALA_LUIZ;
-    alvo = { x: cx - 70, y, largura: 140, altura: 26, vertical: false };
-  }
+// ---------------------------------------------------------------------
+//  O aparelho: duas colunas de madeira presas na mesa, uma travessa e a
+//  lâmina de aço com fio diagonal que fica em repouso no alto e cai entre
+//  as colunas até a base dos dedos. Um por mão. As colunas ficam sempre
+//  visíveis (a mão está presa no aparelho); a lâmina se mexe só na punição.
+// ---------------------------------------------------------------------
 
-  // Posição atual: vem de cima da tela até o alvo.
-  const yInicio = -alvo.altura - 60;
-  const y = interpolar(yInicio, alvo.y, g.progresso);
-  const x = alvo.x;
+function aparelhoDoJogador() {
+  const cx = POSICOES.maoEu.x + (TAMANHO_MAO.largura / 2) * ESCALA_MAO;
+  return {
+    cx,
+    topo: 296,
+    base: ALTURA,
+    abertura: 212,          // distância entre as faces internas das colunas
+    coluna: 22,
+    alturaLamina: 58,
+    yCorte: POSICOES.maoEu.y + LINHA_DOS_NOS * ESCALA_MAO,
+  };
+}
+
+function aparelhoDoOponente() {
+  const origem = origemLuiz();
+  return {
+    cx: origem.x + MAO_DIREITA_LUIZ_PX.x * ESCALA_LUIZ,
+    topo: 128,
+    base: origem.y + (MAO_DIREITA_LUIZ_PX.y + 9) * ESCALA_LUIZ,
+    abertura: 92,
+    coluna: 11,
+    alturaLamina: 26,
+    yCorte: origem.y + (MAO_DIREITA_LUIZ_PX.y + 2) * ESCALA_LUIZ,
+  };
+}
+
+function desenharMadeira(ctx, x, y, largura, altura, semente) {
+  const g = ctx.createLinearGradient(x, 0, x + largura, 0);
+  g.addColorStop(0, '#1d120c');
+  g.addColorStop(0.35, '#3a2618');
+  g.addColorStop(0.7, '#2c1c11');
+  g.addColorStop(1, '#150d08');
+  ctx.fillStyle = g;
+  ctx.fillRect(x, y, largura, altura);
+  ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i < 3; i++) {
+    const gx = x + 4 + ruidoFixo(semente + i) * (largura - 8);
+    ctx.beginPath();
+    ctx.moveTo(gx, y);
+    ctx.lineTo(gx + (ruidoFixo(semente + 9 + i) - 0.5) * 6, y + altura);
+    ctx.stroke();
+  }
+  ctx.strokeStyle = '#080503';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(x, y, largura, altura);
+}
+
+/** Colunas e travessa (atrás da mão). */
+function desenharColunas(ctx, ap) {
+  const esq = ap.cx - ap.abertura / 2 - ap.coluna;
+  const dir = ap.cx + ap.abertura / 2;
+  // Sombra das colunas na mesa.
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillRect(esq - 6, ap.topo + 10, ap.coluna + 6, ap.base - ap.topo);
+  ctx.fillRect(dir - 6, ap.topo + 10, ap.coluna + 6, ap.base - ap.topo);
+  desenharMadeira(ctx, esq, ap.topo, ap.coluna, ap.base - ap.topo, 11);
+  desenharMadeira(ctx, dir, ap.topo, ap.coluna, ap.base - ap.topo, 23);
+  // Travessa.
+  desenharMadeira(ctx, esq - 6, ap.topo - ap.coluna * 0.9, ap.abertura + ap.coluna * 2 + 12, ap.coluna * 0.9, 37);
+  // Ranhura por onde a lâmina desliza.
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(esq + ap.coluna - 3, ap.topo, 3, ap.base - ap.topo);
+  ctx.fillRect(dir, ap.topo, 3, ap.base - ap.topo);
+  // Parafusos que prendem na mesa.
+  ctx.fillStyle = '#5a5e68';
+  for (const px of [esq + ap.coluna / 2, dir + ap.coluna / 2]) {
+    for (const py of [ap.topo + 14, ap.base - 18]) {
+      if (py < ALTURA - 4) {
+        ctx.beginPath();
+        ctx.arc(px, py, Math.max(2, ap.coluna * 0.14), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+}
+
+/** Lâmina com o bloco de madeira em cima (na frente da mão). `progresso` 0 = em repouso no alto, 1 = no corte. */
+function desenharLamina(ctx, ap, progresso, fase) {
+  const esq = ap.cx - ap.abertura / 2;
+  const largura = ap.abertura;
+  const alturaBloco = ap.alturaLamina * 0.7;
+  const yRepouso = ap.topo + 6 + alturaBloco;
+  const yLamina = interpolar(yRepouso, ap.yCorte - ap.alturaLamina, progresso);
 
   ctx.save();
-  // Sombra da lâmina sobre a mesa, mais forte quanto mais perto.
-  ctx.fillStyle = `rgba(0, 0, 0, ${0.45 * g.progresso})`;
-  ctx.fillRect(x + 6, alvo.y + 8, alvo.largura, alvo.altura);
+  // Sombra da lâmina sobre a mão, mais forte quanto mais perto.
+  ctx.fillStyle = `rgba(0, 0, 0, ${0.15 + 0.4 * progresso})`;
+  ctx.fillRect(esq + 4, yLamina + ap.alturaLamina * 0.6 + 8, largura - 8, ap.alturaLamina * 0.5);
 
-  // Corpo de metal.
-  const grad = alvo.vertical
-    ? ctx.createLinearGradient(x, 0, x + alvo.largura, 0)
-    : ctx.createLinearGradient(0, y, 0, y + alvo.altura);
-  grad.addColorStop(0, '#2a2c33');
-  grad.addColorStop(0.45, '#8a8f9a');
-  grad.addColorStop(0.55, '#c9ccd4');
-  grad.addColorStop(1, '#1e2026');
-  ctx.fillStyle = grad;
-  ctx.fillRect(x, y, alvo.largura, alvo.altura);
+  // Bloco de madeira (o peso) acima da lâmina.
+  desenharMadeira(ctx, esq + 2, yLamina - alturaBloco, largura - 4, alturaBloco, 53);
+  ctx.fillStyle = '#5a5e68';
+  for (let i = 0; i < 3; i++) {
+    ctx.beginPath();
+    ctx.arc(esq + 14 + i * (largura - 28) / 2, yLamina - alturaBloco / 2, Math.max(2, ap.alturaLamina * 0.06), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Lâmina trapezoidal: fio diagonal, mais baixo à direita.
+  const yEsq = yLamina + ap.alturaLamina * 0.55;
+  const yDir = yLamina + ap.alturaLamina;
+  ctx.beginPath();
+  ctx.moveTo(esq, yLamina);
+  ctx.lineTo(esq + largura, yLamina);
+  ctx.lineTo(esq + largura, yDir);
+  ctx.lineTo(esq, yEsq);
+  ctx.closePath();
+  const aco = ctx.createLinearGradient(0, yLamina, 0, yDir);
+  aco.addColorStop(0, '#3a3d45');
+  aco.addColorStop(0.4, '#7d838f');
+  aco.addColorStop(0.75, '#b9bec8');
+  aco.addColorStop(1, '#e6e9ef');
+  ctx.fillStyle = aco;
+  ctx.fill();
   ctx.strokeStyle = '#0e0f12';
-  ctx.lineWidth = 2;
-  ctx.strokeRect(x, y, alvo.largura, alvo.altura);
-
-  // Fio da lâmina: uma linha clara no lado que corta, tremendo no impacto.
-  const brilho = g.fase === 'impacto' ? 1 : 0.6;
-  ctx.strokeStyle = `rgba(235, 238, 245, ${brilho})`;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  // Fio: linha clara ao longo da diagonal, mais forte no impacto.
+  ctx.strokeStyle = `rgba(245, 247, 252, ${fase === 'impacto' ? 1 : 0.7})`;
   ctx.lineWidth = 2;
   ctx.beginPath();
-  if (alvo.vertical) {
-    ctx.moveTo(x + 3, y + 4);
-    ctx.lineTo(x + 3, y + alvo.altura - 4);
-  } else {
-    ctx.moveTo(x + 4, y + alvo.altura - 3);
-    ctx.lineTo(x + alvo.largura - 4, y + alvo.altura - 3);
+  ctx.moveTo(esq + 2, yEsq - 1);
+  ctx.lineTo(esq + largura - 2, yDir - 1);
+  ctx.stroke();
+  // Manchas escuras no aço.
+  ctx.fillStyle = 'rgba(40, 30, 30, 0.35)';
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.ellipse(esq + 20 + ruidoFixo(i + 70) * (largura - 40), yLamina + 6 + ruidoFixo(i + 80) * ap.alturaLamina * 0.4,
+      6 + ruidoFixo(i) * 8, 3, 0, 0, Math.PI * 2);
+    ctx.fill();
   }
+  ctx.restore();
+}
+
+function progressoDaLamina(mesa, lado) {
+  if (!mesa.punicao || mesa.punicao.tipo !== 'dedos' || mesa.punicao.lado !== lado) {
+    return { progresso: 0, fase: 'repouso' };
+  }
+  return { progresso: mesa.punicao.progresso, fase: mesa.punicao.fase };
+}
+
+// ---------------------------------------------------------------------
+//  Nível 2 — taser: braçadeira sobre a mão e medidor de ponteiro (2.4)
+// ---------------------------------------------------------------------
+
+/** Onde fica o medidor de cada lado. */
+const MEDIDOR = {
+  eu: { x: 142, y: 424, raio: 58 },
+  adv: { x: 906, y: 196, raio: 42 },
+};
+
+/** Braçadeira de metal com dois eletrodos, presa sobre a mão. */
+function desenharTaser(ctx, mesa, lado, agora) {
+  const grande = lado === 'eu';
+  const centro = grande
+    ? { x: POSICOES.maoEu.x + (TAMANHO_MAO.largura / 2) * ESCALA_MAO, y: POSICOES.maoEu.y + 44 }
+    : (() => {
+      const o = origemLuiz();
+      return { x: o.x + MAO_DIREITA_LUIZ_PX.x * ESCALA_LUIZ, y: o.y + (MAO_DIREITA_LUIZ_PX.y - 2) * ESCALA_LUIZ };
+    })();
+  const largura = grande ? 208 : 92;
+  const altura = grande ? 26 : 13;
+  const x = centro.x - largura / 2;
+  const y = centro.y - altura / 2;
+
+  const descarregando = mesa.punicao?.tipo === 'choque' && mesa.punicao.lado === lado
+    && mesa.punicao.fase === 'descarga';
+  const carregando = mesa.punicao?.tipo === 'choque' && mesa.punicao.lado === lado
+    && mesa.punicao.fase === 'carregando';
+
+  ctx.save();
+  // Sombra e barra de metal.
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.fillRect(x - 4, y + altura, largura + 8, altura * 0.5);
+  const metal = ctx.createLinearGradient(0, y, 0, y + altura);
+  metal.addColorStop(0, '#6b7079');
+  metal.addColorStop(0.5, '#3a3e45');
+  metal.addColorStop(1, '#1b1e22');
+  retanguloArredondado(ctx, x, y, largura, altura, 4);
+  ctx.fillStyle = metal;
+  ctx.fill();
+  ctx.strokeStyle = '#0d0f12';
+  ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // Rebites.
-  ctx.fillStyle = '#5a5e68';
-  const n = alvo.vertical ? Math.floor(alvo.altura / 40) : Math.floor(alvo.largura / 40);
-  for (let i = 0; i < n; i++) {
-    const rx = alvo.vertical ? x + alvo.largura / 2 : x + 20 + i * 40;
-    const ry = alvo.vertical ? y + 20 + i * 40 : y + alvo.altura / 2;
+  // Eletrodos nas pontas, acesos quando o aparelho carrega ou dispara.
+  const brilho = descarregando ? 1 : carregando ? 0.35 + 0.35 * Math.abs(Math.sin(agora / 70)) : 0.12;
+  for (const ex of [x + altura * 0.7, x + largura - altura * 0.7]) {
     ctx.beginPath();
-    ctx.arc(rx, ry, 3, 0, Math.PI * 2);
+    ctx.arc(ex, y + altura / 2, altura * 0.34, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(150, 220, 255, ${0.25 + 0.75 * brilho})`;
+    ctx.shadowColor = `rgba(120, 200, 255, ${brilho})`;
+    ctx.shadowBlur = 18 * brilho;
     ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  // Arco elétrico entre os eletrodos durante a descarga.
+  if (descarregando) {
+    ctx.strokeStyle = 'rgba(210, 240, 255, 0.95)';
+    ctx.lineWidth = 2;
+    const x0 = x + altura * 0.7;
+    const x1 = x + largura - altura * 0.7;
+    const passos = grande ? 14 : 8;
+    for (let repeticao = 0; repeticao < 2; repeticao++) {
+      ctx.beginPath();
+      for (let i = 0; i <= passos; i++) {
+        const t = i / passos;
+        const px = interpolar(x0, x1, t);
+        const desvio = i === 0 || i === passos
+          ? 0
+          : (ruidoFixo(Math.floor(agora / 28) + i * 7 + repeticao * 91) - 0.5) * altura * 1.6;
+        if (i === 0) ctx.moveTo(px, y + altura / 2);
+        else ctx.lineTo(px, y + altura / 2 + desvio);
+      }
+      ctx.stroke();
+    }
+  }
+
+  // Cabo saindo para fora da mesa.
+  ctx.strokeStyle = '#15181c';
+  ctx.lineWidth = grande ? 6 : 3;
+  ctx.beginPath();
+  ctx.moveTo(x + largura, y + altura / 2);
+  ctx.quadraticCurveTo(x + largura + (grande ? 70 : 34), y + altura, x + largura + (grande ? 40 : 20), y + (grande ? 120 : 52));
+  ctx.stroke();
+  ctx.restore();
+}
+
+/** Medidor analógico de 0 a 10, com ponteiro e zona vermelha no fim. */
+function desenharMedidor(ctx, lado, valor, nome) {
+  const { x, y, raio } = MEDIDOR[lado];
+  const anguloInicial = Math.PI * 0.78;
+  const anguloFinal = Math.PI * 2.22;
+  const proporcao = Math.max(0, Math.min(1, valor / 10));
+
+  ctx.save();
+  // Caixa.
+  ctx.beginPath();
+  ctx.arc(x, y, raio, 0, Math.PI * 2);
+  const caixa = ctx.createLinearGradient(x, y - raio, x, y + raio);
+  caixa.addColorStop(0, '#3c3a37');
+  caixa.addColorStop(1, '#16151400');
+  ctx.fillStyle = '#20201e';
+  ctx.fill();
+  ctx.strokeStyle = '#0a0908';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  ctx.strokeStyle = '#575249';
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.arc(x, y, raio - 3, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Mostrador de papel velho.
+  ctx.beginPath();
+  ctx.arc(x, y, raio - 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#c6bda4';
+  ctx.fill();
+
+  // Zona vermelha de 8 a 10.
+  ctx.beginPath();
+  ctx.arc(x, y, raio - 12, interpolar(anguloInicial, anguloFinal, 0.8), anguloFinal);
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = 'rgba(180, 40, 30, 0.75)';
+  ctx.stroke();
+
+  // Marcas de 0 a 10.
+  for (let i = 0; i <= 10; i++) {
+    const ang = interpolar(anguloInicial, anguloFinal, i / 10);
+    const interno = raio - (i % 5 === 0 ? 20 : 15);
+    ctx.beginPath();
+    ctx.moveTo(x + Math.cos(ang) * interno, y + Math.sin(ang) * interno);
+    ctx.lineTo(x + Math.cos(ang) * (raio - 9), y + Math.sin(ang) * (raio - 9));
+    ctx.strokeStyle = '#2c2721';
+    ctx.lineWidth = i % 5 === 0 ? 2.5 : 1;
+    ctx.stroke();
+    if (i % 5 === 0 && raio > 50) {
+      texto(ctx, String(i), x + Math.cos(ang) * (raio - 30), y + Math.sin(ang) * (raio - 30) + 4, 11, '#2c2721');
+    }
+  }
+
+  // Ponteiro.
+  const ang = interpolar(anguloInicial, anguloFinal, proporcao);
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(ang);
+  ctx.beginPath();
+  ctx.moveTo(-raio * 0.12, 0);
+  ctx.lineTo(raio - 12, -2);
+  ctx.lineTo(raio - 12, 2);
+  ctx.closePath();
+  ctx.fillStyle = proporcao >= 0.8 ? '#a8231b' : '#1e1a16';
+  ctx.fill();
+  ctx.restore();
+  ctx.beginPath();
+  ctx.arc(x, y, raio * 0.09, 0, Math.PI * 2);
+  ctx.fillStyle = '#2c2721';
+  ctx.fill();
+
+  // Vidro e legenda.
+  const vidro = ctx.createLinearGradient(x - raio, y - raio, x + raio, y + raio);
+  vidro.addColorStop(0, 'rgba(255,255,255,0.13)');
+  vidro.addColorStop(0.5, 'rgba(255,255,255,0)');
+  ctx.beginPath();
+  ctx.arc(x, y, raio - 7, 0, Math.PI * 2);
+  ctx.fillStyle = vidro;
+  ctx.fill();
+  ctx.restore();
+
+  texto(ctx, nome, x, y + raio + 16, 11, COR.textoApagado);
+  texto(ctx, `${valor.toFixed(0)} / 10`, x, y + raio + 32, 13,
+    valor >= 8 ? COR.vermelho : COR.texto);
+}
+
+// ---------------------------------------------------------------------
+//  Nível 3 — serra: trilho de 15 marcas e a lâmina circular (2.4)
+// ---------------------------------------------------------------------
+
+const TRILHO = { x: 150, yOponente: 196, yJogador: 528, marcas: 15 };
+
+/** Posição vertical da serra para uma posição do trilho (0 = jogador, 15 = oponente). */
+function yDaSerra(posicao) {
+  return interpolar(TRILHO.yJogador, TRILHO.yOponente, posicao / TRILHO.marcas);
+}
+
+/** O trilho riscado na mesa, com as 15 marcas. Desenhado antes das mãos. */
+function desenharTrilho(ctx, nomeJogador, nomeOponente) {
+  ctx.save();
+  // Sulco na mesa e a barra de metal do trilho.
+  ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+  ctx.lineWidth = 16;
+  ctx.beginPath();
+  ctx.moveTo(TRILHO.x, TRILHO.yOponente);
+  ctx.lineTo(TRILHO.x, TRILHO.yJogador);
+  ctx.stroke();
+  const barra = ctx.createLinearGradient(TRILHO.x - 6, 0, TRILHO.x + 6, 0);
+  barra.addColorStop(0, '#2b2e34');
+  barra.addColorStop(0.4, '#878d99');
+  barra.addColorStop(0.7, '#4a4e56');
+  barra.addColorStop(1, '#1c1f24');
+  ctx.strokeStyle = barra;
+  ctx.lineWidth = 9;
+  ctx.beginPath();
+  ctx.moveTo(TRILHO.x, TRILHO.yOponente);
+  ctx.lineTo(TRILHO.x, TRILHO.yJogador);
+  ctx.stroke();
+  // Suportes parafusados nas duas pontas.
+  for (const y of [TRILHO.yOponente, TRILHO.yJogador]) {
+    ctx.fillStyle = '#3c4048';
+    ctx.fillRect(TRILHO.x - 13, y - 5, 26, 10);
+    ctx.fillStyle = '#7e828f';
+    ctx.beginPath();
+    ctx.arc(TRILHO.x, y, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // As 15 marcas riscadas a faca, mais fundas de 5 em 5.
+  for (let i = 0; i <= TRILHO.marcas; i++) {
+    const y = yDaSerra(i);
+    const forte = i % 5 === 0;
+    ctx.strokeStyle = forte ? 'rgba(215, 205, 180, 0.8)' : 'rgba(180, 168, 145, 0.5)';
+    ctx.lineWidth = forte ? 2.5 : 1.5;
+    const comprimento = forte ? 24 : 15;
+    ctx.beginPath();
+    ctx.moveTo(TRILHO.x + 9, y + (ruidoFixo(i) - 0.5) * 1.5);
+    ctx.lineTo(TRILHO.x + 9 + comprimento, y + (ruidoFixo(i + 9) - 0.5) * 2);
+    ctx.stroke();
+    if (forte) texto(ctx, String(i), TRILHO.x + 42, y + 4, 11, 'rgba(210, 200, 178, 0.7)', 'left');
+  }
+
+  texto(ctx, nomeOponente, TRILHO.x, TRILHO.yOponente - 16, 12, COR.textoApagado);
+  texto(ctx, nomeJogador, TRILHO.x, TRILHO.yJogador + 24, 12, COR.textoApagado);
+  ctx.restore();
+}
+
+/** A lâmina circular sobre o trilho. Desenhada depois das mãos. */
+function desenharSerra(ctx, mesa, agora) {
+  const y = yDaSerra(mesa.serraPos);
+  const x = TRILHO.x;
+  const andando = mesa.punicao?.tipo === 'serra';
+  const raio = 62;
+  const giro = (agora / (andando ? 90 : 260)) % (Math.PI * 2);
+
+  ctx.save();
+  // Sombra na mesa.
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.beginPath();
+  ctx.ellipse(x + 10, y + 14, raio * 0.95, raio * 0.4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Motor: caixa atrás da lâmina.
+  retanguloArredondado(ctx, x - 22, y - 18, 44, 36, 5);
+  const caixa = ctx.createLinearGradient(x - 22, 0, x + 22, 0);
+  caixa.addColorStop(0, '#4a4038');
+  caixa.addColorStop(1, '#241e1a');
+  ctx.fillStyle = caixa;
+  ctx.fill();
+  ctx.strokeStyle = '#0d0b0a';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Disco com dentes.
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(giro);
+  const dentes = 22;
+  ctx.beginPath();
+  for (let i = 0; i < dentes; i++) {
+    const a0 = (i / dentes) * Math.PI * 2;
+    const a1 = ((i + 0.5) / dentes) * Math.PI * 2;
+    ctx.lineTo(Math.cos(a0) * raio, Math.sin(a0) * raio);
+    ctx.lineTo(Math.cos(a1) * (raio - 10), Math.sin(a1) * (raio - 10));
+  }
+  ctx.closePath();
+  const aco = ctx.createLinearGradient(-raio, -raio, raio, raio);
+  aco.addColorStop(0, '#585d66');
+  aco.addColorStop(0.45, '#c3c8d2');
+  aco.addColorStop(0.6, '#8d929c');
+  aco.addColorStop(1, '#3a3e45');
+  ctx.fillStyle = aco;
+  ctx.fill();
+  ctx.strokeStyle = '#111316';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  // Furo central, parafuso e três rasgos no disco.
+  ctx.beginPath();
+  ctx.arc(0, 0, raio * 0.2, 0, Math.PI * 2);
+  ctx.fillStyle = '#20232a';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(30, 34, 40, 0.8)';
+  ctx.lineWidth = 5;
+  for (let i = 0; i < 3; i++) {
+    const a = (i / 3) * Math.PI * 2;
+    ctx.beginPath();
+    ctx.arc(0, 0, raio * 0.55, a, a + 0.9);
+    ctx.stroke();
+  }
+  ctx.restore();
+
+  // Poeira de madeira enquanto anda.
+  if (andando) {
+    ctx.fillStyle = 'rgba(190, 170, 130, 0.5)';
+    for (let i = 0; i < 10; i++) {
+      const t = ruidoFixo(Math.floor(agora / 40) + i * 13);
+      const t2 = ruidoFixo(Math.floor(agora / 40) + i * 29);
+      ctx.fillRect(x - 24 + t * 48, y + 6 + t2 * 26, 2, 2);
+    }
   }
   ctx.restore();
 }
@@ -369,8 +839,11 @@ function desenharCarta(ctx, sprite) {
   const valor = sprite.valor === null ? '?' : String(sprite.valor);
   texto(ctx, valor, largura / 2, altura / 2 + 15, 40, COR.cartaTinta, 'center', true);
   texto(ctx, valor, 9, 20, 14, COR.cartaTinta, 'left', true);
+  // Número do canto de baixo, girado 180°. Depois do giro os dígitos crescem
+  // para BAIXO a partir da linha de base, então ela fica a 20 px da borda
+  // (e não a 8), senão o número vaza para fora da carta.
   ctx.save();
-  ctx.translate(largura - 9, altura - 8);
+  ctx.translate(largura - 9, altura - 20);
   ctx.rotate(Math.PI);
   texto(ctx, valor, 0, 0, 14, COR.cartaTinta, 'left', true);
   ctx.restore();
@@ -385,6 +858,215 @@ function desenharCarta(ctx, sprite) {
     ctx.restore();
     texto(ctx, 'oculta', largura / 2, altura - 12, 10, 'rgba(120, 40, 30, 0.9)');
   }
+  ctx.restore();
+}
+
+// ---------------------------------------------------------------------
+//  Cartas trunfo (2.3)
+// ---------------------------------------------------------------------
+
+const COR_TRUNFO = {
+  fundo: '#191014',
+  fundoClaro: '#2a1b20',
+  borda: '#6b4a3a',
+  bordaViva: '#c9a06a',
+  tinta: '#d8c4a0',
+  tintaFraca: 'rgba(216, 196, 160, 0.55)',
+};
+
+/** Traço trêmulo, como desenhado à mão: a linha desvia um pouco do caminho reto. */
+function tracoTremido(ctx, pontos, semente = 0, desvio = 1.4) {
+  ctx.beginPath();
+  pontos.forEach(([x, y], i) => {
+    const jx = (ruidoFixo(semente + i * 7) - 0.5) * 2 * desvio;
+    const jy = (ruidoFixo(semente + i * 13 + 3) - 0.5) * 2 * desvio;
+    if (i === 0) ctx.moveTo(x + jx, y + jy);
+    else ctx.lineTo(x + jx, y + jy);
+  });
+  ctx.stroke();
+}
+
+function circuloTremido(ctx, cx, cy, raio, semente = 0, desvio = 1.2) {
+  const pontos = [];
+  for (let i = 0; i <= 18; i++) {
+    const a = (i / 18) * Math.PI * 2;
+    pontos.push([cx + Math.cos(a) * raio, cy + Math.sin(a) * raio]);
+  }
+  tracoTremido(ctx, pontos, semente, desvio);
+}
+
+function setaTremida(ctx, x0, y0, x1, y1, semente) {
+  tracoTremido(ctx, [[x0, y0], [x1, y1]], semente);
+  const ang = Math.atan2(y1 - y0, x1 - x0);
+  const p = 6;
+  tracoTremido(ctx, [
+    [x1 - Math.cos(ang - 0.5) * p, y1 - Math.sin(ang - 0.5) * p],
+    [x1, y1],
+    [x1 - Math.cos(ang + 0.5) * p, y1 - Math.sin(ang + 0.5) * p],
+  ], semente + 31);
+}
+
+/** Símbolo meio desenhado à mão de cada carta, centrado em (cx, cy). */
+function desenharSimboloTrunfo(ctx, id, cx, cy, tamanho) {
+  const u = tamanho / 2;            // meia altura útil do símbolo
+  const semente = id.length * 17;
+  ctx.save();
+  ctx.strokeStyle = COR_TRUNFO.tinta;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+  ctx.rotate((ruidoFixo(semente) - 0.5) * 0.06);
+
+  const numero = (n, raio = u * 0.82) => {
+    circuloTremido(ctx, cx, cy, raio, semente);
+    texto(ctx, String(n), cx, cy + raio * 0.42, raio * 1.15, COR_TRUNFO.tinta, 'center', true);
+  };
+  const cartinha = (dx = 0, dy = 0, escala = 1) => {
+    const l = u * 0.62 * escala;
+    const a = u * 0.86 * escala;
+    tracoTremido(ctx, [
+      [cx + dx - l / 2, cy + dy - a / 2], [cx + dx + l / 2, cy + dy - a / 2],
+      [cx + dx + l / 2, cy + dy + a / 2], [cx + dx - l / 2, cy + dy + a / 2],
+      [cx + dx - l / 2, cy + dy - a / 2],
+    ], semente + 5);
+  };
+
+  switch (id) {
+    case 'one_up':
+    case 'two_up': {
+      const n = id === 'one_up' ? 1 : 2;
+      setaTremida(ctx, cx, cy + u * 0.75, cx, cy - u * 0.55, semente);
+      texto(ctx, `+${n}`, cx + u * 0.55, cy - u * 0.05, u * 0.95, COR_TRUNFO.tinta, 'center', true);
+      break;
+    }
+    case 'remove':
+      cartinha(-u * 0.3, 0);
+      setaTremida(ctx, cx + u * 0.05, cy, cx + u * 0.85, cy, semente + 9);
+      break;
+    case 'return':
+      cartinha(u * 0.3, 0);
+      setaTremida(ctx, cx - u * 0.05, cy, cx - u * 0.85, cy, semente + 9);
+      break;
+    case 'shield':
+      tracoTremido(ctx, [
+        [cx - u * 0.7, cy - u * 0.7], [cx + u * 0.7, cy - u * 0.7],
+        [cx + u * 0.7, cy + u * 0.1], [cx, cy + u * 0.85],
+        [cx - u * 0.7, cy + u * 0.1], [cx - u * 0.7, cy - u * 0.7],
+      ], semente);
+      tracoTremido(ctx, [[cx, cy - u * 0.5], [cx, cy + u * 0.5]], semente + 4, 0.8);
+      break;
+    case 'destroy':
+      cartinha(0, 0);
+      ctx.strokeStyle = '#c05040';
+      tracoTremido(ctx, [[cx - u * 0.55, cy - u * 0.7], [cx + u * 0.55, cy + u * 0.7]], semente + 2, 2);
+      tracoTremido(ctx, [[cx + u * 0.55, cy - u * 0.7], [cx - u * 0.55, cy + u * 0.7]], semente + 6, 2);
+      break;
+    case 'perfect_draw': {
+      cartinha(0, u * 0.1, 0.9);
+      const pontas = [];
+      for (let i = 0; i < 10; i++) {
+        const a = -Math.PI / 2 + (i / 10) * Math.PI * 2;
+        const r = i % 2 === 0 ? u * 0.5 : u * 0.22;
+        pontas.push([cx + Math.cos(a) * r, cy + u * 0.1 + Math.sin(a) * r]);
+      }
+      pontas.push(pontas[0]);
+      tracoTremido(ctx, pontas, semente + 11, 0.7);
+      break;
+    }
+    case 'go_for_17': numero(17, u * 0.9); circuloTremido(ctx, cx, cy, u * 1.02, semente + 3); break;
+    case 'go_for_24': numero(24, u * 0.9); circuloTremido(ctx, cx, cy, u * 1.02, semente + 3); break;
+    case 'go_for_27': numero(27, u * 0.9); circuloTremido(ctx, cx, cy, u * 1.02, semente + 3); break;
+    default: {
+      const valor = /^card_(\d+)$/.exec(id)?.[1];
+      if (valor) numero(valor);
+      else texto(ctx, '?', cx, cy + u * 0.4, u, COR_TRUNFO.tinta, 'center', true);
+    }
+  }
+  ctx.restore();
+}
+
+/**
+ * Carta trunfo: fundo escuro, moldura trêmula e o símbolo à mão.
+ * `carta` = { id, nome }. `opcoes.destacada` levanta a carta (mouse em cima).
+ */
+function desenharCartaTrunfo(ctx, carta, x, y, largura, altura, opcoes = {}) {
+  const { destacada = false, escala = 1, comNome = true } = opcoes;
+  ctx.save();
+  ctx.translate(x + largura / 2, y + altura / 2);
+  ctx.scale(escala, escala);
+  ctx.translate(-largura / 2, -altura / 2);
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.7)';
+  ctx.shadowBlur = destacada ? 20 : 12;
+  ctx.shadowOffsetY = destacada ? 4 : 6;
+  retanguloArredondado(ctx, 0, 0, largura, altura, 6);
+  const fundo = ctx.createLinearGradient(0, 0, 0, altura);
+  fundo.addColorStop(0, COR_TRUNFO.fundoClaro);
+  fundo.addColorStop(1, COR_TRUNFO.fundo);
+  ctx.fillStyle = fundo;
+  ctx.fill();
+  ctx.restore();
+
+  retanguloArredondado(ctx, 0, 0, largura, altura, 6);
+  ctx.strokeStyle = destacada ? COR_TRUNFO.bordaViva : COR_TRUNFO.borda;
+  ctx.lineWidth = destacada ? 2 : 1.5;
+  ctx.stroke();
+
+  // Moldura interna trêmula, como riscada à mão.
+  ctx.strokeStyle = destacada ? 'rgba(201, 160, 106, 0.8)' : 'rgba(150, 110, 80, 0.55)';
+  ctx.lineWidth = 1;
+  const m = 5;
+  tracoTremido(ctx, [
+    [m, m], [largura - m, m], [largura - m, altura - m], [m, altura - m], [m, m],
+  ], carta.id.length * 3, 1.1);
+
+  const alturaSimbolo = comNome ? altura * 0.52 : altura * 0.62;
+  desenharSimboloTrunfo(ctx, carta.id, largura / 2, alturaSimbolo * 0.92 + 6, alturaSimbolo * 0.7);
+
+  if (comNome) {
+    const nome = carta.nome.toUpperCase();
+    const tamanho = nome.length > 9 ? 8 : 9;
+    texto(ctx, nome, largura / 2, altura - 10, tamanho, COR_TRUNFO.tintaFraca);
+  }
+  ctx.restore();
+}
+
+/** Caixa com o nome e o texto em português da carta sob o cursor. */
+function desenharDica(ctx, dica) {
+  const largura = 300;
+  const margem = 12;
+  ctx.font = `12px ${FONTE}`;
+
+  const linhas = [];
+  let atual = '';
+  for (const palavra of dica.texto.split(' ')) {
+    const tentativa = atual ? `${atual} ${palavra}` : palavra;
+    if (ctx.measureText(tentativa).width <= largura - margem * 2 || !atual) atual = tentativa;
+    else { linhas.push(atual); atual = palavra; }
+  }
+  if (atual) linhas.push(atual);
+
+  const altura = margem * 2 + 18 + linhas.length * 16;
+  const x = Math.max(12, Math.min(LARGURA - largura - 12, dica.x - largura / 2));
+  const y = Math.max(12, dica.y - altura - 14);
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.8)';
+  ctx.shadowBlur = 18;
+  retanguloArredondado(ctx, x, y, largura, altura, 6);
+  ctx.fillStyle = 'rgba(14, 10, 9, 0.96)';
+  ctx.fill();
+  ctx.restore();
+  retanguloArredondado(ctx, x, y, largura, altura, 6);
+  ctx.strokeStyle = COR_TRUNFO.borda;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  texto(ctx, dica.titulo.toUpperCase(), x + margem, y + margem + 12, 13, COR_TRUNFO.bordaViva, 'left', true);
+  linhas.forEach((linha, i) => {
+    texto(ctx, linha, x + margem, y + margem + 32 + i * 16, 12, COR.texto, 'left');
+  });
   ctx.restore();
 }
 
@@ -420,6 +1102,10 @@ function desenharBaralho(ctx, restantes) {
  *   rodada, alvo, seed, rapido
  * }
  */
+/** Nome de quem fala na TV; preenchido pelo main.js a partir do config. */
+export let NOME_ANFITRIAO = 'Kaio';
+export function definirNomeDoAnfitriao(nome) { NOME_ANFITRIAO = nome; }
+
 export function criarRenderizador(canvas, opcoes = {}) {
   canvas.width = LARGURA;
   canvas.height = ALTURA;
@@ -444,15 +1130,28 @@ export function criarRenderizador(canvas, opcoes = {}) {
 
     cenario.desenharParede(ctx, lampada, POSICOES.pivoLampada.x);
     desenharConeDeLuz(ctx, lampada);
-    cenario.desenharFundoDaSala(ctx, agora, lampada, POSICOES.luizCentroX);
+    cenario.desenharFundoDaSala(ctx, agora, lampada, POSICOES.luizCentroX, mesa.tvForte);
     desenharOponente(ctx, mesa, agora);
     desenharLuminaria(ctx, lampada);
     cenario.desenharTampo(ctx);
     desenharPocaDeLuz(ctx, lampada);
+    // --- Aparelho do nível, na parte do oponente ---
+    const primeiroNome = (n) => n.split(' ')[0];
+    const apAdv = aparelhoDoOponente();
+    if (mesa.nivel === 1) desenharColunas(ctx, apAdv);
+    if (mesa.nivel === 3) desenharTrilho(ctx, primeiroNome(mesa.eu.nome), primeiroNome(mesa.adv.nome));
     desenharBracosDoOponente(ctx, mesa, agora);
+    if (mesa.nivel === 1) {
+      const { progresso, fase } = progressoDaLamina(mesa, 'adv');
+      desenharLamina(ctx, apAdv, progresso, fase);
+    }
+    if (mesa.nivel === 2) {
+      desenharTaser(ctx, mesa, 'adv', agora);
+      desenharMedidor(ctx, 'adv', mesa.adv.medidor, primeiroNome(mesa.adv.nome));
+    }
 
     desenharBaralho(ctx, mesa.baralhoRestante);
-    cenario.desenharPlaca(ctx, mesa.alvo, mesa.rodada);
+    cenario.desenharPlaca(ctx, mesa.alvo, mesa.rodada, mesa.trocaDeAlvo);
 
     // --- Lado do oponente ---
     for (const c of mesa.adv.cartas) desenharCarta(ctx, c);
@@ -465,12 +1164,17 @@ export function criarRenderizador(canvas, opcoes = {}) {
       y: origem.y + TAMANHO_LUIZ.altura * ESCALA_LUIZ,
     };
     texto(ctx, mesa.adv.nome.toUpperCase(), maoDir.x + 84, maoDir.y - 12, 14, COR.textoApagado, 'left');
-    texto(ctx, `${mesa.adv.dedos}/5 dedos`, maoDir.x + 84, maoDir.y + 8, 13, mesa.adv.dedos <= 2 ? COR.vermelho : COR.texto, 'left');
+    const estadoDele = mesa.nivel === 1 ? `${mesa.adv.dedos}/5 dedos`
+      : mesa.nivel === 2 ? `choque ${mesa.adv.medidor.toFixed(0)}/10`
+        : `serra a ${(15 - mesa.serraPos).toFixed(1).replace('.0', '')} dele`;
+    const aflito = mesa.nivel === 1 ? mesa.adv.dedos <= 2
+      : mesa.nivel === 2 ? mesa.adv.medidor >= 8 : (15 - mesa.serraPos) <= 3;
+    texto(ctx, estadoDele, maoDir.x + 84, maoDir.y + 8, 13, aflito ? COR.vermelho : COR.texto, 'left');
     cenario.desenharPlacar(ctx, 1020, 176, 74, 40, mesa.adv.aposta, { digitos: 2, rotulo: 'APOSTA DELE', agora });
 
     // --- Lado do jogador ---
     for (const c of mesa.eu.cartas) desenharCarta(ctx, c);
-    texto(ctx, mesa.eu.nome.toUpperCase(), 640, 568, 15, COR.textoApagado);
+    texto(ctx, mesa.eu.nome.toUpperCase(), 640, 552, 15, COR.textoApagado);
     cenario.desenharPlacar(ctx, 1010, 470, 112, 62, mesa.eu.aposta, {
       digitos: 2, rotulo: 'SUA APOSTA', destaque: mesa.eu.aposta >= 3, agora,
     });
@@ -478,18 +1182,98 @@ export function criarRenderizador(canvas, opcoes = {}) {
     const total = mesa.eu.cartas.reduce((s, c) => s + (c.valor ?? 0), 0);
     if (mesa.eu.cartas.length > 0) {
       const estourou = total > mesa.alvo;
-      texto(ctx, `TOTAL ${total}${estourou ? '   ·   ESTOUROU' : ''}`, 640, 606, 26, estourou ? COR.vermelho : COR.texto, 'center', true);
+      texto(ctx, `TOTAL ${total}${estourou ? '   ·   ESTOUROU' : ''}`, 640, 584, 26, estourou ? COR.vermelho : COR.texto, 'center', true);
     }
-    // A sua mão: presa, suando, tremendo mais a cada dedo perdido.
-    const tremor = tremorDaMao(agora, mesa.eu.dedos);
+    // A sua mão: presa no aparelho, saindo da borda de baixo, tremendo mais a cada dedo perdido.
+    const apEu = aparelhoDoJogador();
+    if (mesa.nivel === 1) desenharColunas(ctx, apEu);
+    // Quanto pior a situação, mais a mão treme (o tremor usa uma escala de 0 a 5).
+    const folgaDaMao = mesa.nivel === 1 ? mesa.eu.dedos
+      : mesa.nivel === 2 ? 5 - Math.round(mesa.eu.medidor / 2)
+        : Math.min(5, Math.round(mesa.serraPos / 1.5));
+    const tremor = tremorDaMao(agora, folgaDaMao);
     desenharMaoPixel(ctx, POSICOES.maoEu.x + tremor.x, POSICOES.maoEu.y + tremor.y, mesa.eu.dedos, { escala: ESCALA_MAO, estilo: 'humana' });
-    texto(ctx, mesa.eu.nome.split(' ')[0], POSICOES.maoEu.x + centroMao, POSICOES.maoEu.y + baseMao + 18, 13, COR.textoApagado);
-    texto(ctx, `${mesa.eu.dedos}/5 dedos`, POSICOES.maoEu.x + centroMao, POSICOES.maoEu.y + baseMao + 36, 13, mesa.eu.dedos <= 2 ? COR.vermelho : COR.texto);
-    // A aposta, escrita junto da mão que está em jogo (o placar vermelho repete o número).
-    texto(ctx, `aposta: ${mesa.eu.aposta} ${mesa.eu.aposta === 1 ? 'dedo' : 'dedos'}`, POSICOES.maoEu.x + centroMao, POSICOES.maoEu.y + baseMao + 54, 13, mesa.eu.aposta >= 3 ? COR.vermelho : COR.textoApagado);
+    if (mesa.nivel === 1) {
+      const { progresso, fase } = progressoDaLamina(mesa, 'eu');
+      desenharLamina(ctx, apEu, progresso, fase);
+    }
+    if (mesa.nivel === 2) {
+      desenharTaser(ctx, mesa, 'eu', agora);
+      desenharMedidor(ctx, 'eu', mesa.eu.medidor, primeiroNome(mesa.eu.nome));
+    }
+    if (mesa.nivel === 3) desenharSerra(ctx, mesa, agora);
 
-    // Guilhotina, por cima da mão punida.
-    if (mesa.guilhotina) desenharGuilhotina(ctx, mesa.guilhotina, agora);
+    // Rótulos à direita do aparelho.
+    const rotuloX = apEu.cx + apEu.abertura / 2 + apEu.coluna + 14;
+    texto(ctx, primeiroNome(mesa.eu.nome), rotuloX, 522, 13, COR.textoApagado, 'left');
+    if (mesa.nivel === 1) {
+      texto(ctx, `${mesa.eu.dedos}/5 dedos`, rotuloX, 540, 13, mesa.eu.dedos <= 2 ? COR.vermelho : COR.texto, 'left');
+    } else if (mesa.nivel === 2) {
+      texto(ctx, `choque ${mesa.eu.medidor.toFixed(0)}/10`, rotuloX, 540, 13, mesa.eu.medidor >= 8 ? COR.vermelho : COR.texto, 'left');
+    } else {
+      const ate = mesa.serraPos.toFixed(1).replace('.0', '');
+      texto(ctx, `serra a ${ate} de você`, rotuloX, 540, 13, mesa.serraPos <= 3 ? COR.vermelho : COR.texto, 'left');
+    }
+    const unidade = mesa.nivel === 1 ? (mesa.eu.aposta === 1 ? 'dedo' : 'dedos')
+      : mesa.nivel === 2 ? 'de choque' : 'marcas';
+    texto(ctx, `aposta: ${mesa.eu.aposta} ${unidade}`, rotuloX, 558, 13, mesa.eu.aposta >= 3 ? COR.vermelho : COR.textoApagado, 'left');
+
+    // Visor velho de pontos, ao lado da mão do jogador (2.1).
+    const visor = POSICOES.visorPontos;
+    cenario.desenharPlacar(ctx, visor.x, visor.y, visor.largura, visor.altura, mesa.pontos.total, {
+      digitos: 6, rotulo: 'PONTOS', agora,
+    });
+    if (mesa.pontos.multiplicador > 1) {
+      texto(ctx, `sequência ×${String(mesa.pontos.multiplicador).replace('.', ',')}`, visor.x + visor.largura / 2, visor.y + visor.altura + 30, 12, COR.vermelho);
+    }
+
+    // Visor menor com o recorde da sessão; pisca quando é batido (2.6).
+    const visorRecorde = POSICOES.visorRecorde;
+    cenario.desenharPlacar(ctx, visorRecorde.x, visorRecorde.y, visorRecorde.largura, visorRecorde.altura, mesa.recorde.valor, {
+      digitos: 5, rotulo: 'RECORDE', destaque: mesa.recorde.piscando, agora,
+    });
+    if (mesa.recorde.piscando) {
+      texto(ctx, 'NOVO RECORDE', visorRecorde.x + visorRecorde.largura / 2, visorRecorde.y + visorRecorde.altura + 30, 12, COR.vermelho, 'center', true);
+    }
+
+    // --- Cartas trunfo já jogadas, na mesa, do lado de quem jogou ---
+    for (const lado of ['adv', 'eu']) {
+      const jogadas = mesa[lado].trunfosNaMesa;
+      // A última fica escondida enquanto a carta ainda está voando para a mesa.
+      const visiveis = mesa.trunfoEmVoo?.lado === lado ? jogadas.slice(0, -1) : jogadas;
+      visiveis.forEach((carta, i) => {
+        const p = posicaoTrunfoNaMesa(lado, i);
+        desenharCartaTrunfo(ctx, carta, p.x, p.y, p.largura, p.altura, {
+          comNome: false,
+          destacada: mesa.dica?.origem === `mesa-${lado}-${i}`,
+        });
+      });
+      if (visiveis.length > 0) {
+        const p = posicaoTrunfoNaMesa(lado, 0);
+        texto(ctx, lado === 'eu' ? 'suas cartas na mesa' : 'cartas dele na mesa',
+          p.x, p.y - 8, 11, COR.textoApagado, 'left');
+      }
+    }
+
+    // --- Mão de trunfos do jogador, embaixo ---
+    mesa.eu.trunfosNaMao.forEach((carta, i) => {
+      const p = posicaoTrunfoNaMao(i, mesa.eu.trunfosNaMao.length);
+      const destacada = mesa.dica?.origem === `mao-${i}`;
+      desenharCartaTrunfo(ctx, carta, p.x, p.y - (destacada ? 10 : 0), p.largura, p.altura, { destacada });
+    });
+    if (mesa.eu.trunfosNaMao.length > 0) {
+      const p = posicaoTrunfoNaMao(0, mesa.eu.trunfosNaMao.length);
+      texto(ctx, mesa.podeJogarTrunfo ? 'clique para jogar' : 'aguarde sua vez',
+        POSICOES.maoTrunfos.centroX, p.y - 12, 11, COR.textoApagado);
+    }
+
+    // Trunfo voando da mão para a mesa.
+    if (mesa.trunfoEmVoo) {
+      const v = mesa.trunfoEmVoo;
+      desenharCartaTrunfo(ctx, v.carta, v.x, v.y, TRUNFO.largura, TRUNFO.altura, {
+        escala: v.escala, comNome: false,
+      });
+    }
 
     // Carta em movimento, por cima de tudo.
     if (mesa.emVoo) desenharCarta(ctx, mesa.emVoo);
@@ -501,15 +1285,18 @@ export function criarRenderizador(canvas, opcoes = {}) {
     }
 
     // --- Mensagem central ---
+    // Cabe entre a placa "21" (x≈400) e o baralho (x≈1080): até duas linhas.
     let mensagem = mesa.mensagem;
     if (mesa.pensando) mensagem += '.'.repeat(1 + (Math.floor(agora / 400) % 3));
-    texto(ctx, mensagem, 640, 385, 18, mesa.mensagemVermelha ? COR.vermelho : COR.texto);
+    textoAjustado(ctx, mensagem, 640, 385, 18, mesa.mensagemVermelha ? COR.vermelho : COR.texto, 640);
 
     desenharVinheta(ctx);
 
-    // Flash vermelho do impacto.
+    // Flash do impacto: vermelho na guilhotina, branco azulado no choque.
     if (mesa.flash > 0) {
-      ctx.fillStyle = `rgba(150, 20, 15, ${0.55 * mesa.flash})`;
+      ctx.fillStyle = mesa.flashBranco
+        ? `rgba(225, 240, 255, ${0.72 * mesa.flash})`
+        : `rgba(150, 20, 15, ${0.55 * mesa.flash})`;
       ctx.fillRect(-40, -40, LARGURA + 80, ALTURA + 80);
     }
 
@@ -520,16 +1307,31 @@ export function criarRenderizador(canvas, opcoes = {}) {
       ctx.fillStyle = `rgba(0, 0, 0, ${mesa.telaPreta})`;
       ctx.fillRect(0, 0, LARGURA, ALTURA);
       if (mesa.textoFinal) {
-        texto(ctx, mesa.textoFinal, LARGURA / 2, ALTURA / 2 - 10, 28, COR.texto);
-        texto(ctx, `rodada ${mesa.rodada}   ·   ${mesa.eu.nome.split(' ')[0]} ${mesa.eu.dedos}/5   ·   ${mesa.adv.nome.split(' ')[0]} ${mesa.adv.dedos}/5`,
+        textoAjustado(ctx, mesa.textoFinal, LARGURA / 2, ALTURA / 2 - 10, 28, COR.texto, 1000);
+        texto(ctx, `rodada ${mesa.rodada}   ·   ${mesa.eu.nome.split(' ')[0]} ${mesa.eu.dedos}/5   ·   ${mesa.adv.nome.split(' ')[0]} ${mesa.adv.dedos}/5   ·   ${mesa.pontos.total} pontos`,
           LARGURA / 2, ALTURA / 2 + 26, 13, COR.textoApagado);
       }
     }
 
+    // A TV continua acesa mesmo com a sala escurecida, quando o anfitrião fala.
+    cenario.desenharTvAcesa(ctx, agora, mesa.tvForte);
+
+    // Fala do Kaio na troca de nível: legenda em cima da tela escurecida.
+    if (mesa.kaio) {
+      const painel = 96;
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.fillRect(0, ALTURA - painel - 40, LARGURA, painel);
+      texto(ctx, `${NOME_ANFITRIAO} · na televisão`, LARGURA / 2, ALTURA - painel - 16, 12, COR.textoApagado);
+      textoAjustado(ctx, mesa.kaio, LARGURA / 2, ALTURA - painel + 26, 20, COR.texto, 940, 2);
+    }
+
+    // Dica da carta sob o cursor, acima de tudo menos os efeitos.
+    if (mesa.dica) desenharDica(ctx, mesa.dica);
+
     // Pós-processamento: granulado, linhas de varredura e vinheta, mais fortes
     // quando a tela escurece ou o jogador está perto de perder tudo.
-    const perigo = (5 - mesa.eu.dedos) / 5;
-    efeitos.aplicar(ctx, agora, Math.max(mesa.escurecimento, perigo * 0.6));
+    const perigoNaTela = (5 - folgaDaMao) / 5;
+    efeitos.aplicar(ctx, agora, Math.max(mesa.escurecimento, perigoNaTela * 0.6));
 
     const rodape = `seed ${mesa.seed ?? '?'}${mesa.rapido ? '   ·   rápido' : ''}${efeitos.ativos ? '' : '   ·   sem efeitos'}`;
     texto(ctx, rodape, 16, ALTURA - 14, 12, 'rgba(120, 112, 105, 0.7)', 'left');

@@ -1,0 +1,32 @@
+Sub-passo: 2.6
+Roteiro: Recorde da sessão: duas partidas, a segunda batendo o recorde (seed 21)
+Data: 2026-09-23T15:45:25.015Z
+Duração: 150.3 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 5
+  - 01-visores-zerados.png
+  - 02-fim-da-partida-1.png
+  - 03-partida-2-comecando.png
+  - 04-visor-piscando.png
+  - 05-visor-piscando-outro-instante.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 2.6 — Recorde da sessão: duas partidas, a segunda batendo o recorde (seed 21)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-2\2.6
+Servidor: http://127.0.0.1:51103
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=21
+nota   começo: pontos 0, recorde 0
+print  01-visores-zerados.png
+nota   partida 1 (comprando abaixo de 11): 125 pontos, recorde 125
+print  02-fim-da-partida-1.png
+nota   partida 2 começa: pontos 0, recorde 125
+print  03-partida-2-comecando.png
+nota   recorde batido: 125 -> 313, visor piscando
+print  04-visor-piscando.png
+print  05-visor-piscando-outro-instante.png
+vídeo  video.mp4 (convertido com ffmpeg)

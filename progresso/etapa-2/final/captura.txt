@@ -1,0 +1,41 @@
+Sub-passo: 2.final
+Roteiro: Partida inteira pelos três níveis (seed 21, rápido, trocas em velocidade normal)
+Data: 2026-09-23T15:56:15.823Z
+Duração: 51.9 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 9
+  - 01-mesa-nivel-1.png
+  - 02-punicao-nivel-1.png
+  - 03-troca-para-nivel-2.png
+  - 04-mesa-nivel-2.png
+  - 05-punicao-nivel-2.png
+  - 06-troca-para-nivel-3.png
+  - 07-mesa-nivel-3.png
+  - 08-punicao-nivel-3.png
+  - 09-tela-final.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 2.final — Partida inteira pelos três níveis (seed 21, rápido, trocas em velocidade normal)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-2\final
+Servidor: http://127.0.0.1:55240
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=21&rapido=1
+print  01-mesa-nivel-1.png
+nota   nível 1: pontos 0, recorde 0
+print  02-punicao-nivel-1.png
+print  03-troca-para-nivel-2.png
+print  04-mesa-nivel-2.png
+nota   nível 2: pontos 313, recorde 313
+print  05-punicao-nivel-2.png
+print  06-troca-para-nivel-3.png
+print  07-mesa-nivel-3.png
+nota   nível 3: pontos 963, recorde 963
+print  08-punicao-nivel-3.png
+print  09-tela-final.png
+nota   fim: nível 3, 963 pontos, recorde 963
+nota   trocas de nível vistas: 2
+vídeo  video.mp4 (convertido com ffmpeg)

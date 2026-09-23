@@ -24,10 +24,22 @@ export function lerParametros(search = '') {
   const rapido = parametros.get('rapido') === '1';
   const efeitos = parametros.get('efeitos') !== '0'; // ?efeitos=0 desliga granulado/scanlines
 
+  // ?trunfos=two_up,shield,go_for_24 -> mão inicial fixa (para testes e captura).
+  const trunfosTexto = parametros.get('trunfos');
+  const trunfos = trunfosTexto
+    ? trunfosTexto.split(',').map((t) => t.trim()).filter((t) => /^[a-z0-9_]+$/.test(t))
+    : null;
+
+  // ?nivel=2 começa direto no aparelho de choque; ?nivel=3 na serra.
+  const nivelTexto = parametros.get('nivel');
+  const nivel = /^[123]$/.test(nivelTexto ?? '') ? Number(nivelTexto) : null;
+
   return {
     seed,
     rapido,
     efeitos,
+    nivel,
+    trunfos: trunfos && trunfos.length > 0 ? trunfos : null,
     fatorTempo: rapido ? FATOR_TEMPO_RAPIDO : FATOR_TEMPO_NORMAL,
   };
 }

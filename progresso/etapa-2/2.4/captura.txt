@@ -1,0 +1,39 @@
+Sub-passo: 2.4
+Roteiro: Níveis 2 (choque) e 3 (serra), uma punição em cada e a troca de nível com o Kaio
+Data: 2026-09-23T15:26:51.241Z
+Duração: 133.4 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 7
+  - 01-nivel-2-choque.png
+  - 02-nivel-2-punicao.png
+  - 03-nivel-3-serra.png
+  - 04-nivel-3-punicao.png
+  - 05-nivel-1-guilhotina.png
+  - 06-kaio-falando.png
+  - 07-mesa-do-nivel-2.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 2.4 — Níveis 2 (choque) e 3 (serra), uma punição em cada e a troca de nível com o Kaio
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-2\2.4
+Servidor: http://127.0.0.1:65261
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=21&nivel=2
+nota   nível 2: medidores em 0 e 0
+print  01-nivel-2-choque.png
+print  02-nivel-2-punicao.png
+nota   depois do choque: medidores em 1 e 0
+abrir /index.html?seed=21&nivel=3
+nota   nível 3: serra na marca 7 de 15
+print  03-nivel-3-serra.png
+print  04-nivel-3-punicao.png
+nota   depois da rodada: serra 7 -> 6
+abrir /index.html?seed=21
+print  05-nivel-1-guilhotina.png
+print  06-kaio-falando.png
+nota   depois da troca: nível 2, medidores zerados em 0/0
+print  07-mesa-do-nivel-2.png
+vídeo  video.mp4 (convertido com ffmpeg)

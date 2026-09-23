@@ -10,16 +10,19 @@
 //  para os roteiros de captura usarem.
 // =====================================================================
 
-import { criarJogo, iniciarRodada, hit, stay, FASE, LADO } from '../src/engine/game.js';
+import { criarJogo, iniciarRodada, hit, stay, avancarNivel, FASE, LADO } from '../src/engine/game.js';
 import { decidirAcao, ACAO } from '../src/engine/ai.js';
 
 const quantidade = Number(process.argv[2] ?? 500);
 const seedInicial = Number(process.argv[3] ?? 1);
 
-function simular(seed) {
-  const jogo = criarJogo({ seed });
+function simular(seed, nivelInicial = 1) {
+  const jogo = criarJogo({ seed, nivel: nivelInicial });
   let acoes = 0;
+  const rodadasPorNivel = {};
   while (jogo.fase !== FASE.FIM_DE_JOGO) {
+    if (jogo.fase === FASE.NIVEL_CONCLUIDO) { avancarNivel(jogo); continue; }
+    rodadasPorNivel[jogo.nivel] = (rodadasPorNivel[jogo.nivel] ?? 0) + 1;
     iniciarRodada(jogo);
     while (jogo.fase === FASE.JOGANDO) {
       const lado = jogo.turno;
@@ -32,13 +35,16 @@ function simular(seed) {
     seed,
     vencedor: jogo.vencedorDoJogo,
     rodadas: jogo.rodada,
+    nivelFinal: jogo.nivel,
+    rodadasPorNivel,
     dedos: { jogador: jogo.jogadores[LADO.JOGADOR].dedos, oponente: jogo.jogadores[LADO.OPONENTE].dedos },
     acoes,
   };
 }
 
+const nivelInicial = Number(process.argv[4] ?? 1);
 const resultados = [];
-for (let s = seedInicial; s < seedInicial + quantidade; s++) resultados.push(simular(s));
+for (let s = seedInicial; s < seedInicial + quantidade; s++) resultados.push(simular(s, nivelInicial));
 
 const porDesfecho = { jogador: [], oponente: [], ninguem: [] };
 for (const r of resultados) porDesfecho[r.vencedor].push(r);
@@ -50,10 +56,11 @@ for (const [desfecho, lista] of Object.entries(porDesfecho)) {
 }
 
 const maisCurtas = (lista) => [...lista].sort((a, b) => a.rodadas - b.rodadas || a.acoes - b.acoes).slice(0, 5);
+const linha = (r) => `  seed ${r.seed}: ${r.rodadas} rodadas (${JSON.stringify(r.rodadasPorNivel)}), até o nível ${r.nivelFinal}`;
 console.log('\nPartidas mais curtas em que João Gabriel VENCE:');
-for (const r of maisCurtas(porDesfecho.jogador)) console.log(`  seed ${r.seed}: ${r.rodadas} rodadas, ${r.acoes} ações, dedos ${r.dedos.jogador}x${r.dedos.oponente}`);
+for (const r of maisCurtas(porDesfecho.jogador)) console.log(linha(r));
 console.log('Partidas mais curtas em que João Gabriel PERDE:');
-for (const r of maisCurtas(porDesfecho.oponente)) console.log(`  seed ${r.seed}: ${r.rodadas} rodadas, ${r.acoes} ações, dedos ${r.dedos.jogador}x${r.dedos.oponente}`);
+for (const r of maisCurtas(porDesfecho.oponente)) console.log(linha(r));
 if (porDesfecho.ninguem.length) {
   console.log('Partidas em que os dois zeram:');
   for (const r of maisCurtas(porDesfecho.ninguem)) console.log(`  seed ${r.seed}: ${r.rodadas} rodadas`);

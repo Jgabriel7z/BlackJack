@@ -4,7 +4,23 @@ import { teste, assertIgual } from './testador.js';
 import { lerParametros, FATOR_TEMPO_NORMAL, FATOR_TEMPO_RAPIDO } from '../src/ui/parametros.js';
 
 teste('parâmetros: sem nada na URL, seed null, ritmo normal e efeitos ligados', () => {
-  assertIgual(lerParametros(''), { seed: null, rapido: false, efeitos: true, fatorTempo: FATOR_TEMPO_NORMAL });
+  assertIgual(lerParametros(''), {
+    seed: null, rapido: false, efeitos: true, nivel: null, trunfos: null, fatorTempo: FATOR_TEMPO_NORMAL,
+  });
+});
+
+teste('parâmetros: ?nivel=2 e ?nivel=3 escolhem o aparelho; valor inválido é ignorado', () => {
+  assertIgual(lerParametros('?nivel=2').nivel, 2);
+  assertIgual(lerParametros('?nivel=3').nivel, 3);
+  assertIgual(lerParametros('?nivel=9').nivel, null);
+  assertIgual(lerParametros('?nivel=abc').nivel, null);
+});
+
+teste('parâmetros: ?trunfos=... vira a mão inicial, ignorando lixo', () => {
+  assertIgual(lerParametros('?trunfos=two_up,shield,go_for_24').trunfos, ['two_up', 'shield', 'go_for_24']);
+  assertIgual(lerParametros('?trunfos= two_up , shield ').trunfos, ['two_up', 'shield']);
+  assertIgual(lerParametros('?trunfos=<script>').trunfos, null, 'id inválido é descartado');
+  assertIgual(lerParametros('?trunfos=').trunfos, null);
 });
 
 teste('parâmetros: ?efeitos=0 desliga o pós-processamento', () => {

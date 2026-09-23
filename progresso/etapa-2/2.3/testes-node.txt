@@ -1,0 +1,109 @@
+  ok   rng: mesma seed gera a mesma sequência
+  ok   rng: seeds diferentes geram sequências diferentes
+  ok   rng: valores ficam em [0, 1) e a seed fica guardada
+  ok   rng: seed inválida lança erro; seedAleatoria devolve inteiro de 32 bits
+  ok   baralho novo tem 11 cartas únicas de 1 a 11
+  ok   embaralhar não perde nem repete cartas e não altera o original
+  ok   embaralhar com função aleatória fixa é previsível
+  ok   mesma seed dá o mesmo baralho; seed diferente dá baralho diferente
+  ok   embaralhar sem gerador ainda funciona (seed sorteada)
+  ok   comprar tira a carta do topo e falha com baralho vazio
+  ok   somarMao soma oculta + abertas
+  ok   estourou só acima do alvo
+  ok   vencedor: nenhum estourou, maior total vence
+  ok   vencedor: um estourou, o outro vence
+  ok   vencedor: os dois estouraram, menor total vence
+  ok   vencedor: totais iguais é empate (abaixo e acima do alvo)
+  ok   vencedor respeita alvo diferente de 21
+  ok   jogo novo começa aguardando, com 5 dedos cada e nomes vindos do config
+  ok   jogo sem seed sorteia uma e guarda em jogo.seed
+  ok   mesma seed reproduz a mesma partida inteira
+  ok   iniciarRodada dá 1 oculta + 1 aberta para cada e deixa 7 no baralho
+  ok   aposta começa em 1 e sobe 1 por rodada para os dois
+  ok   não dá para iniciar rodada com outra em andamento
+  ok   hit compra uma carta aberta, zera stays e passa a vez
+  ok   agir fora do turno lança erro
+  ok   agir sem rodada em andamento lança erro
+  ok   um stay só passa a vez; hit no meio zera a contagem
+  ok   dois stays seguidos resolvem a rodada
+  ok   com baralho vazio não dá para comprar, só passar
+  ok   vitória normal: perdedor perde dedos = aposta, vencedor conta rodada
+  ok   estouro: quem passa de 21 perde
+  ok   duplo estouro: menor total vence
+  ok   empate: os dois perdem dedos
+  ok   resumo da rodada expõe as cartas ocultas dos dois
+  ok   dedos nunca ficam negativos
+  ok   partida termina quando alguém perde todos os dedos
+  ok   empate final: os dois zerados, ninguém vence
+  ok   verMesa esconde a oculta do adversário durante a rodada
+  ok   verMesa revela tudo depois da rodada resolvida
+  ok   verMesa não altera o estado
+  ok   IA: limite de compra é 17
+  ok   IA: com 16 compra
+  ok   IA: com 17 para
+  ok   IA: com mais de 17 (inclusive estourado) para
+  ok   IA: com baralho vazio para, mesmo com total baixo
+  ok   IA: decidir não altera o estado
+  ok   IA: funciona para qualquer lado (também decide pelo jogador)
+  ok   IA contra IA: 200 partidas com seeds diferentes terminam sem erro nem travar
+  ok   IA contra IA: mesma seed dá a mesma partida
+  ok   parâmetros: sem nada na URL, seed null, ritmo normal e efeitos ligados
+  ok   parâmetros: ?trunfos=... vira a mão inicial, ignorando lixo
+  ok   parâmetros: ?efeitos=0 desliga o pós-processamento
+  ok   parâmetros: ?seed=123 vira número
+  ok   parâmetros: seed inválida é ignorada
+  ok   parâmetros: ?rapido=1 encurta o tempo; outro valor não
+  ok   sequenciador: começa ocioso e roda um passo até o fim
+  ok   sequenciador: chama aoIniciar e aoTerminar uma vez cada, na ordem
+  ok   sequenciador: fatorTempo encurta a duração (?rapido=1)
+  ok   sequenciador: aoTerminar pode enfileirar o próximo passo (reação da IA)
+  ok   sequenciador: duração zero termina no mesmo quadro
+  ok   suavização e utilidades: extremos e limites
+  ok   pontuação: começa zerada
+  ok   pontuação: rodada vencida simples vale 100
+  ok   pontuação: +50 ao fechar exatamente no alvo
+  ok   pontuação: alvo diferente de 21 (cartas Go For) conta o alvo informado
+  ok   pontuação: +25 ao vencer com o oponente estourado
+  ok   pontuação: +10 por trunfo usado (parâmetro já previsto)
+  ok   multiplicador: 1x, 1,5x e 2x pela sequência de vitórias
+  ok   pontuação: duas vitórias seguidas aplicam ×1,5 na segunda
+  ok   pontuação: terceira vitória seguida dobra, com bônus dentro do multiplicador
+  ok   pontuação: derrota e empate não pontuam e zeram a sequência
+  ok   pontuação: +500 por nível concluído, fora do multiplicador
+  ok   pontuação: histórico guarda um registro por rodada com o total acumulado
+  ok   trunfos: catálogo traz as 16 cartas desta etapa, e só elas
+  ok   trunfos: catálogo recusa carta com efeito não suportado nesta etapa
+  ok   trunfos: o motor não carrega o JSON sozinho (sem catálogo, sem trunfos)
+  ok   One-Up: +1 na aposta do oponente e compra 1 trunfo
+  ok   Two-Up: +2 na aposta do oponente e compra 1 trunfo
+  ok   Two-Up: só vale enquanto está na mesa; Destroy devolve a aposta
+  ok   2 Card: compra a carta 2 se ela ainda está no baralho
+  ok   3 Card: compra a carta 3 se ela ainda está no baralho
+  ok   4 Card: compra a carta 4 se ela ainda está no baralho
+  ok   5 Card: compra a carta 5 se ela ainda está no baralho
+  ok   6 Card: compra a carta 6 se ela ainda está no baralho
+  ok   7 Card: compra a carta 7 se ela ainda está no baralho
+  ok   5 Card: não faz nada se o 5 já saiu do baralho
+  ok   Remove: devolve ao baralho a última carta aberta do oponente
+  ok   Return: devolve ao baralho a última carta aberta de quem jogou
+  ok   Shield: reduz a própria aposta em 1 enquanto está na mesa
+  ok   Shield: a aposta nunca fica negativa
+  ok   Shield: com a aposta zerada, perder a rodada não tira dedo
+  ok   Destroy: remove a última carta trunfo que o oponente pôs na mesa
+  ok   Destroy: sem trunfos do oponente na mesa, não faz nada
+  ok   Perfect Draw: compra a carta que chega mais perto do alvo sem passar
+  ok   Perfect Draw: se todas estouram, pega a menor carta
+  ok   melhorCartaDoBaralho: casos diretos
+  ok   Go for 17: muda o alvo da rodada para 17
+  ok   Go for 24 substitui o Go for 17 que já estava na mesa
+  ok   Go for 27: vira o alvo e substitui a Go For anterior
+  ok   Go For: o alvo novo vale na hora de decidir a rodada
+  ok   trunfos: cada lado recebe os iniciais no começo da rodada
+  ok   trunfos: a mesa é limpa entre rodadas, a mão não
+  ok   trunfos: a mão não passa do máximo do config
+  ok   trunfos: comprar carta dá trunfo com a chance do config
+  ok   trunfos: não dá para jogar carta que não está na mão nem fora do turno
+  ok   trunfos: usar carta conta nas estatísticas (para a pontuação)
+  ok   verMesa: mostra a mesa do adversário, mas esconde a mão de trunfos dele
+
+107/107 testes passaram.

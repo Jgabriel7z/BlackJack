@@ -74,7 +74,7 @@ export function criarEfeitos(opcoes = {}) {
       const dy = Math.floor(ruidoFixo(quadro + 17) * TAMANHO_LADRILHO);
       ctx.save();
       ctx.globalCompositeOperation = 'overlay';
-      ctx.globalAlpha = 0.16 + 0.18 * intensidade;
+      ctx.globalAlpha = 0.11 + 0.14 * intensidade;
       for (let y = -dy; y < ALTURA; y += TAMANHO_LADRILHO) {
         for (let x = -dx; x < LARGURA; x += TAMANHO_LADRILHO) {
           ctx.drawImage(ladrilho, x, y);
@@ -90,10 +90,10 @@ export function criarEfeitos(opcoes = {}) {
       ctx.fillRect(0, 0, LARGURA, ALTURA);
       ctx.restore();
 
-      // Vinheta pesada.
-      const v = ctx.createRadialGradient(LARGURA / 2, ALTURA / 2, 300, LARGURA / 2, ALTURA / 2, 900);
+      // Vinheta: fecha os cantos, mas sem apagar os rótulos das bordas.
+      const v = ctx.createRadialGradient(LARGURA / 2, ALTURA / 2, 340, LARGURA / 2, ALTURA / 2, 940);
       v.addColorStop(0, 'rgba(0,0,0,0)');
-      v.addColorStop(1, 'rgba(0,0,0,0.75)');
+      v.addColorStop(1, 'rgba(0,0,0,0.58)');
       ctx.fillStyle = v;
       ctx.fillRect(0, 0, LARGURA, ALTURA);
     },

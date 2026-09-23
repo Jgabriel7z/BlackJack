@@ -41,34 +41,20 @@ import {
 //  Paletas
 // ---------------------------------------------------------------------
 
+// Legenda do sprite da mão: a..g pele (7 tons), k hematoma, r arranhão, n unha,
+// v veia, m/M/H metal da algema, c pano da manga, 0 contorno.
 export const PALETAS_MAO = {
   humana: {
     0: '#15111a',
-    a: '#4a3238',
-    b: '#6a4a4e',
-    c: '#8a6660',
-    d: '#a88478',
-    e: '#c4a08e',
-    g: '#6d6a52',
-    r: '#7a3540',
-    n: '#3a3a33',
-    m: '#23242a',
-    M: '#474a54',
-    H: '#7e828f',
+    a: '#3a252b', b: '#553439', c: '#704a4a', d: '#8a6058', e: '#a37866', f: '#bd9178', g: '#d4ab8e',
+    k: '#5d5f48', r: '#7a3540', n: '#3a3a33', v: '#6a4a72',
+    m: '#23242a', M: '#474a54', H: '#8b8f9c',
   },
   palida: {
     0: '#15111a',
-    a: '#3c3444',
-    b: '#574a5c',
-    c: '#75657a',
-    d: '#8f8290',
-    e: '#a89ca4',
-    g: '#5e6b5a',
-    r: '#5c3a4a',
-    n: '#3a4038',
-    m: '#23242a',
-    M: '#474a54',
-    H: '#7e828f',
+    a: '#2e2a34', b: '#443d4c', c: '#5b5464', d: '#736c7a', e: '#8a848e', f: '#a09aa2', g: '#b5b0b4',
+    k: '#4f5a4c', r: '#5c3a4a', n: '#2f3230', v: '#5a4a6a',
+    m: '#23242a', M: '#474a54', H: '#8b8f9c',
   },
 };
 
@@ -113,12 +99,13 @@ function desenharSprite(ctx, sprite, x0, y0, escala, paleta, opcoes = {}) {
 
 /**
  * Desenha a mão com `dedos` presentes (0..5), canto superior esquerdo em
- * (x, y). Tamanho final: 64*escala por 36*escala.
+ * (x, y). Tamanho final: 44*escala por 64*escala. Pulso embaixo, dedos
+ * para cima; o antebraço deve sair pela borda de baixo da tela.
  * opcoes.estilo: 'humana' | 'palida'
- * opcoes.espelhar: true = pulso à esquerda, dedos para a direita (padrão)
+ * opcoes.espelhar: inverte horizontalmente (polegar para o outro lado)
  */
 export function desenharMaoPixel(ctx, x, y, dedos, opcoes = {}) {
-  const { escala = 4, estilo = 'humana', espelhar = true } = opcoes;
+  const { escala = 4, estilo = 'humana', espelhar = false } = opcoes;
   const paleta = PALETAS_MAO[estilo] ?? PALETAS_MAO.humana;
   const perdidos = new Set(ORDEM_PERDA.slice(0, 5 - Math.max(0, Math.min(5, dedos))));
   const comum = { espelhar, larguraTotal: LARGURA_MAO };
@@ -126,14 +113,14 @@ export function desenharMaoPixel(ctx, x, y, dedos, opcoes = {}) {
   ctx.save();
   ctx.imageSmoothingEnabled = false;
 
-  // Sombra chapada sob a mão, deslocada para baixo e para a direita.
+  // Sombra chapada sob a mão, deslocada para a esquerda (a luz vem da direita).
   ctx.fillStyle = 'rgba(0, 0, 0, 0.45)';
   ctx.beginPath();
   ctx.ellipse(
-    x + (LARGURA_MAO / 2) * escala + escala * 2,
-    y + (ALTURA_MAO / 2) * escala + escala * 3,
-    (LARGURA_MAO / 2) * escala * 0.9,
-    (ALTURA_MAO / 2) * escala * 0.7,
+    x + (LARGURA_MAO / 2) * escala - escala * 3,
+    y + (ALTURA_MAO / 2) * escala + escala * 4,
+    (LARGURA_MAO / 2) * escala * 0.8,
+    (ALTURA_MAO / 2) * escala * 0.75,
     0, 0, Math.PI * 2,
   );
   ctx.fill();

@@ -50,6 +50,16 @@ teste('sequenciador: aoTerminar pode enfileirar o próximo passo (reação da IA
   assertIgual(seq.nomeAtual, 'comprando');
 });
 
+teste('sequenciador: passo com ritmoReal ignora o fatorTempo', () => {
+  const seq = criarSequenciador(0.05);
+  seq.adicionar({ nome: 'fala', duracao: 1000, ritmoReal: true });
+  seq.atualizar(0);
+  seq.atualizar(500);
+  assertIgual(seq.nomeAtual, 'fala', 'aos 500 ms ainda está no meio, mesmo no modo rápido');
+  seq.atualizar(1000);
+  assert(!seq.ocupado, 'termina em 1000 ms, a duração cheia');
+});
+
 teste('sequenciador: duração zero termina no mesmo quadro', () => {
   const seq = criarSequenciador(1);
   let terminou = false;

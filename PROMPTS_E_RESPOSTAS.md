@@ -9,7 +9,8 @@ Este arquivo guarda **todos** os prompts usados no projeto, na ordem em que fora
 | Fase | Ferramenta | Modelo | Estrutura de agentes |
 |------|-----------|--------|----------------------|
 | Pesquisa e documento de referência (prompts 1–2) | Claude (chat, claude.ai) | _preencher com o modelo que apareceu no chat_ | Agente único com acesso à web |
-| Planejamento e desenvolvimento (prompt 3 em diante) | Claude Code (extensão VS Code) | Claude Fable 5.1 (`claude-fable-5-1`) | Agente único; sem subagentes até o momento |
+| Planejamento e desenvolvimento (prompts 3–16) | Claude Code (extensão VS Code) | Claude Fable 5.1 (`claude-fable-5-1`) | Agente único; sem subagentes |
+| Desenvolvimento (prompt 17 em diante) | Claude Code (extensão VS Code) | Claude Opus 5 com contexto de 1M (`claude-opus-5[1m]`) | Agente único; sem subagentes |
 
 Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente como foi escrito**, a resposta (íntegra quando for texto curto, resumo quando for código ou arquivo), arquivos gerados/alterados e observações (retrabalho, erros, o que teve que ser corrigido).
 
@@ -415,7 +416,234 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
   - Fiz além do pedido: `?efeitos=0`; a intensidade do granulado cresce perto da morte.
 - **Impressões da equipe:**
 
-### Prompt 16 — 
+---
+
+## Fase 3 — Etapa 2: níveis e pontuação
+
+### Prompt 16 — Ajustes visuais (mão, guilhotina) e sub-passo 2.1: pontuação
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (VS Code), modelo Claude Fable 5.1
+- **Prompt (verbatim):**
+
+> A mão deveira estar saindo da mesa pelo jogador, e as pixel art do luiz e da mão ainda estão abaixo do esperado, a gilhotina tá parecendo uma regua, pode usar alguma ferramenta melhor para gerar as pixels arts?
+>
+> Começando a etapa 2 pelo 2.1, a pontuação. As regras estão no plano: 100 por rodada ganha, +50 se fechou exatamente no alvo, +25 se ganhou com o outro estourado, +10 por trunfo usado (ainda não tem trunfo mas já deixa pronto), multiplicador 1x / 1,5x / 2x pra sequência de vitórias e +500 por nível.
+>
+> Faz isso num score.js no engine, com testes. Na tela, um visor velho de sete segmentos do lado do João Gabriel, daqueles que dá pra ver os segmentos apagados de leve.
+>
+> Captura: print do visor no começo e depois de ganhar duas seguidas, pra aparecer o multiplicador. Fechamento e para no 2.1.
+
+- **Mensagem enviada durante a execução (verbatim):**
+
+> depois tu ajeita o texto no meio da tela pq ele as vezes saí
+
+- **Resposta (resumo):**
+  - **Texto do meio:** a mensagem central passou a quebrar em até duas linhas dentro de 640 px (entre a placa "21" e o baralho) e a reduzir a fonte se ainda não couber (`textoAjustado` em `render.js`); o texto da tela final usa o mesmo ajuste.
+  - **Ferramenta de pixel art:** o agente não tem gerador de imagens na sessão; explicou que pode melhorar os geradores procedurais ou, se o grupo produzir/gerar sprites em PNG por fora, adicionar um carregador de PNG ao jogo.
+  - **Mão v3** (`gerar_mao.py` reescrito, grade 44×64): sai pela borda de baixo da tela, pulso algemado com corrente presa à mesa, manga rasgada cortada pela tela, dedos para cima um pouco abertos, luz vinda da lâmpada (acima e à direita), 7 tons de pele com dithering ordenado, tendões, veias, hematomas, arranhões, unhas e vincos. Dedos em camadas como antes.
+  - **Aparelho da guilhotina** (`render.js`): duas colunas de madeira com veios e ranhuras presas na mesa por parafusos, travessa, bloco de madeira (peso) e lâmina de aço trapezoidal com fio diagonal, em repouso no alto e caindo até a base dos dedos na punição. Um aparelho grande para a mão do João e um pequeno para a mão do Luiz. O Luiz não foi alterado; pendência anotada no plano.
+  - **2.1 — `src/engine/score.js`**: regras do plano implementadas com detalhamento por rodada (`base`, `alvoExato`, `oponenteEstourou`, `trunfos`, `multiplicador`, `pontos`, `totalDepois`), sequência de vitórias que derrota e empate zeram, `pontuarNivel` fora do multiplicador, `trunfosUsados` já aceito. 12 testes.
+  - **Tela:** visor de sete segmentos de 6 dígitos ao lado da mão do João (reaproveita `desenharPlacar` do cenário; os segmentos apagados ficam visíveis de leve, como pedido), mensagem de resultado com "+N pontos ×M", "sequência ×M" sob o visor quando há multiplicador, total de pontos na tela final. `body[data-pontos]` para os roteiros. Vencer a partida conta como nível concluído (+500).
+  - **Captura 2.1** (seed 41, achada com a IA dos dois lados: duas vitórias seguidas fechando em 21): visor zerado, +150 após a 1ª vitória, +225 com ×1,5 após a 2ª; o roteiro confere 375 no total.
+  - Fechamento: **72/72 testes**, captura sem erros, prints conferidos, vídeo, documentos.
+- **Arquivos gerados/alterados:** `Blackjack_21/src/engine/score.js` (novo), `tests/score.test.js` (novo), `tests/tests.html`, `tests/run-node.mjs`, `tools/arte/gerar_mao.py` (reescrito), `src/ui/sprites/mao.js` (regenerado), `src/ui/pixelart.js` (paleta de 7 tons, orientação), `src/ui/render.js` (mão nova, aparelho, visor de pontos), `src/ui/main.js` (pontuação), `tools/roteiros/2.1.mjs` (novo), `progresso/etapa-2/2.1/*`, `progresso/LINHA_DO_TEMPO.md`, `PLANO_DE_DESENVOLVIMENTO.md`, `CLAUDE.md`, este arquivo.
+- **Observações (retrabalho, bugs, correções):**
+  - Nenhum retrabalho no 2.1; testes e captura passaram de primeira.
+  - Quarto retrabalho visual (mão e guilhotina). O Luiz ficou como estava: melhorar de verdade exige dobrar a resolução do gerador ou trocar por PNG.
+  - Decisões do agente: só o jogador humano pontua; o multiplicador vale sobre base e bônus, e o +500 do nível fica fora dele; "nível concluído" nesta etapa é vencer a partida (o oponente zerar os dedos); o alvo usado para o bônus de 21 exato é `jogo.alvo`, já preparado para as cartas "Go For".
+  - Fiz além do pedido: histórico por rodada em `pontuacao.historico`, total de pontos na tela final, `data-pontos` no DOM, texto "sequência ×M".
+  - Fora do escopo de propósito: trunfos (2.2), níveis 2 e 3 (2.4), IA por nível (2.5), high score (2.6).
+- **Impressões da equipe:**
+
+### Prompt 17 — Sub-passo 2.2: cartas trunfo (só lógica)
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (VS Code), modelo Claude Opus 5 (1M context) — o modelo mudou de Fable 5.1 para Opus 5 a partir deste prompt
+- **Prompt (verbatim):**
+
+> 2.2: as cartas trunfo, mas só a lógica, nada de tela ainda.
+>
+> Um trumps.js que usa o trump_cards.json. As cartas dessa vez são One-Up, Two-Up, as de 2 a 7, Remove, Return, Shield, Destroy, Perfect Draw e as Go for 17/24/27. O resto fica pra etapa 4.
+>
+> Onde o PDF não define, usa o que tá na parte C7 (o que é "melhor carta possível", uns 30% de chance de ganhar trunfo ao comprar, no máximo 8 na mão) e deixa esses números no config.js pra gente poder mexer. O engine não carrega o JSON sozinho, ele recebe pronto.
+>
+> Quero um teste pra cada carta. Alguns que me preocupam: o Two-Up só soma 2 enquanto tá na mesa (se levar Destroy a aposta volta), a carta 5 não faz nada se o 5 já saiu, o Go for 24 substitui o Go for 17, o Shield não deixa a aposta ficar negativa e o Perfect Draw pega a menor carta quando todas estouram.
+>
+> Print do tests.html. Fechamento e para no 2.2.
+
+- **Resposta (resumo):**
+  - **`src/engine/trumps.js`**: `prepararCatalogo(json, { ids })` recebe o catálogo já carregado e devolve só as 16 cartas da etapa, recusando efeito não suportado; `aplicarTrunfo(jogo, lado, id)` tira a carta da mão, executa os efeitos na ordem e, se houver efeito `persistent`, deixa a carta na mesa do lado de quem jogou (é o que Destroy remove); `modificadorDeAposta` e `alvoDaMesa` somam o que está na mesa; `melhorCartaDoBaralho` implementa a definição do C7; `darTrunfo` respeita o máximo da mão descartando o mais antigo.
+  - **Integração no `game.js`**: `criarJogo({ catalogoTrunfos })` (sem ele a partida roda como na Etapa 1), trunfos iniciais por rodada, mesa limpa a cada rodada, chance de ganhar trunfo no `hit`, `apostaEfetiva(jogo, lado)` (nunca negativa) usada na punição, `alvoAtual(jogo)` usado para decidir a rodada e devolvido em `ultimaRodada.alvo`, `verMesa` mostra a mesa do adversário mas a mão dele só como quantidade, `stats.trunfosUsados` para a pontuação do 2.1.
+  - **`config.js`**: bloco `TRUNFOS` com `chanceAoComprar: 0.30`, `maximoNaMao: 8`, `iniciaisPorRodada: 1`.
+  - **`tools/gerar_dados.mjs`**: converte `../trump_cards.json` em `data/trump_cards.js` (módulo ES), porque `import` de JSON não funciona igual no Node e no browser. O JSON da raiz continua sendo a fonte.
+  - **34 testes** em `tests/trumps.test.js`: um por carta (as seis numéricas em laço), mais os cinco casos apontados pelo grupo, mais limites da mão, chance ao comprar, turno, estatísticas e o `verMesa`.
+  - Fechamento: **106/106 testes**; captura 2.2 (print do `tests.html`) sem erros; print conferido; vídeo; documentos.
+- **Arquivos gerados/alterados:** `Blackjack_21/src/engine/trumps.js` (novo), `tests/trumps.test.js` (novo), `tools/gerar_dados.mjs` (novo), `data/trump_cards.js` (gerado), `src/config.js` (bloco `TRUNFOS`), `src/engine/game.js` (integração), `tests/tests.html`, `tests/run-node.mjs`, `tools/roteiros/2.2.mjs` (novo), `progresso/etapa-2/2.2/*`, `progresso/LINHA_DO_TEMPO.md`, `PLANO_DE_DESENVOLVIMENTO.md`, este arquivo.
+- **Observações (retrabalho, bugs, correções):**
+  - Nenhum retrabalho: testes e captura passaram na primeira execução. O agente reescreveu dois testes próprios que tinham ficado confusos antes de rodar.
+  - Decisões do agente onde o PDF é omisso: a carta persistente fica no lado de **quem jogou** (Destroy do adversário é que a remove); "Go For" substitui qualquer "Go For" na mesa, de qualquer lado; trunfo pode ser jogado no próprio turno; a mesa é limpa entre rodadas, a mão não; a mão do adversário aparece só como quantidade em `verMesa`, para não vazar informação.
+  - Fiz além do pedido: `stats.trunfosUsados` (liga com o +10 por trunfo do 2.1), `ultimaRodada.alvo`, e o gerador de dados para os testes rodarem igual no Node e no browser.
+  - Fora do escopo de propósito: qualquer tela de trunfos (2.3), níveis 2 e 3 (2.4), IA usando trunfos (2.5), high score (2.6), e as cartas da Etapa 4 (Exchange, Trump Switch, Destroy+/++, Ultimate Draw, Harvest, Love Your Enemy e as inimigas).
+- **Impressões da equipe:**
+
+### Prompt 18 — Sub-passo 2.3: cartas trunfo na tela
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (VS Code), modelo Claude Opus 5 (1M context)
+- **Prompt (verbatim):**
+
+> 2.3, colocar os trunfos na tela. A mão de trunfos do João Gabriel fica embaixo, com um desenho diferente das cartas normais (fundo escuro, um símbolo meio desenhado à mão). Clicou, jogou. As cartas jogadas ficam na mesa do lado de quem jogou, e passando o mouse aparece o nome e o que ela faz em português. No meio da mesa uma plaquinha com o alvo (21, 17, 24, 27) que troca com um "estalo" quando alguém joga uma Go For.
+>
+> Pra não depender da sorte nos testes, faz dar pra passar ?trunfos=two_up,shield,go_for_24 na URL e começar com essas.
+>
+> Captura: joga Two-Up, Shield e Go for 24, print depois de cada uma e um com a descrição aberta no mouse. Fechamento e para no 2.3.
+
+- **Resposta (resumo):**
+  - **Carta trunfo** (`render.js`): fundo escuro em degradê, moldura interna riscada com traço trêmulo e um **símbolo desenhado à mão por carta** (setas com +1/+2, número em círculo torto para as numéricas e as Go For, escudo, carta com X vermelho para Destroy, carta com estrela para Perfect Draw, carta com seta saindo/voltando para Remove e Return). O tremor vem de um ruído fixo, então o desenho é sempre o mesmo.
+  - **Mão embaixo**: cartas de 66×92 que se sobrepõem quando são muitas, com a carta sob o cursor levantando 10 px. Rótulo "clique para jogar" ou "aguarde sua vez".
+  - **Clique**: `mousemove`/`click` no canvas convertem a posição com `getBoundingClientRect`; a carta sob o cursor é encontrada de cima para baixo. Clicar joga pelo motor (`aplicarTrunfo`), a carta voa da mão até a mesa encolhendo, e só aparece na mesa quando pousa.
+  - **Cartas jogadas** ficam do lado de quem jogou (as dele em cima, as minhas embaixo), menores e levemente empilhadas.
+  - **Dica no mouse**: painel escuro com o nome em destaque e o `text_pt` do catálogo quebrado em linhas, tanto para a mão quanto para as cartas na mesa.
+  - **Estalo da placa** (`cenario.js`): quando uma Go For muda o alvo, a placa dá um tranco (pula, balança, treme), o número vira de lado (escala horizontal a zero), o novo aparece e há um clarão. Dura 700 ms e passa pelo sequenciador, então `?rapido=1` acelera.
+  - **`?trunfos=...`**: valida os ids e fixa a mão da primeira rodada. Novo teste em `parametros.test.js`.
+  - **Captura 2.3** (seed 41, mão fixa): mão, dica no mouse, depois de cada uma das três cartas, e o estalo no meio da virada. O roteiro lê `data-trunfo-slots` para clicar na carta certa e confere no fim que o alvo é 24 e que as três estão na mesa.
+  - Fechamento: **107/107 testes**, captura sem erros, prints conferidos, vídeo de 10 s.
+- **Arquivos gerados/alterados:** `Blackjack_21/src/ui/render.js` (cartas trunfo, dica, posições), `src/ui/main.js` (catálogo, clique, mouse, animações), `src/ui/cenario.js` (placa com estalo), `src/ui/parametros.js` (`?trunfos`), `tests/parametros.test.js`, `tools/roteiros/2.3.mjs` (novo), `progresso/etapa-2/2.3/*`, `PLANO_DE_DESENVOLVIMENTO.md`, `CLAUDE.md`, `progresso/LINHA_DO_TEMPO.md`, este arquivo.
+- **Observações (retrabalho, bugs, correções):**
+  - Uma correção de layout, achada olhando os prints: a placa do alvo e as cartas jogadas ficavam atrás da coluna de madeira da guilhotina. Movi as duas para a direita (x=316) e diminuí as cartas da mesa. Nenhum bug de lógica.
+  - Decisões do agente: as cartas na mesa se sobrepõem um pouco, como um leque, para caberem até 8; a dica aparece também para as cartas já jogadas, não só para a mão; `data-trunfo-slots` expõe a posição de cada carta da própria mão (já visível na tela) para o roteiro clicar sem adivinhar coordenadas.
+  - Fiz além do pedido: aviso quando um HIT traz trunfo junto; a mensagem central mostra o texto da carta jogada; cursor vira "pointer" sobre uma carta jogável.
+  - Fora do escopo de propósito: a IA não usa trunfos ainda (2.5); níveis 2 e 3 (2.4); high score (2.6).
+- **Impressões da equipe:**
+
+### Prompt 19 — Sub-passo 2.4: níveis 2 (choque) e 3 (serra)
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (VS Code), modelo Claude Opus 5 (1M context)
+- **Prompt (verbatim):**
+
+> 2.4, os outros dois níveis (as regras estão na parte A4 do PDF).
+>
+> Nível 2 é o choque: um aparelho de taser em cima das mãos e um medidor de ponteiro de 0 a 10 pra cada um. Quem perde, o ponteiro sobe conforme a aposta, flash branco e tremor. Chegou em 10 morreu. Cada um começa com 2 trunfos. Empate os dois levam choque.
+>
+> Nível 3 é a serra: um trilho com 15 marcas riscadas na mesa entre os dois e a serra começando no meio. Quem perde, a serra anda na direção dele o valor da aposta. Quando chega, corta pra tela preta, sem mostrar nada. Empate não mexe a serra.
+>
+> Entre um nível e outro a tela escurece, a TV liga com chiado e o Kaio fala uma ou duas frases escritas tipo legenda, e aí a mesa volta com o aparelho novo. Perdeu em qualquer nível acabou o jogo (a tela do 1.5 serve por enquanto). A IA continua a mesma nesse passo.
+>
+> Faz dar pra começar direto num nível com ?nivel=2 ou ?nivel=3.
+>
+> Captura: print de cada nível, de uma punição em cada, e vídeo de uma troca de nível com o Kaio falando. Fechamento e para no 2.4.
+
+- **Mensagens enviadas durante a execução (verbatim):**
+
+> depois da uma olhada nas cartas, pq o numero de baixo tá saindo delas
+
+> pode deixar essa serra maior e com detlahes de sangue dps
+
+- **Resposta (resumo):**
+  - **`src/engine/niveis.js`** (novo): configuração dos três aparelhos (punição, trunfos iniciais, falas do anfitrião), `aplicarPunicaoDoNivel`, `estaMorto`, `prepararNivel`, `descreverMorte`. Trilho de 15 com a serra começando em 7 (C7).
+  - **`game.js`**: fase nova `NIVEL_CONCLUIDO` (o oponente caiu mas ainda há aparelho) e `avancarNivel`, que zera vida, mesa e mãos e recomeça a aposta em 1. `punir` passou a delegar ao nível. `iniciarRodada` recusa rodar antes de avançar de nível, o que evita laço infinito. Empate na serra não pune ninguém.
+  - **Nível 2 na tela**: braçadeira de metal com dois eletrodos sobre cada mão, arco elétrico desenhado com ruído durante a descarga, cabo saindo da mesa; medidor analógico de 0 a 10 com marcas, zona vermelha de 8 a 10, ponteiro e vidro; flash branco azulado e tremor.
+  - **Nível 3 na tela**: trilho de metal com suportes parafusados e 15 marcas riscadas (mais fundas de 5 em 5, numeradas), nomes nas duas pontas; serra circular grande com 22 dentes, rasgos no disco e motor, girando mais rápido quando anda, com poeira de madeira; ao chegar na ponta corta para preto na hora.
+  - **Troca de nível**: escurece, a TV acende (redesenhada por cima do escurecimento para continuar visível), o Kaio fala duas frases como legenda com o nome dele em cima, e a mesa volta com o aparelho novo.
+  - **`?nivel=2` / `?nivel=3`** e os atributos `data-nivel`, `data-medidor-meu`, `data-medidor-dele`, `data-serra`.
+  - **18 testes** em `niveis.test.js` e ajustes nos testes da Etapa 1 que supunham um único nível.
+  - **Cartas**: o número do canto de baixo vazava para fora da carta. Depois do giro de 180° os dígitos crescem para baixo a partir da linha de base, que estava a 8 px da borda; passou para 20 px.
+  - **Serra maior** a pedido do grupo: raio de 42 para 62, mais dentes e rasgos no disco.
+  - Fechamento: **125/125 testes**, captura sem erros, 7 prints conferidos, vídeo de 1min47.
+- **Arquivos gerados/alterados:** `Blackjack_21/src/engine/niveis.js`, `tests/niveis.test.js`, `tools/depurar.mjs`, `tools/roteiros/2.4.mjs` (novos); `src/engine/game.js`, `src/engine/trumps.js`, `src/ui/{main,render,cenario,parametros}.js`, `tests/{engine,ai,trumps,parametros}.test.js`, `tools/simular.mjs`, `progresso/etapa-2/2.4/*`, `PLANO_DE_DESENVOLVIMENTO.md`, `CLAUDE.md`, `progresso/LINHA_DO_TEMPO.md`, este arquivo.
+- **Observações (retrabalho, bugs, correções):**
+  - **Três correções durante a execução.** (1) `perigo` declarado duas vezes na mesma função travou a página; a captura pegou pela exceção no console. (2) A captura falhou esperando a troca de nível: a partida real divergia da simulação porque sortear cartas trunfo consumia o mesmo gerador do baralho. Separei os geradores, os dois derivados da seed: agora a mesma seed dá o mesmo baralho com ou sem trunfos, e a simulação prevê a partida de verdade. Virou teste. (3) O roteiro esperava o jogo ficar ocioso depois da punição e perdia a troca de nível, que vem logo em seguida; reescrito para observar `data-animacao` continuamente, e o limite de passos subiu porque uma rodada no ritmo real leva uns 15 s.
+  - Para achar a causa do travamento criei `tools/depurar.mjs`, que joga sozinho e imprime cada mudança de estado.
+  - **Decisão registrada:** o nível 1 ficou com 1 carta trunfo por rodada, embora o plano original dissesse "sem trunfos no nível 1". Isso veio do 2.3, em que o grupo pediu a mão de trunfos jogável. Anotado no plano.
+  - **Decisão de design:** a aposta recomeça em 1 a cada nível (aparelho novo, contagem nova); o PDF não é explícito.
+  - **Pendência com o grupo:** foi pedido "detalhes de sangue" na serra. Isso contraria a regra de violência sem sangue que o próprio grupo definiu no prompt 4 e que está no `CLAUDE.md` e no relatório. Como o pedido veio com "dps", só a serra maior foi feita; o sangue aguarda o grupo confirmar que quer mudar a regra do projeto.
+  - Fora do escopo de propósito: IA por nível (2.5), high score (2.6), tela de abertura (Etapa 3).
+- **Impressões da equipe:**
+
+### Prompt 20 — Sub-passo 2.5: IA diferente para cada nível
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (VS Code), modelo Claude Opus 5 (1M context)
+- **Prompt (verbatim):**
+
+> 2.5, IA diferente pra cada nível:
+> - nível 1 continua comprando até 17
+> - nível 2 também, mas usa uns trunfos simples: Shield quando a aposta dele tá alta, Two-Up quando ele tá ganhando
+> - nível 3 calcula a chance de estourar com as cartas que ainda estão no baralho (lembrando que ele não sabe a oculta do João Gabriel), guarda o Destroy pra quando o jogador joga algo perigoso e usa Go For quando for bom pra ele
+>
+> Comenta no código, em português e curto, a ideia de cada nível, que eu vou precisar explicar isso no relatório.
+>
+> Quero um teste que prove que o nível 3 é mais difícil: umas 1000 rodadas do nível 3 contra o nível 1, e ele tem que estourar menos e ganhar mais. Me mostra os números.
+>
+> Captura: um vídeo curto do Luiz Alberto no nível 3 usando trunfo. Fechamento e para no 2.5.
+
+- **Mensagem enviada durante a execução (verbatim):**
+
+> Os textos estão meio apagados não acha?
+
+- **Resposta (resumo):**
+  - **`ai.js` reescrito** com um cabeçalho em português explicando a ideia de cada nível em três parágrafos curtos, feito para ser copiado no relatório. A IA decide sempre a partir de `verMesa(jogo, lado)`, que já esconde a carta oculta do adversário.
+  - **Nível 1**: inalterado, compra abaixo de 17.
+  - **Nível 2**: mesma conta, mais `decidirTrunfo`: Shield quando a aposta efetiva dele chega a 3 e ele ainda não tem um na mesa; Two-Up (ou One-Up) quando o total dele passa o visível do jogador.
+  - **Nível 3**: `decidirAcao` compara dois riscos calculados sobre as cartas não vistas — estourar comprando, contra perder parado. O segundo risco supõe que o adversário **continua comprando até 17**, o que foi decisivo: sem isso a IA parava cedo demais e empatava em vitórias. Além disso guarda o Destroy para quando há ameaça na mesa do adversário (carta que encarece a aposta dele ou mudou o alvo) e joga Go For só quando o alvo novo tira ela do estouro ou deixa o total exato.
+  - **Números** (1000 rodadas, mesmo baralho, só a cabeça do oponente muda, sem trunfos para isolar a decisão): estouros **31,5% → 19,2%**, vitórias **45,7% → 48,7%**, total médio 20,3 → 18,6. Estável em 3000 rodadas (+2,8 e −12,3 pontos). Salvo em `progresso/etapa-2/2.5/comparacao-ia.txt`, com a ferramenta `tools/comparar_ia.mjs`.
+  - **Na tela**: o oponente agora joga uma carta trunfo antes de comprar ou parar, com a carta voando de perto das mãos dele (a mão de trunfos dele é secreta, então não há de onde sair) para a mesa do lado dele.
+  - **Textos mais legíveis** a pedido do grupo: cor principal e a apagada clareadas, vermelho mais vivo, sombra escura atrás de todo texto, vinheta de 0,75 para 0,58 e granulado mais fraco.
+  - Fechamento: **138/138 testes**, captura sem erros, 4 prints conferidos, vídeo de 12 s.
+- **Arquivos gerados/alterados:** `Blackjack_21/src/engine/ai.js` (reescrito), `tests/ai.test.js`, `tools/comparar_ia.mjs` (novo), `tools/roteiros/2.5.mjs` (novo), `src/ui/main.js` (o oponente joga trunfos), `src/ui/render.js` e `src/ui/efeitos.js` (legibilidade), `progresso/etapa-2/2.5/*`, `PLANO_DE_DESENVOLVIMENTO.md`, `progresso/LINHA_DO_TEMPO.md`, este arquivo.
+- **Observações (retrabalho, bugs, correções):**
+  - **Uma iteração de verdade na regra da IA.** A primeira versão do nível 3 estourava bem menos (31,5% → 14,2%) mas vencia igual (45,7% → 45,2%), porque supunha que o adversário parava naquele instante e por isso ela parava cedo demais. Ao fazer a conta prevendo que o outro compra até 17, as vitórias subiram para 48,7%. Foi medindo com a ferramenta que dava para ver isso.
+  - Dois testes que eu mesmo escrevi errado falharam e foram corrigidos: a contagem do risco de estourar (3 de 6, não 4 de 6) e o caso do Two-Up, em que o jogador continuava atrás do oponente.
+  - Decisão do agente: o oponente joga no máximo uma carta trunfo por turno, e só depois decide comprar ou parar; mantém o ritmo legível.
+  - Fora do escopo de propósito: high score (2.6), tela de abertura (Etapa 3), cartas trunfo da Etapa 4.
+- **Impressões da equipe:**
+
+### Prompt 21 — Sub-passo 2.6: recorde da sessão (opcional do guia)
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (VS Code), modelo Claude Opus 5 (1M context)
+- **Prompt (verbatim):**
+
+> 2.6 (esse é opcional mas quero fazer): mostrar o recorde da sessão num segundo visor menor escrito RECORDE. Por enquanto só na memória, salvar fica pra etapa 4. Quando bater o recorde o visor pisca.
+>
+> Captura: duas partidas seguidas, a segunda batendo o recorde, e print do visor piscando. Fechamento e para aqui.
+
+- **Resposta (resumo):**
+  - **`score.js`**: `criarRecorde`, `atualizarRecorde(recorde, total)` e `registrarPartida`. O detalhe que importa: `atualizarRecorde` devolve `bateu: true` **só quando já havia um recorde anterior**, senão a primeira partida ficaria piscando o tempo todo enquanto o visor sobe do zero.
+  - **`main.js`**: o recorde vive fora de `novaPartida`, então atravessa o "jogar de novo" e some ao recarregar a página. A conferência acontece a cada rodada pontuada e no fim da partida. O piscar dura 5 s, controlado por um instante guardado e comparado com o relógio do loop de animação, sem ocupar a fila de passos.
+  - **Na tela**: segundo visor de sete segmentos, menor, escrito RECORDE, ao lado do de PONTOS. Os dois visores foram reposicionados lado a lado para caber entre a mão e a mão de trunfos. Quando pisca, aparece "NOVO RECORDE" em vermelho abaixo.
+  - **Captura**: duas partidas seguidas sem recarregar. Na primeira o roteiro joga mal de propósito, comprando só abaixo de 11, e fecha com 125 pontos. Na segunda joga com a regra da IA e passa para 313, e é aí que o visor pisca. O roteiro confere que a primeira não pisca, que o recorde atravessa o reinício, que os pontos zeram e que o recorde subiu.
+  - Fechamento: **143/143 testes**, captura sem erros, 5 prints conferidos, vídeo de 2min12.
+- **Arquivos gerados/alterados:** `Blackjack_21/src/engine/score.js`, `tests/score.test.js`, `src/ui/main.js`, `src/ui/render.js`, `tools/roteiros/2.6.mjs` (novo), `progresso/etapa-2/2.6/*`, `PLANO_DE_DESENVOLVIMENTO.md`, `progresso/LINHA_DO_TEMPO.md`, este arquivo.
+- **Observações (retrabalho, bugs, correções):**
+  - Nenhum retrabalho: testes e captura passaram na primeira execução.
+  - Decisão do agente para a captura: como o botão "jogar de novo" mantém a seed da URL, duas partidas iguais dariam a mesma pontuação e nunca bateriam o recorde. Em vez de mudar o código, o roteiro joga a primeira partida com uma regra pior (comprar abaixo de 11) e a segunda com a regra da IA. Assim a mesma seed produz pontuações diferentes.
+  - Com isto a **Etapa 2 está completa**: os seis sub-passos e o opcional. Falta a captura final da etapa e o `RESUMO.md`, quando o grupo pedir para fechar.
+  - Fora do escopo de propósito: salvar o recorde em disco (4.1), tela de abertura e retorno automático (Etapa 3).
+- **Impressões da equipe:**
+
+### Prompt 22 — Fechamento da Etapa 2
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (VS Code), modelo Claude Opus 5 (1M context)
+- **Prompt (verbatim):**
+
+> Fechando a etapa 2, sem coisa nova. Mesmo esquema da etapa 1:
+> - passa pelo checklist da etapa 2 com prova de cada item
+> - roda de novo a captura final da etapa 1 pra ver se o nível 1 continua igual
+> - me diz quantos trunfos estão funcionando e testados (a meta era 14)
+> - grava um vídeo passando pelos 3 níveis (pode usar ?rapido, mas deixa as trocas de nível em velocidade normal) e os prints em progresso/etapa-2/final/, mais o RESUMO.md
+> - se passou tudo, commit e tag etapa-2
+
+- **Resposta (resumo):**
+  - **Checklist da Etapa 2** verificado item a item com prova (ver a resposta ao grupo): pontuação, três níveis, trunfos, dificuldade medida da IA, ausência de regressão e o opcional.
+  - **Regressão do nível 1**: roteiro novo `2.regressao.mjs` repete a partida da Etapa 1 (seed 1617) e confere 3 rodadas com 2x0, exatamente o registrado no fechamento anterior. Salva em `progresso/etapa-2/regressao/` para **não sobrescrever** a evidência original da Etapa 1, conforme a regra do `CLAUDE.md`.
+  - **Trunfos**: 16 implementados e 16 com teste próprio, contra a meta de 14.
+  - **Vídeo dos três níveis**: roteiro `2.final.mjs` com `?rapido=1`. Para as trocas de nível ficarem em velocidade normal foi preciso um ajuste pequeno: um passo de animação agora pode levar `ritmoReal: true` e ignorar o fator de tempo; os cinco passos da troca de nível receberam a marca. Com teste.
+  - **`progresso/etapa-2/RESUMO.md`** com os nove prints da partida completa, a tabela da comparação da IA e onde está cada coisa.
+  - Fechamento: **144/144 testes**, as duas capturas sem erro de navegador, vídeo de 44 s, commit e tag `etapa-2`.
+- **Arquivos gerados/alterados:** `Blackjack_21/tools/roteiros/2.final.mjs` e `2.regressao.mjs` (novos), `src/ui/animacao.js` e `src/ui/main.js` (`ritmoReal`), `tests/animacao.test.js`, `progresso/etapa-2/final/*`, `progresso/etapa-2/regressao/*`, `progresso/etapa-2/RESUMO.md`, `PLANO_DE_DESENVOLVIMENTO.md`, `CLAUDE.md`, `progresso/LINHA_DO_TEMPO.md`, este arquivo.
+- **Observações (retrabalho, bugs, correções):**
+  - Duas correções no roteiro final, ambas de nomeação de prints: a primeira versão tirava duas fotos da mesma troca de nível, porque o número do nível muda no meio da animação; a segunda contava três trocas em vez de duas, porque entre dois passos a animação passa por "aguardando" durante um quadro e a borda reabria o bloco. Resolvido tratando a troca como um bloco e ignorando esse estado transitório.
+  - Nada de novo no jogo além do `ritmoReal`, que existia só para atender ao pedido do vídeo.
+- **Impressões da equipe:**
+
+### Prompt 23 — 
 - **Data:**
 - **Ferramenta:**
 - **Prompt (verbatim):**
@@ -451,6 +679,6 @@ _(preencher)_
 | Fase 0 — Referência | 2 | 0 | 2 |
 | Fase 1 — Planejamento | 1 | 0 | 1 |
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
-| Etapa 2 — Níveis/pontuação | | | |
+| Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
 | Etapa 3 — Abertura | | | |
 | Etapa 4 — Extras | | | |

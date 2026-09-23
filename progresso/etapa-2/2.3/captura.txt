@@ -1,0 +1,33 @@
+Sub-passo: 2.3
+Roteiro: Mão de trunfos, cartas na mesa, dica no mouse e o estalo da placa (seed 41)
+Data: 2026-09-23T14:45:31.909Z
+Duração: 11.2 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 6
+  - 01-mao-de-trunfos.png
+  - 02-dica-no-mouse.png
+  - 03-jogou-two-up.png
+  - 04-jogou-shield.png
+  - 05-estalo-da-placa.png
+  - 06-jogou-go-for-24.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 2.3 — Mão de trunfos, cartas na mesa, dica no mouse e o estalo da placa (seed 41)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-2\2.3
+Servidor: http://127.0.0.1:51748
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=41&trunfos=two_up%2Cshield%2Cgo_for_24
+nota   mão inicial: two_up@686,660;shield@762,660;go_for_24@838,660
+print  01-mao-de-trunfos.png
+print  02-dica-no-mouse.png
+nota   depois do Two-Up, na minha mesa: two_up
+print  03-jogou-two-up.png
+print  04-jogou-shield.png
+print  05-estalo-da-placa.png
+print  06-jogou-go-for-24.png
+nota   alvo: 21 -> 24
+vídeo  video.mp4 (convertido com ffmpeg)

@@ -1,0 +1,28 @@
+Sub-passo: 2.5
+Roteiro: Luiz Alberto no nível 3 usando carta trunfo (seed 21)
+Data: 2026-09-23T15:38:19.431Z
+Duração: 13.5 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 4
+  - 01-nivel-3-antes.png
+  - 02-joguei-two-up.png
+  - 03-luiz-jogando-trunfo.png
+  - 04-depois-do-trunfo-dele.png
+Vídeo: video.mp4
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 2.5 — Luiz Alberto no nível 3 usando carta trunfo (seed 21)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-2\2.5
+Servidor: http://127.0.0.1:54870
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=21&nivel=3&trunfos=two_up
+nota   nível 3, serra na marca 7
+print  01-nivel-3-antes.png
+print  02-joguei-two-up.png
+print  03-luiz-jogando-trunfo.png
+print  04-depois-do-trunfo-dele.png
+nota   na minha mesa depois da resposta dele: ""
+vídeo  video.mp4 (convertido com ffmpeg)

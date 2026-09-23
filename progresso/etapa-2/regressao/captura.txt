@@ -1,0 +1,25 @@
+Sub-passo: 2.regressao
+Roteiro: Regressão: o nível 1 com a seed 1617 termina como na Etapa 1 (3 rodadas, 2x0)
+Data: 2026-09-23T15:50:55.707Z
+Duração: 41.8 s
+Navegador: Chrome instalado na máquina
+Viewport: 1280x720
+Prints: 3
+  - 01-mesa-rodada-1.png
+  - 02-guilhotina-nivel-1.png
+  - 03-fim-do-nivel-1.png
+Vídeo: (não gravado)
+Erros do navegador: 0
+Erro do roteiro: nenhum
+
+Log:
+Captura do sub-passo 2.regressao — Regressão: o nível 1 com a seed 1617 termina como na Etapa 1 (3 rodadas, 2x0)
+Destino: C:\Users\joaog\OneDrive\Documentos\FACULDADE\Andrei\progresso\etapa-2\regressao
+Servidor: http://127.0.0.1:50258
+Navegador: Chrome instalado na máquina
+abrir /index.html?seed=1617
+print  01-mesa-rodada-1.png
+print  02-guilhotina-nivel-1.png
+nota   nível 1 com a seed 1617: 3 rodadas, dedos João 2 x Luiz 0
+nota   registro da Etapa 1: 3 rodadas, dedos João 2 x Luiz 0
+print  03-fim-do-nivel-1.png

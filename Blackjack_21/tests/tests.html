@@ -37,7 +37,7 @@
   </style>
 </head>
 <body>
-  <h1>21 — testes do motor de regras (1.1) e da IA básica (1.2)</h1>
+  <h1>21 — testes do motor, IA, animação, pontuação e cartas trunfo</h1>
   <p class="resumo" id="resumo">Rodando...</p>
   <ul id="lista"></ul>
   <p id="aviso" class="aviso" hidden>
@@ -53,6 +53,9 @@
     import './ai.test.js';
     import './parametros.test.js';
     import './animacao.test.js';
+    import './score.test.js';
+    import './trumps.test.js';
+    import './niveis.test.js';
     import { rodarTodos } from './testador.js';
 
     const resultados = rodarTodos();

@@ -1,0 +1,8 @@
+1000 rodadas com o mesmo baralho, só a cabeça do oponente muda:
+
+  nível 1    vitórias  457 ( 45.7%)   estouros  315 ( 31.5%)   empates 115   total médio 20.3
+  nível 3    vitórias  487 ( 48.7%)   estouros  192 ( 19.2%)   empates  84   total médio 18.6
+
+diferença do nível 3 para o nível 1:
+  vitórias: +3.0 pontos percentuais
+  estouros: -12.3 pontos percentuais

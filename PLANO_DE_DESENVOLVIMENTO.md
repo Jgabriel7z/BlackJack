@@ -42,12 +42,12 @@ Andrei/                          <- documentos do relatório e referências
     ├── index.html               (Etapa 1.3) aceita ?seed=123 e ?rapido=1
     ├── src/
     │   ├── config.js            nomes dos personagens e ajustes do grupo
-    │   ├── engine/              rng.js, deck.js, rules.js, game.js (1.1) · ai.js (1.2) · trumps.js, score.js (Etapa 2)
+    │   ├── engine/              rng.js, deck.js, rules.js, game.js (1.1) · ai.js (1.2) · score.js (2.1), trumps.js (2.2), niveis.js (2.4)
     │   └── ui/                  main.js, render.js, parametros.js (1.3) · animacao.js, lampada.js, pixelart.js (1.4) · audio.js, effects.js, screens.js (depois)
     ├── tests/                   testador.js, engine.test.js, tests.html (browser), run-node.mjs (terminal)
-    ├── tools/                   servidor.mjs (http local), capturar.mjs (prints + vídeo), simular.mjs (IA×IA para achar seeds), roteiros/N.M.mjs (um por sub-passo), arte/gerar_*.py (sprites)
+    ├── tools/                   servidor.mjs (http local), capturar.mjs (prints + vídeo), simular.mjs (IA×IA para achar seeds), gerar_dados.mjs (JSON -> módulo), roteiros/N.M.mjs (um por sub-passo), arte/gerar_*.py (sprites)
     ├── node_modules/            (ignorado pelo git)
-    └── data/                    trump_cards.json (copiado da raiz na Etapa 2)
+    └── data/                    trump_cards.js (gerado de ../trump_cards.json; a raiz continua sendo a fonte)
 ```
 
 ---
@@ -90,6 +90,7 @@ Andrei/                          <- documentos do relatório e referências
 - [x] Nada além do escopo (sem trunfos, sem pontos, sem menu)
 - [x] Código separado em `engine/` e `ui/`; `engine/` não importa nada de DOM
 - Evidências: `progresso/etapa-1/1.1` a `1.5`, mais `progresso/etapa-1/final/` (partida inteira com o visual final) e `progresso/etapa-1/RESUMO.md` para a apresentação. Tag git `etapa-1`.
+- **Ajustes visuais na abertura da Etapa 2** (a pedido do grupo): a mão do João passou a sair da borda de baixo da tela (pulso algemado, dedos para o oponente, luz vinda da lâmpada, 7 tons com dithering); a guilhotina virou um aparelho de madeira preso na mesa (duas colunas, travessa, lâmina de aço com fio diagonal em repouso no alto), um em cada mão. **Pendência visual:** o grupo ainda considera o Luiz Alberto abaixo do esperado; o próximo passo é regenerá-lo em resolução dobrada (fator 2 no gerador) ou trocar por sprites PNG feitos/gerados pelo grupo, para os quais o jogo precisaria de um carregador de imagem.
 - **Passe visual pós-1.5** (a pedido do grupo, com as referências de `REFERENCIAS.md`): `src/ui/cenario.js` (parede de tijolos, TV com chiado, cadeira, tampo de concreto com ladrilhos, placa "21", placares de sete segmentos com as apostas) e `src/ui/efeitos.js` (granulado, linhas de varredura, vinheta; `?efeitos=0` desliga). Isso adianta a Etapa 4.3 e os itens B2/B5 do PDF; o que sobra para a 4.3 é aberração cromática, tremor por tensão e a distorção da TV quando o Anfitrião falar.
 
 ### Prompt sugerido para começar a Etapa 1 (colar no Claude Code)
@@ -110,7 +111,7 @@ Depois, um prompt por sub-passo (1.2, 1.3...), sempre terminando com "não avanc
 
 | Nível | Punição | Condição para avançar | Trunfos | IA |
 |-------|---------|----------------------|---------|----|
-| 1 — Guilhotina | Dedos = aposta; aposta +1 por rodada | Oponente perde os 5 dedos | Não | Compra até 17 |
+| 1 — Guilhotina | Dedos = aposta; aposta +1 por rodada | Oponente perde os 5 dedos | Sim, 1 por rodada (o plano previa "não", mas o grupo pediu os trunfos jogáveis já no nível 1, no 2.3) | Compra até 17 |
 | 2 — Choque | Medidor 0–10 sobe conforme a aposta; 10 = morte | Oponente chega a 10 | Sim, 2 no início + chance ao comprar | Compra até 17, usa trunfos simples (Shield quando aposta alta, Two-Up quando está na frente) |
 | 3 — Serra | Trilho de 15 unidades; serra avança em direção ao perdedor | Serra chega no oponente | Sim, oponente com trunfos mais fortes | Calcula probabilidade de estourar com o baralho restante; guarda Destroy para cartas perigosas |
 
@@ -129,19 +130,22 @@ O jogador perde a partida (GAME OVER) se for ele quem chega ao limite do nível.
 
 | # | Sub-passo | O que entregar | Como testar |
 |---|-----------|----------------|-------------|
-| 2.1 | Pontuação | `score.js` no engine; visor na mesa | Testes das regras de pontos; visor atualiza a cada rodada |
-| 2.2 | Trunfos básicos no motor | `trumps.js` lê `data/trump_cards.json`; implementa efeitos `bet_mod`, `draw_specific`, `return_last_faceup`, `destroy_last_trump`, `draw_best`, `set_target`. Cartas: One-Up, Two-Up, 2–7 Card, Remove, Return, Shield, Destroy, Perfect Draw, Go for 17/24/27 | Teste por carta: Two-Up soma 2 na aposta do oponente só enquanto na mesa; 5 Card não faz nada se o 5 já saiu; Go for 24 substitui Go for 17 |
-| 2.3 | Trunfos na interface | Mão de trunfos do jogador embaixo, cartas jogadas ficam na mesa do lado de quem jogou, texto da carta ao passar o mouse; placa central mostra o alvo atual | Jogar cada carta e ver o efeito na mesa |
-| 2.4 | Níveis 2 e 3 | Máquina de níveis; medidor de choque e trilho da serra desenhados; transição de nível com fala do Anfitrião na TV | Vencer nível 1 leva ao 2; perder em qualquer nível encerra |
-| 2.5 | IA por nível | `ai.js` com três níveis de dificuldade | Nível 3 estoura menos que nível 1 em 100 rodadas simuladas (teste automático) |
-| 2.6 | High score (opcional) | Maior pontuação da sessão mostrada na mesa (sem persistência ainda) | Bater o recorde atualiza o visor |
+| 2.1 ✅ | Pontuação | `src/engine/score.js`: `criarPontuacao`, `pontuarRodada(pontuacao, resultado, { alvo, trunfosUsados })`, `pontuarNivel`, `multiplicadorDaSequencia`. +100 vitória, +50 alvo exato, +25 oponente estourado, +10 por trunfo (parâmetro pronto), ×1/×1,5/×2 por sequência, +500 por nível (fora do multiplicador). Derrota e empate zeram a sequência. Visor velho de sete segmentos (6 dígitos, segmentos apagados visíveis) ao lado da mão do João; mensagem de resultado mostra "+N pontos ×M"; "sequência ×M" sob o visor; total na tela final | 12 testes de `score.js`; roteiro `2.1.mjs` (seed 41, duas vitórias com 21 exato): visor zerado, +150, depois +225 com ×1,5 = 375, conferido pelo roteiro. **Feito em 2026-09-23: 72 testes, 3 prints + vídeo** |
+| 2.2 ✅ | Trunfos básicos no motor | `src/engine/trumps.js` **recebe** o catálogo pronto (`prepararCatalogo`), nunca lê arquivo. Efeitos `bet_mod`, `draw_trump`, `draw_specific`, `return_last_faceup`, `destroy_last_trump`, `draw_best`, `set_target`. 16 cartas: One-Up, Two-Up, 2–7 Card, Remove, Return, Shield, Destroy, Perfect Draw, Go for 17/24/27. Efeito persistente vira carta na mesa (Destroy tira). `apostaEfetiva` e `alvoAtual` no `game.js`. Números do C7 em `config.js` (`TRUNFOS`: 30% ao comprar, máximo 8 na mão, 1 inicial por rodada). `data/trump_cards.js` gerado de `../trump_cards.json` por `tools/gerar_dados.mjs` | 34 testes, um por carta mais bordas: Two-Up volta ao normal com Destroy; 5 Card não faz nada se o 5 saiu; Go for 24 substitui Go for 17; Shield não deixa a aposta negativa; Perfect Draw pega a menor quando todas estouram. **Feito em 2026-09-23: 106 testes, print do tests.html + vídeo** |
+| 2.3 ✅ | Trunfos na interface | Mão do jogador embaixo (fundo escuro, moldura e símbolo trêmulos, desenhados à mão por carta); clique joga, a carta voa para a mesa e fica do lado de quem jogou (menor, empilhada); dica com nome e texto em português ao passar o mouse, na mão e na mesa; placa de papel com o alvo troca com "estalo" (tranco, número virando de lado, clarão) quando uma Go For entra. `?trunfos=a,b,c` fixa a mão inicial da 1ª rodada | Roteiro `2.3.mjs` (seed 41, mão fixa) joga Two-Up, Shield e Go for 24, com print de cada uma, da dica e do estalo; confere alvo 24 e as três cartas na mesa. **Feito em 2026-09-23: 107 testes, 6 prints + vídeo** |
+| 2.4 ✅ | Níveis 2 e 3 | `src/engine/niveis.js`: config dos três aparelhos, `aplicarPunicaoDoNivel`, `estaMorto`, `prepararNivel`, `descreverMorte`. Fase nova `NIVEL_CONCLUIDO` + `avancarNivel` no `game.js`; aposta recomeça em 1 a cada nível. **Nível 2**: braçadeira de taser sobre cada mão, arco elétrico na descarga, medidor de ponteiro 0–10 com zona vermelha, flash branco e tremor; 2 trunfos iniciais; empate choca os dois. **Nível 3**: trilho de metal com 15 marcas riscadas entre os dois, serra circular grande girando, poeira ao andar, empate não mexe a serra, chegada corta para preto. Transição: tela escurece, a TV acende por cima do escurecimento e o Kaio fala duas frases como legenda. `?nivel=2` e `?nivel=3` começam direto | 18 testes em `niveis.test.js`; roteiro `2.4.mjs` (seed 21, que vence os três níveis): print de cada nível, de uma punição em cada e do Kaio falando, mais vídeo da troca. **Feito em 2026-09-23: 125 testes, 7 prints + vídeo de 1min47** |
+| 2.5 ✅ | IA por nível | `ai.js` com uma cabeça por nível, comentada em português. **1**: conta até 17, sem trunfos. **2**: mesma conta, mais Shield quando a aposta dele passa de 3 e Two-Up quando está na frente. **3**: `decidirAcao` compara o risco de estourar (cartas que ela ainda não viu, a oculta do jogador incluída) com o risco de perder parado (supondo que o outro compra até 17); guarda o Destroy para quando o jogador põe carta perigosa na mesa e usa Go For quando o alvo novo salva a mão dela. `decidirAcao(jogo, lado, nivel)` aceita o nível na chamada, para comparar as duas cabeças sobre o mesmo baralho | 14 testes novos, incluindo 1000 rodadas nível 3 contra nível 1 com o mesmo baralho: **estouros 31,5% → 19,2%, vitórias 45,7% → 48,7%**. `tools/comparar_ia.mjs` imprime a tabela. **Feito em 2026-09-23: 138 testes, 4 prints + vídeo** |
+| 2.6 ✅ | High score (opcional) | `criarRecorde`, `atualizarRecorde` e `registrarPartida` em `score.js`; o recorde vive fora de `novaPartida`, então atravessa o "jogar de novo" e some ao recarregar (guardar em disco é 4.1). Segundo visor de sete segmentos, menor, escrito RECORDE, ao lado do de PONTOS; pisca por 5 s e mostra "NOVO RECORDE" quando um recorde anterior é superado. Na primeira partida o visor só acompanha, sem piscar | 5 testes de recorde; roteiro `2.6.mjs` joga duas partidas seguidas sem recarregar (a 1ª comprando abaixo de 11, a 2ª com a regra da IA): 125 pontos → recorde batido em 313, com print do visor piscando. **Feito em 2026-09-23: 143 testes, 5 prints + vídeo** |
 
 ### Checklist de aceite da Etapa 2
-- [ ] Pontos calculados e visíveis; testes passando
-- [ ] Os três níveis jogáveis em sequência
-- [ ] Pelo menos 14 trunfos funcionando e testados
-- [ ] Dificuldade da IA perceptível entre níveis
-- [ ] Etapa 1 continua funcionando (sem regressão)
+- [x] Pontos calculados e visíveis; testes passando (12 testes de pontuação, visor de sete segmentos)
+- [x] Os três níveis jogáveis em sequência, com troca de nível e fala do anfitrião
+- [x] Pelo menos 14 trunfos funcionando e testados (16 cartas, 34 testes)
+- [x] Dificuldade da IA perceptível entre níveis (medida: estouros 31,5% → 19,2%, vitórias 45,7% → 48,7%)
+- [x] Etapa 1 continua funcionando (143 testes no total, os da Etapa 1 incluídos)
+- [x] Opcional feito: recorde da sessão com visor próprio
+- [x] Regressão do nível 1: a partida da Etapa 1 (seed 1617) termina igual, 3 rodadas e 2x0 (`progresso/etapa-2/regressao/`)
+- Evidências: `progresso/etapa-2/2.1` a `2.6`, mais `final/` (partida pelos três níveis) e `RESUMO.md`. Tag git `etapa-2`.
 
 ---
 

@@ -6,6 +6,10 @@
 //    nome        texto curto, exposto em body[data-animacao] para roteiros
 //    duracao     em ms, no ritmo normal; é multiplicada por `fatorTempo`
 //                (0,05 com ?rapido=1), então tudo acelera junto
+//    ritmoReal   true faz o passo ignorar o `fatorTempo`: ele roda na
+//                velocidade normal mesmo com ?rapido=1. É o caso da fala
+//                do anfitrião na troca de nível, que precisa dar tempo
+//                de ler mesmo numa captura acelerada.
 //    aoIniciar() chamado uma vez quando o passo começa
 //    aoAtualizar(progresso)  chamado a cada quadro com progresso 0..1
 //    aoTerminar()            chamado uma vez ao acabar; pode enfileirar
@@ -66,7 +70,7 @@ export function criarSequenciador(fatorTempo = 1) {
       }
       if (atual === null) return null;
 
-      const duracao = atual.duracao * fatorTempo;
+      const duracao = atual.duracao * (atual.ritmoReal ? 1 : fatorTempo);
       const progresso = duracao <= 0 ? 1 : limitar((agora - inicio) / duracao, 0, 1);
       atual.aoAtualizar?.(progresso);
 

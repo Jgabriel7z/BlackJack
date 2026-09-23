@@ -181,7 +181,7 @@ function criarTvEstatica() {
   return { tela, ctx: tela.getContext('2d'), imagem: tela.getContext('2d').createImageData(64, 48) };
 }
 
-function desenharTv(ctx, ruido, agora, intensidadeLampada) {
+function desenharTv(ctx, ruido, agora, intensidadeLampada, forca = 0) {
   const { x, y, largura, altura } = TV;
 
   // Mesinha da TV (a mesa grande cobre as pernas).
@@ -244,12 +244,14 @@ function desenharTv(ctx, ruido, agora, intensidadeLampada) {
   ctx.fillRect(telaX, telaY, telaL, telaA);
   ctx.restore();
 
-  // Luz azulada da TV sobre a mesinha e a parede.
-  const brilho = ctx.createRadialGradient(x + largura / 2, y + altura / 2, 20, x + largura / 2, y + altura / 2, 200);
-  brilho.addColorStop(0, `rgba(170, 190, 220, ${0.10 * (1.2 - intensidadeLampada * 0.4)})`);
+  // Luz azulada da TV sobre a mesinha e a parede; muito mais forte quando
+  // o aparelho "liga" para o anfitrião falar.
+  const alcance = 200 + forca * 320;
+  const brilho = ctx.createRadialGradient(x + largura / 2, y + altura / 2, 20, x + largura / 2, y + altura / 2, alcance);
+  brilho.addColorStop(0, `rgba(170, 190, 220, ${(0.10 + 0.45 * forca) * (1.2 - intensidadeLampada * 0.4)})`);
   brilho.addColorStop(1, 'rgba(170, 190, 220, 0)');
   ctx.fillStyle = brilho;
-  ctx.fillRect(x - 200, y - 150, largura + 400, altura + 300);
+  ctx.fillRect(x - alcance, y - alcance, largura + alcance * 2, altura + alcance * 2);
 }
 
 // ---------------------------------------------------------------------
@@ -271,10 +273,39 @@ function desenharCadeira(ctx, centroX) {
 //  Placa dobrada com o alvo
 // ---------------------------------------------------------------------
 
-export const PLACA = { x: 300, y: 250, largura: 96, altura: 78 };
+export const PLACA = { x: 318, y: 262, largura: 96, altura: 78 };
 
-function desenharPlaca(ctx, alvo, rodada) {
-  const { x, y, largura, altura } = PLACA;
+/**
+ * Placa de papel dobrada com o valor-alvo da rodada.
+ * `troca` = { anterior, progresso 0..1 } anima o "estalo" quando uma carta
+ * "Go For" muda o alvo: a placa dá um tranco, o número vira de lado e o
+ * novo aparece (Parte B5 do PDF).
+ */
+function desenharPlaca(ctx, alvo, rodada, troca = null) {
+  const { largura, altura } = PLACA;
+  let { x, y } = PLACA;
+
+  // Tranco: a placa pula e balança no momento da virada.
+  let escalaNumero = 1;
+  let numeroMostrado = alvo;
+  let clarao = 0;
+  let inclinacao = 0;
+  if (troca && troca.progresso < 1) {
+    const p = troca.progresso;
+    const meio = Math.abs(Math.cos(p * Math.PI));   // 1 -> 0 -> 1
+    escalaNumero = meio;
+    numeroMostrado = p < 0.5 ? troca.anterior : alvo;
+    const tranco = Math.sin(p * Math.PI) * (1 - p);
+    x += (ruidoFixo(Math.floor(p * 40)) - 0.5) * 10 * tranco;
+    y -= 6 * tranco;
+    inclinacao = (ruidoFixo(Math.floor(p * 40) + 5) - 0.5) * 0.14 * tranco;
+    clarao = Math.max(0, 1 - Math.abs(p - 0.5) * 6);
+  }
+
+  ctx.save();
+  ctx.translate(x + largura / 2, y + altura / 2);
+  ctx.rotate(inclinacao);
+  ctx.translate(-(x + largura / 2), -(y + altura / 2));
   // Sombra.
   ctx.fillStyle = 'rgba(0,0,0,0.5)';
   ctx.beginPath();
@@ -313,19 +344,33 @@ function desenharPlaca(ctx, alvo, rodada) {
     ctx.arc(sx, sy, 6 + ruidoFixo(i + 3) * 10, 0, Math.PI * 2);
     ctx.fill();
   }
-  // Número do alvo.
+  // Número do alvo: no estalo ele vira de lado (escala horizontal vai a zero).
+  ctx.save();
+  ctx.translate(x + largura / 2, y + altura - 22);
+  ctx.scale(Math.max(0.02, escalaNumero), 1);
   ctx.font = `bold 44px ${FONTE}`;
   ctx.fillStyle = '#1f1a16';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
-  ctx.fillText(String(alvo), x + largura / 2, y + altura - 22);
+  ctx.fillText(String(numeroMostrado), 0, 0);
+  ctx.restore();
+
   ctx.font = `11px ${FONTE}`;
   ctx.fillStyle = 'rgba(40, 30, 22, 0.8)';
+  ctx.textAlign = 'center';
   ctx.fillText('ALVO', x + largura / 2, y + 16);
+
+  if (clarao > 0) {
+    ctx.fillStyle = `rgba(255, 245, 220, ${0.5 * clarao})`;
+    ctx.fillRect(x, y, largura, altura);
+  }
+  ctx.restore();
+
   // Rodada, riscada a giz na mesa ao lado.
   ctx.font = `12px ${FONTE}`;
   ctx.fillStyle = 'rgba(200, 190, 170, 0.45)';
-  ctx.fillText(`rodada ${rodada}`, x + largura / 2, y + altura + 26);
+  ctx.textAlign = 'center';
+  ctx.fillText(`rodada ${rodada}`, PLACA.x + largura / 2, PLACA.y + altura + 26);
 }
 
 // ---------------------------------------------------------------------
@@ -447,14 +492,46 @@ export function criarCenario() {
       ctx.restore();
     },
 
-    /** Objetos atrás da mesa: cadeira e TV. Desenhar antes do oponente e do tampo. */
-    desenharFundoDaSala(ctx, agora, lampada, centroOponenteX) {
+    /**
+     * Objetos atrás da mesa: cadeira e TV. Desenhar antes do oponente e do tampo.
+     * `forcaDaTv` 0..1 acende a TV na troca de nível, quando o Kaio fala.
+     */
+    desenharFundoDaSala(ctx, agora, lampada, centroOponenteX, forcaDaTv = 0) {
       desenharCadeira(ctx, centroOponenteX);
-      desenharTv(ctx, ruidoTv, agora, lampada.intensidade);
+      desenharTv(ctx, ruidoTv, agora, lampada.intensidade, forcaDaTv);
     },
 
     desenharTampo(ctx) {
       ctx.drawImage(tampo, 0, 0);
+    },
+
+    /**
+     * Redesenha só a tela da TV e o halo dela, por cima do escurecimento,
+     * para o aparelho continuar aceso quando o anfitrião fala.
+     */
+    desenharTvAcesa(ctx, agora, forca) {
+      if (forca <= 0) return;
+      const { x, y, largura, altura } = TV;
+      const telaX = x + 12;
+      const telaY = y + 12;
+      const telaL = largura - 44;
+      const telaA = altura - 26;
+
+      ctx.save();
+      ctx.globalAlpha = forca;
+      const halo = ctx.createRadialGradient(x + largura / 2, y + altura / 2, 30, x + largura / 2, y + altura / 2, 460);
+      halo.addColorStop(0, 'rgba(150, 175, 210, 0.5)');
+      halo.addColorStop(1, 'rgba(150, 175, 210, 0)');
+      ctx.fillStyle = halo;
+      ctx.fillRect(x - 460, y - 460, largura + 920, altura + 920);
+
+      retanguloArredondado(ctx, telaX, telaY, telaL, telaA, 10);
+      ctx.save();
+      ctx.clip();
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(ruidoTv.tela, telaX - 2, telaY - 2, telaL + 4, telaA + 4);
+      ctx.restore();
+      ctx.restore();
     },
 
     desenharPlaca,

@@ -3,6 +3,9 @@ import './engine.test.js';
 import './ai.test.js';
 import './parametros.test.js';
 import './animacao.test.js';
+import './score.test.js';
+import './trumps.test.js';
+import './niveis.test.js';
 import { rodarTodos } from './testador.js';
 
 const resultados = rodarTodos();
