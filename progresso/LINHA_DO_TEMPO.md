@@ -323,3 +323,10 @@ Primeira rodada de mudanças pedidas jogando, não planejando.
 - O limite da mão passou a viver na partida (`jogo.maximoNaMao`), e vale só para o jogador: o do oponente é sempre o padrão do config.
 - Dois testes novos travam isso: nenhuma recompensa é do tipo que dá carta por rodada, e mesmo com a mão maior continua chegando uma só.
 - Testes: 324/324. A regressão da seed 1617 continua igual.
+
+## 2026-09-23 — O modo difícil sem muletas
+- No difícil **nenhuma recompensa vale** — nem as já ganhas — e em troca o **monte de trunfos entra inteiro**, inclusive as cartas que ainda não foram desbloqueadas. Quem escolhe o difícil quer o jogo cheio e sem empurrão.
+- As recompensas continuam sendo ganhas e guardadas no difícil; elas só voltam a valer quando o jogador desliga o modo.
+- A regra ficou no módulo puro (`cartasDoSorteio` e `vagasAMaisNaMao` em `progresso.js`), com três testes, em vez de espalhada pela interface.
+- O rodapé do título passou a dizer o que o difícil muda, em três partes: oponente no máximo, monte inteiro, nenhuma recompensa.
+- Testes: 327/327.

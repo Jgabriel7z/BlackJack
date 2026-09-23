@@ -962,6 +962,21 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
   - Dois testes travam a regra para ela não ser furada de novo: nenhuma recompensa pode ser do tipo que dá carta por rodada, e mesmo com a mão maior continua chegando uma só.
 - **Impressões da equipe:**
 
+### Prompt 34 — O difícil sem muletas
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> Não quero essas recompensas no modo dificil, só libere todos os trunfos possiveis, mas não coloque esses bonus
+
+- **Resposta (resumo):** no difícil o jogo deixou de dar e de segurar ao mesmo tempo: nenhuma recompensa vale (nem as já ganhas), e o monte de trunfos entra inteiro, inclusive as cartas que ainda não foram desbloqueadas.
+- **Arquivos gerados/alterados:** alterados `src/engine/progresso.js`, `src/ui/main.js`, `render.js`, `tests/progresso.test.js`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **As duas metades do pedido são a mesma ideia.** Liberar tudo e tirar os bônus parecem coisas opostas — uma dá, outra tira — mas as duas dizem "não quero o jogo me ajudando nem me segurando". O modo difícil virou isso: monte cheio, zero muleta.
+  - **A regra foi para o módulo puro, não para a interface.** `cartasDoSorteio` e `vagasAMaisNaMao` decidem sozinhas o que vale, olhando `opcoes.dificil`; o `main.js` só chama. Assim deu para travar com três testes, inclusive o de que as recompensas **continuam sendo ganhas** no difícil e voltam a valer quando o modo é desligado — progresso não se perde, só fica suspenso.
+  - O rodapé do título passou a dizer as três coisas que o difícil muda, porque um modo que altera o monte sem avisar seria uma surpresa desagradável.
+- **Impressões da equipe:**
+
 ---
 
 ## Contagem de prompts por etapa
@@ -973,4 +988,4 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
 | Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
 | Etapa 3 — Abertura | 4 (sub-passos 3.1 a 3.5; o prompt 26 trouxe 3.4 e 3.5 juntos) | 1 (fechamento) | 5 |
-| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 5 (29: fechar o trabalho; 30: ajustes depois de jogar; 31: o Kaio piadista; 32: uma carta por rodada e a voz dele; 33: a recompensa que furava a regra) | 6 |
+| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 6 (29 a 34: fechamento e os ajustes feitos jogando) | 7 |

@@ -48,7 +48,7 @@ import {
   anotarPartida,
   anotarTrunfoUsado,
   anotarTrunfoRemovido,
-  cartasSorteaveis,
+  cartasDoSorteio,
   vagasAMaisNaMao,
   RECOMPENSAS,
 } from '../engine/progresso.js';
@@ -133,7 +133,7 @@ let catalogo = montarCatalogo();
 
 function montarCatalogo() {
   return prepararCatalogo(catalogoJson, {
-    sorteaveis: cartasSorteaveis(progresso, CARTAS_DO_JOGADOR),
+    sorteaveis: cartasDoSorteio(progresso, CARTAS_DO_JOGADOR),
     // A Desperation não é carta de mão: só o anfitrião joga, na trapaça.
     extras: ['desperation'],
   });
@@ -1275,6 +1275,9 @@ function alternarEfeitos() {
 function alternarDificil() {
   mesa.dificil = !mesa.dificil;
   progresso.opcoes.dificil = mesa.dificil;
+  // O difícil muda o monte: entra tudo, inclusive o que não foi ganho.
+  catalogo = montarCatalogo();
+  mesa.dados.desbloqueadas = progresso.desbloqueios.length;
   salvarProgresso();
 }
 

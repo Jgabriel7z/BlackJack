@@ -1279,11 +1279,14 @@ function desenharRodapeDosDados(ctx, mesa) {
   texto(ctx, partes.join('   ·   '), LARGURA / 2, y, 14, COR.textoApagado);
 
   // O modo difícil é escolhido aqui, no menu inicial.
-  const modo = mesa.dificil
-    ? 'MODO DIFÍCIL LIGADO — o oponente joga no máximo desde o nível 1'
-    : 'modo normal   ·   H liga o modo difícil';
-  texto(ctx, modo, LARGURA / 2, y - 26, 14,
-    mesa.dificil ? COR.vermelho : COR.textoApagado, 'center', mesa.dificil);
+  if (mesa.dificil) {
+    texto(ctx, 'MODO DIFÍCIL LIGADO', LARGURA / 2, y - 44, 15, COR.vermelho, 'center', true);
+    texto(ctx, 'o oponente joga no máximo desde o nível 1   ·   o monte vem inteiro   ·   nenhuma recompensa vale',
+      LARGURA / 2, y - 24, 12, COR.textoApagado);
+  } else {
+    texto(ctx, 'modo normal   ·   H liga o modo difícil',
+      LARGURA / 2, y - 26, 14, COR.textoApagado);
+  }
 
   if (dados.salvando) {
     const efeitos = mesa.efeitos?.ligados === false ? 'E liga os efeitos' : 'E desliga os efeitos';

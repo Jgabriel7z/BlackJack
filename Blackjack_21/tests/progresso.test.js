@@ -12,6 +12,7 @@ import {
   anotarTrunfoRemovido,
   conferirRecompensas,
   cartasSorteaveis,
+  cartasDoSorteio,
   vagasAMaisNaMao,
   RECOMPENSAS,
   VERSAO,
@@ -165,6 +166,39 @@ teste('progresso: as duas recompensas de vaga se somam', () => {
   for (let i = 0; i < 3; i++) anotarRodada(p, { total: 21, alvo: 21 });
   anotarPartida(p, { venceu: true, estourouAlgumaVez: true });
   assertIgual(vagasAMaisNaMao(p), 2);
+});
+
+// ---------------------------------------------------------------------
+//  O modê difícil: tudo liberado, nenhum bônus
+// ---------------------------------------------------------------------
+
+teste('difícil: o monte entra inteiro, mesmo sem ter desbloqueado nada', () => {
+  const todas = ['one_up', 'shield', 'go_for_24', 'go_for_27'];
+  const normal = criarProgresso();
+  const dificil = criarProgresso();
+  dificil.opcoes.dificil = true;
+
+  assertIgual(cartasDoSorteio(normal, todas), ['one_up', 'shield'], 'no normal as premiadas ficam presas');
+  assertIgual(cartasDoSorteio(dificil, todas), todas, 'no difícil sai tudo');
+});
+
+teste('difícil: nenhuma recompensa vale, nem as já ganhas', () => {
+  const p = criarProgresso();
+  for (let i = 0; i < 3; i++) anotarRodada(p, { total: 21, alvo: 21 });
+  anotarPartida(p, { venceu: true, estourouAlgumaVez: true });
+  assertIgual(vagasAMaisNaMao(p), 2, 'no normal as duas contam');
+
+  p.opcoes.dificil = true;
+  assertIgual(vagasAMaisNaMao(p), 0, 'no difícil não conta nenhuma');
+});
+
+teste('difícil: as recompensas continuam guardadas para quando ele voltar ao normal', () => {
+  const p = criarProgresso();
+  p.opcoes.dificil = true;
+  for (let i = 0; i < 5; i++) anotarPartida(p, { venceu: true });
+  assert(p.desbloqueios.includes('go_for_24'), 'ganhar no difícil ainda desbloqueia');
+  p.opcoes.dificil = false;
+  assert(cartasDoSorteio(p, ['go_for_24']).includes('go_for_24'));
 });
 
 teste('progresso: recompensa nenhuma dá carta a mais por rodada', () => {

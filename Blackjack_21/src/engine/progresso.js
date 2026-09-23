@@ -105,6 +105,19 @@ export const RECOMPENSAS = Object.freeze([
   },
 ]);
 
+/**
+ * O monte de onde as cartas são sorteadas.
+ *
+ * No modo difícil o jogo não segura nada e não dá nada: o baralho de
+ * trunfos entra INTEIRO, inclusive o que ainda não foi desbloqueado, e
+ * em troca nenhuma recompensa vale (ver `vagasAMaisNaMao`). Quem escolhe
+ * o difícil quer o jogo cheio e sem empurrão.
+ */
+export function cartasDoSorteio(progresso, todas) {
+  if (progresso.opcoes?.dificil) return [...todas];
+  return cartasSorteaveis(progresso, todas);
+}
+
 /** As cartas que ainda não foram desbloqueadas não entram no sorteio. */
 export function cartasSorteaveis(progresso, todas) {
   const presas = new Set(
@@ -125,6 +138,8 @@ export function cartasSorteaveis(progresso, todas) {
  * hora certa) sem furar a regra.
  */
 export function vagasAMaisNaMao(progresso) {
+  // No difícil nenhuma recompensa vale: é o preço de ter o monte inteiro.
+  if (progresso.opcoes?.dificil) return 0;
   return RECOMPENSAS.filter((r) => r.tipo === 'mao_maior'
     && progresso.desbloqueios.includes(r.id)).length;
 }
