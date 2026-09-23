@@ -102,9 +102,9 @@ export function criarJogo(opcoes = {}) {
     serra: SERRA_INICIAL,
     vitoriaFinal: false,
     catalogoTrunfos: opcoes.catalogoTrunfos ?? null,
-    // Cartas trunfo a mais que o JOGADOR recebe no começo de cada rodada,
-    // vindas das recompensas da tabela A5 (sub-passo 4.1).
-    trunfosExtras: opcoes.trunfosExtras ?? 0,
+    // Quantas cartas trunfo a mão do JOGADOR comporta. O padrão vem do
+    // config; as recompensas da tabela A5 aumentam esse número (4.1).
+    maximoNaMao: opcoes.maximoNaMao ?? TRUNFOS.maximoNaMao,
     // Dois geradores separados, os dois vindos da seed: assim sortear cartas
     // trunfo não muda o embaralhamento, e a mesma seed dá sempre o mesmo
     // baralho, com trunfos ligados ou não.
@@ -178,10 +178,6 @@ export function iniciarRodada(jogo) {
       darTrunfo(jogo, LADO.JOGADOR);
       darTrunfo(jogo, LADO.OPONENTE);
     }
-    // As cartas a mais das recompensas vêm DEPOIS do sorteio normal, de
-    // propósito: sem recompensa nenhuma a ordem dos sorteios é exatamente
-    // a de antes, e as seeds antigas continuam dando a mesma partida.
-    for (let i = 0; i < jogo.trunfosExtras; i++) darTrunfo(jogo, LADO.JOGADOR);
   }
 
   jogo.staysSeguidos = 0;

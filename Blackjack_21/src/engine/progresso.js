@@ -89,16 +89,16 @@ export const RECOMPENSAS = Object.freeze([
   },
   {
     id: 'trunfo_inicial_alvos',
-    tipo: 'trunfo_inicial',
-    nome: 'Uma carta trunfo a mais no começo da rodada',
+    tipo: 'mao_maior',
+    nome: 'Uma vaga a mais na mão de trunfos',
     condicao: 'Fechar no alvo exato 3 vezes no total',
     progresso: (e) => `${Math.min(e.alvosExatos, 3)}/3`,
     atingida: (e) => e.alvosExatos >= 3,
   },
   {
     id: 'trunfo_inicial_estourado',
-    tipo: 'trunfo_inicial',
-    nome: 'Uma carta trunfo a mais no começo da rodada',
+    tipo: 'mao_maior',
+    nome: 'Uma vaga a mais na mão de trunfos',
     condicao: 'Vencer uma partida mesmo tendo estourado',
     progresso: () => '—',
     atingida: (e, evento) => evento.venceuTendoEstourado === true,
@@ -114,9 +114,18 @@ export function cartasSorteaveis(progresso, todas) {
   return todas.filter((id) => !presas.has(id));
 }
 
-/** Quantas cartas trunfo a mais o jogador começa a rodada (0, 1 ou 2). */
-export function trunfosIniciaisExtras(progresso) {
-  return RECOMPENSAS.filter((r) => r.tipo === 'trunfo_inicial'
+/**
+ * Quantas vagas a mais a mão de trunfos ganha (0, 1 ou 2).
+ *
+ * A tabela A5 do PDF chama esta recompensa de "Starting Trump Card +1",
+ * uma carta a mais no começo da rodada. Depois de jogar, o grupo fechou
+ * a entrada em UMA carta por rodada, e uma recompensa que desse outra
+ * seria justamente o que ele pediu para acabar. Ela virou então uma
+ * vaga a mais na mão: continua valendo (dá para guardar carta boa para a
+ * hora certa) sem furar a regra.
+ */
+export function vagasAMaisNaMao(progresso) {
+  return RECOMPENSAS.filter((r) => r.tipo === 'mao_maior'
     && progresso.desbloqueios.includes(r.id)).length;
 }
 

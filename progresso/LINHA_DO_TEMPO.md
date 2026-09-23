@@ -316,3 +316,10 @@ Primeira rodada de mudanças pedidas jogando, não planejando.
 - **A carta chega com animação**: sobe pela borda de baixo até o lugar dela na mão, passa um pouco do ponto e volta. Como agora é a única da rodada, ela merecia ser vista chegando; a mensagem da mesa diz qual foi.
 - **O Kaio ganhou voz**: nenhuma palavra, só grunhidos graves com chiado de alto-falante por cima, no espírito do que o grupo pediu. O ritmo dos grunhidos sai do próprio texto da fala (soma dos códigos das letras), sem `Math.random` — então a mesma fala soa sempre igual e nenhuma soa como a outra. Vale para os comentários da rodada, as trocas de nível, a despedida e a trapaça.
 - Testes: 321/321. A regressão da seed 1617 e o ciclo completo (seed 177) continuam iguais.
+
+## 2026-09-23 — A recompensa que furava a regra nova
+- O grupo continuava ganhando **duas** cartas por rodada depois da mudança. A causa não era o config: era a recompensa da tabela A5 **"Vencer uma partida mesmo tendo estourado"**, desbloqueada jogando, que dava "uma carta trunfo a mais no começo da rodada" — exatamente o que tinha acabado de ser proibido.
+- As duas recompensas desse tipo viraram **uma vaga a mais na mão** (4 → 5 → 6). Continuam valendo, porque guardar carta boa para a hora certa é vantagem real, e param de furar a regra de uma carta por rodada.
+- O limite da mão passou a viver na partida (`jogo.maximoNaMao`), e vale só para o jogador: o do oponente é sempre o padrão do config.
+- Dois testes novos travam isso: nenhuma recompensa é do tipo que dá carta por rodada, e mesmo com a mão maior continua chegando uma só.
+- Testes: 324/324. A regressão da seed 1617 continua igual.

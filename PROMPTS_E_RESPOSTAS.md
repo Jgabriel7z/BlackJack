@@ -945,6 +945,23 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
   - Os ajudantes de áudio (`tom` e `rajada`) ganharam `atraso` para dar para agendar a sequência de grunhidos — antes tudo tocava no instante da chamada.
 - **Impressões da equipe:**
 
+### Prompt 33 — A recompensa que furava a regra
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> Ele ainda tá me dando duas cartas de trunfo for turno
+
+- **Resposta (resumo):** o config estava certo, o bug era de design. A recompensa da tabela A5 "Vencer uma partida mesmo tendo estourado" — que o grupo desbloqueou jogando — dava "uma carta trunfo a mais no começo da rodada", que é exatamente o que tinha acabado de ser proibido. As duas recompensas desse tipo viraram **uma vaga a mais na mão**.
+- **Arquivos gerados/alterados:** alterados `src/engine/progresso.js`, `game.js`, `trumps.js`, `src/ui/main.js`, `tests/progresso.test.js`, `tests/trumps.test.js`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **A regra nova brigou com uma regra antiga, e ninguém viu na hora.** Fechar a entrada em uma carta por rodada e manter uma recompensa que dá outra carta por rodada são duas decisões que não podem coexistir. Quem percebeu foi quem estava jogando, não quem escreveu — e só porque o progresso salvo já tinha a recompensa.
+  - **A diagnóstico veio antes do conserto.** Um script mediu quantas cartas chegam com 0, 1 e 2 recompensas desbloqueadas, confirmando a causa em vez de chutar no código.
+  - **A recompensa não foi apagada, foi repensada.** Uma vaga a mais na mão (4 → 5 → 6) continua sendo vantagem de verdade agora que a carta é escassa: dá para guardar uma boa para a hora certa. O PDF chama essa linha de "Starting Trump Card +1"; a mudança está anotada no código com o motivo.
+  - **O limite da mão virou estado da partida**, e vale só para o jogador — o oponente segue no padrão do config, senão a recompensa ajudaria os dois.
+  - Dois testes travam a regra para ela não ser furada de novo: nenhuma recompensa pode ser do tipo que dá carta por rodada, e mesmo com a mão maior continua chegando uma só.
+- **Impressões da equipe:**
+
 ---
 
 ## Contagem de prompts por etapa
@@ -956,4 +973,4 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
 | Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
 | Etapa 3 — Abertura | 4 (sub-passos 3.1 a 3.5; o prompt 26 trouxe 3.4 e 3.5 juntos) | 1 (fechamento) | 5 |
-| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 4 (29: fechar o trabalho; 30: ajustes depois de jogar; 31: o Kaio piadista; 32: uma carta por rodada e a voz dele) | 5 |
+| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 5 (29: fechar o trabalho; 30: ajustes depois de jogar; 31: o Kaio piadista; 32: uma carta por rodada e a voz dele; 33: a recompensa que furava a regra) | 6 |

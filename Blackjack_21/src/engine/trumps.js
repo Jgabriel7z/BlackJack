@@ -112,7 +112,12 @@ export function darTrunfo(jogo, lado, id = null) {
   const participante = jogo.jogadores[lado];
   const escolhido = id ?? sortearTrunfo(jogo.catalogoTrunfos, jogo._aleatorioTrunfos());
   participante.trunfos.push(escolhido);
-  while (participante.trunfos.length > TRUNFOS.maximoNaMao) participante.trunfos.shift();
+  // O limite do jogador pode ser maior que o do config, por recompensa;
+  // o do oponente é sempre o padrão.
+  const limite = lado === 'jogador'
+    ? (jogo.maximoNaMao ?? TRUNFOS.maximoNaMao)
+    : TRUNFOS.maximoNaMao;
+  while (participante.trunfos.length > limite) participante.trunfos.shift();
   return escolhido;
 }
 

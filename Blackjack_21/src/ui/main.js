@@ -49,7 +49,7 @@ import {
   anotarTrunfoUsado,
   anotarTrunfoRemovido,
   cartasSorteaveis,
-  trunfosIniciaisExtras,
+  vagasAMaisNaMao,
   RECOMPENSAS,
 } from '../engine/progresso.js';
 import {
@@ -78,7 +78,7 @@ import {
   CARTAS_DO_JOGADOR,
 } from '../engine/trumps.js';
 import catalogoJson from '../../data/trump_cards.js';
-import { NOMES, EQUIPE, TITULO, FALA_DA_VITORIA, FALA_DA_TRAPACA } from '../config.js';
+import { NOMES, EQUIPE, TITULO, TRUNFOS, FALA_DA_VITORIA, FALA_DA_TRAPACA } from '../config.js';
 import { lerParametros } from './parametros.js';
 import {
   criarRenderizador,
@@ -272,8 +272,8 @@ function novaPartida(opcoes = {}) {
     seed: opcoes.seed ?? parametros.seed ?? seedAleatoria(),
     catalogoTrunfos: catalogo,
     nivel: parametros.nivel ?? 1,
-    // Recompensa da tabela A5: cartas trunfo a mais no começo da rodada.
-    trunfosExtras: demonstracao ? 0 : trunfosIniciaisExtras(progresso),
+    // Recompensa da tabela A5: vagas a mais na mão de trunfos.
+    maximoNaMao: TRUNFOS.maximoNaMao + (demonstracao ? 0 : vagasAMaisNaMao(progresso)),
   });
   rngVisual = criarRng((jogo.seed ^ 0x9e3779b9) >>> 0);
   // Gerador só das falas: assim mudar o que ele diz não mexe no piscar

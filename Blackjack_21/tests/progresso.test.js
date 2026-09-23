@@ -12,7 +12,7 @@ import {
   anotarTrunfoRemovido,
   conferirRecompensas,
   cartasSorteaveis,
-  trunfosIniciaisExtras,
+  vagasAMaisNaMao,
   RECOMPENSAS,
   VERSAO,
 } from '../src/engine/progresso.js';
@@ -137,34 +137,42 @@ teste('progresso: Go For 27 sai com três alvos exatos seguidos', () => {
   assert(novas.some((r) => r.id === 'go_for_27'));
 });
 
-teste('progresso: três alvos exatos no total dão uma carta trunfo a mais', () => {
+teste('progresso: três alvos exatos no total dão uma vaga a mais na mão', () => {
   const p = criarProgresso();
   for (let i = 0; i < 2; i++) {
     anotarRodada(p, { total: 21, alvo: 21 });
     anotarRodada(p, { total: 15, alvo: 21 });   // quebra a sequência de propósito
   }
-  assertIgual(trunfosIniciaisExtras(p), 0);
+  assertIgual(vagasAMaisNaMao(p), 0);
   anotarRodada(p, { total: 21, alvo: 21 });
   assert(p.desbloqueios.includes('trunfo_inicial_alvos'));
-  assertIgual(trunfosIniciaisExtras(p), 1);
+  assertIgual(vagasAMaisNaMao(p), 1);
 });
 
-teste('progresso: vencer tendo estourado dá outra carta trunfo a mais', () => {
+teste('progresso: vencer tendo estourado dá outra vaga a mais na mão', () => {
   const p = criarProgresso();
   anotarPartida(p, { venceu: false, estourouAlgumaVez: true });
-  assertIgual(trunfosIniciaisExtras(p), 0, 'perder não vale');
+  assertIgual(vagasAMaisNaMao(p), 0, 'perder não vale');
   anotarPartida(p, { venceu: true, estourouAlgumaVez: false });
-  assertIgual(trunfosIniciaisExtras(p), 0, 'vencer sem estourar também não');
+  assertIgual(vagasAMaisNaMao(p), 0, 'vencer sem estourar também não');
   anotarPartida(p, { venceu: true, estourouAlgumaVez: true });
   assert(p.desbloqueios.includes('trunfo_inicial_estourado'));
-  assertIgual(trunfosIniciaisExtras(p), 1);
+  assertIgual(vagasAMaisNaMao(p), 1);
 });
 
-teste('progresso: as duas recompensas de trunfo inicial se somam', () => {
+teste('progresso: as duas recompensas de vaga se somam', () => {
   const p = criarProgresso();
   for (let i = 0; i < 3; i++) anotarRodada(p, { total: 21, alvo: 21 });
   anotarPartida(p, { venceu: true, estourouAlgumaVez: true });
-  assertIgual(trunfosIniciaisExtras(p), 2);
+  assertIgual(vagasAMaisNaMao(p), 2);
+});
+
+teste('progresso: recompensa nenhuma dá carta a mais por rodada', () => {
+  // O grupo fechou a entrada em uma carta por rodada; a recompensa da
+  // tabela A5 que dava outra virou vaga na mão justamente para não
+  // furar essa regra.
+  const daCartaPorRodada = RECOMPENSAS.filter((r) => r.tipo === 'trunfo_inicial');
+  assertIgual(daCartaPorRodada, []);
 });
 
 teste('progresso: uma recompensa só é anunciada uma vez', () => {

@@ -289,6 +289,25 @@ teste('trunfos: a mão não passa do máximo do config', () => {
   assertIgual(jogo.jogadores.jogador.trunfos.length, TRUNFOS.maximoNaMao);
 });
 
+teste('trunfos: a mão do jogador pode ser maior por recompensa; a dele não', () => {
+  const jogo = criarJogo({ seed: 9, catalogoTrunfos: CATALOGO, maximoNaMao: TRUNFOS.maximoNaMao + 2 });
+  iniciarRodada(jogo);
+  jogo.jogadores[LADO.JOGADOR].trunfos = [];
+  jogo.jogadores[LADO.OPONENTE].trunfos = [];
+  for (let i = 0; i < 12; i++) {
+    darTrunfo(jogo, LADO.JOGADOR);
+    darTrunfo(jogo, LADO.OPONENTE);
+  }
+  assertIgual(jogo.jogadores[LADO.JOGADOR].trunfos.length, TRUNFOS.maximoNaMao + 2);
+  assertIgual(jogo.jogadores[LADO.OPONENTE].trunfos.length, TRUNFOS.maximoNaMao);
+});
+
+teste('trunfos: mesmo com a mão maior, continua uma carta por rodada', () => {
+  const jogo = criarJogo({ seed: 9, catalogoTrunfos: CATALOGO, maximoNaMao: TRUNFOS.maximoNaMao + 2 });
+  iniciarRodada(jogo);
+  assertIgual(jogo.jogadores[LADO.JOGADOR].trunfos.length, TRUNFOS.porRodada);
+});
+
 teste('trunfos: comprar carta não dá mais trunfo nenhum', () => {
   // A torneira fechou depois de jogar: a única carta da rodada é a do
   // começo. O que ainda traz carta é efeito de outra carta, que é jogada.
