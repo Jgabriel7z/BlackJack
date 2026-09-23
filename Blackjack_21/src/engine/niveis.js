@@ -42,6 +42,7 @@ export const NIVEIS = Object.freeze({
     trunfosIniciais: 2,
     fala: [
       'Dedos são baratos. Sobram nove.',
+      'Anima, João. Você ainda consegue contar o que te resta.',
       'Este aqui não dá para costurar de volta. Nível dez é o último.',
     ],
   }),
@@ -53,6 +54,7 @@ export const NIVEIS = Object.freeze({
     trunfosIniciais: 2,
     fala: [
       'Vocês dois já me entediaram.',
+      'Trouxe uma coisa que não precisa de mão nenhuma para funcionar.',
       'Agora há uma lâmina entre vocês. Ela anda sozinha, e nunca para no meio.',
     ],
   }),

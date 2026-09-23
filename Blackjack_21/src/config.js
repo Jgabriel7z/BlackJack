@@ -53,6 +53,72 @@ export const FALA_DA_TRAPACA = Object.freeze([
   'Eu decido quando esta mesa acaba — e não é agora.',
 ]);
 
+/**
+ * O que o Kaio solta durante a partida. Ele não narra o jogo: tira sarro
+ * de quem está jogando, como o mestre do material original. A regra do
+ * grupo continua valendo — ele é cruel de boca, mas nada do que ele diz
+ * descreve ferida, sangue ou mutilação; o nojo fica por conta do que a
+ * pessoa imagina.
+ *
+ * Uma fala por rodada, no máximo, e ele não repete enquanto houver
+ * outra daquela mesma situação guardada (ver `src/engine/anfitriao.js`).
+ */
+export const FALAS_DO_ANFITRIAO = Object.freeze({
+  jogadorEstourou: Object.freeze([
+    'Passou. Que pena. Eu tinha at\u00e9 apostado em voc\u00ea.',
+    'Existe um n\u00famero antes desse, Jo\u00e3o. V\u00e1rios, na verdade.',
+    'Voc\u00ea comprou porque quis. Essa \u00e9 a parte bonita.',
+    'A casa agradece a generosidade.',
+    'Ningu\u00e9m te obrigou. Guarde isso para quando doer.',
+  ]),
+  oponenteEstourou: Object.freeze([
+    'Luiz, Luiz... a gente j\u00e1 conversou sobre isso.',
+    'Ele estourou sozinho. N\u00e3o fica convencido, Jo\u00e3o.',
+    'Um dos dois tinha que ser o burro da noite. Hoje n\u00e3o foi voc\u00ea.',
+    'Eu escolho os oponentes pela persist\u00eancia, n\u00e3o pela intelig\u00eancia.',
+  ]),
+  alvoExato: Object.freeze([
+    'Cravado. Guarde esse momento, \u00e9 o melhor da sua noite.',
+    'Perfeito. Eu odeio quando \u00e9 perfeito.',
+    'Sorte. Fala comigo quando fizer de novo.',
+    'Muito bom. Sinceramente. E isso me irrita.',
+  ]),
+  jogadorVenceuRodada: Object.freeze([
+    'Uma para voc\u00ea. Eu tenho a noite inteira.',
+    'Comemora, vai. Faz parte do meu trabalho deixar.',
+    'Gostei. Agora ficou interessante de assistir.',
+    'Anota a\u00ed: uma. Eu vou lembrar.',
+  ]),
+  jogadorPerdeuRodada: Object.freeze([
+    'Ai. Essa eu senti daqui.',
+    'N\u00e3o foi nada. Voc\u00ea tinha de sobra.',
+    'Olha pelo lado bom: agora \u00e9 menos coisa para perder.',
+    'Eu avisei que a mesa \u00e9 honesta. Eu \u00e9 que n\u00e3o sou.',
+    'Sem drama. Voc\u00ea assinou.',
+  ]),
+  empate: Object.freeze([
+    'Empate. Os dois pagam. Adoro empate.',
+    'Ningu\u00e9m ganhou e todo mundo perdeu. Meu momento favorito.',
+    'Que lindo. Justi\u00e7a existe, e ela cobra dos dois.',
+  ]),
+  jogadorQuaseMorto: Object.freeze([
+    'Calma. Respira. Isso deixa tudo mais engra\u00e7ado.',
+    'Se eu fosse voc\u00ea eu j\u00e1 teria parado. Mas eu n\u00e3o sou voc\u00ea: eu sou o dono da mesa.',
+    'Uma agora, Jo\u00e3o. Uma.',
+    'Voc\u00ea t\u00e1 fazendo essa cara de quem entendeu o jogo. Tarde.',
+  ]),
+  oponenteQuaseMorto: Object.freeze([
+    'O Luiz est\u00e1 quase. N\u00e3o sei se torço por voc\u00ea ou por ele.',
+    'Se ele sair, sobra voc\u00ea e eu. Pensa nisso com carinho.',
+    'Ele durou mais que os outros. N\u00e3o \u00e9 elogio.',
+  ]),
+  apostaAlta: Object.freeze([
+    'A aposta subiu. A mesa fica mais honesta assim.',
+    'Tudo isso numa carta s\u00f3. Que beleza.',
+    'Agora sim vale a pena ligar a c\u00e2mera.',
+  ]),
+});
+
 /** A tela de título: o tubo acendendo e o convite piscando (3.2). */
 export const TITULO = Object.freeze({
   ligarTv: 2600,        // quanto dura a televisão acendendo

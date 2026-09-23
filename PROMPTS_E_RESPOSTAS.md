@@ -911,6 +911,23 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
   - Testes: 306. A regressão da seed 1617 e a captura do ciclo completo continuam iguais.
 - **Impressões da equipe:**
 
+### Prompt 31 — O Kaio piadista
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> faça o kaio ser mais piadista entre os nivel, ele faz piadas sadicas e pesadas, semelhante ao lucas do material original, então ele deve ter alguns comentarios durante o jogo pra aumentar a irmessão
+
+- **Resposta (resumo):** o Kaio só falava em três momentos roteirizados (troca de nível, vitória e trapaça). Agora ele comenta a rodada: 35 falas em 9 situações, escolhidas por um módulo puro (`src/engine/anfitriao.js`) com o gerador de seed — a mesma partida dá sempre a mesma conversa. A fala aparece numa tarja de televisão no alto da tela.
+- **Arquivos gerados/alterados:** `src/engine/anfitriao.js` e `tests/anfitriao.test.js` (novos); alterados `src/config.js`, `src/engine/niveis.js`, `src/ui/main.js`, `src/ui/render.js`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **O tempo da piada importa mais que a piada.** A primeira versão soltava a fala junto com o resultado da rodada, e ele falava por cima do próprio jogo. Ele passou a comentar **depois da punição**: a lâmina desce, a tela treme, e só então ele abre a boca.
+  - **O silêncio precisou ser projetado.** Um comentador que fala em toda rodada vira barulho de fundo e some da percepção. Ficou em no máximo uma fala por rodada, 72% de chance, e sem repetir enquanto houver outra daquela situação guardada.
+  - **Ele fala do que é engraçado para ele, não do que importa para o jogador.** A ordem de interesse põe "você está a um passo do fim" na frente de tudo, depois estourar, depois empate — ganhar uma rodada é a última coisa que ele comenta.
+  - **A regra de violência sem sangue virou teste automatizado.** Escrever para um personagem sádico é justamente onde a regra do grupo corre risco, então um teste varre todas as falas atrás de sangue, ferida, corte, carne e osso. Ele é cruel; o texto não descreve mutilação.
+  - **Gerador próprio para as falas**, separado do visual: mudar o que ele diz não mexe no piscar da lâmpada nem no tempo que o oponente leva pensando, então as seeds das capturas continuam valendo.
+- **Impressões da equipe:**
+
 ---
 
 ## Contagem de prompts por etapa
@@ -922,4 +939,4 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
 | Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
 | Etapa 3 — Abertura | 4 (sub-passos 3.1 a 3.5; o prompt 26 trouxe 3.4 e 3.5 juntos) | 1 (fechamento) | 5 |
-| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 2 (prompt 29: fechar o trabalho; prompt 30: ajustes depois de jogar) | 3 |
+| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 3 (prompt 29: fechar o trabalho; 30: ajustes depois de jogar; 31: o Kaio piadista) | 4 |

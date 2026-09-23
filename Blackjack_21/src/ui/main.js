@@ -58,9 +58,10 @@ import {
   prepararTrapaca,
   aplicarTrapaca,
 } from '../engine/trapaca.js';
+import { criarAnfitriao, comentarSobre } from '../engine/anfitriao.js';
 import { criarArmazenamento } from './armazenamento.js';
 import { criarAudio } from './audio.js';
-import { tensaoDaCena } from './tensao.js';
+import { tensaoDaCena, intensidadeDoPerigo } from './tensao.js';
 import {
   posicaoNoPlacar,
   registrar as registrarNoPlacar,
@@ -156,6 +157,10 @@ let estourouNaPartida = false;
 let levouPunicaoNaPartida = false;
 /** O estado da trapaça do anfitrião nesta partida (4.8). */
 let trapaca = criarTrapaca();
+/** Quem decide quando o Kaio abre a boca durante a rodada. */
+let anfitriao = null;
+/** Quanto tempo um comentário dele fica na tela. */
+const DURACAO_DO_COMENTARIO = 5200;
 let lampada = null;
 let pontuacao = null;
 
@@ -223,6 +228,8 @@ const mesa = {
   pontos: { total: 0, multiplicador: 1, ultimo: null },
   // 2.6
   recorde: { valor: 0, piscando: false, piscandoDesde: null },
+  // O Kaio comentando a rodada: { texto, ate } enquanto está no ar.
+  comentario: null,
   // 4.8
   trapaca: { forca: 0 },   // 0..1, a luz virando e a TV gritando
   // ajuste depois de jogar
@@ -268,6 +275,9 @@ function novaPartida(opcoes = {}) {
     trunfosExtras: demonstracao ? 0 : trunfosIniciaisExtras(progresso),
   });
   rngVisual = criarRng((jogo.seed ^ 0x9e3779b9) >>> 0);
+  // Gerador só das falas: assim mudar o que ele diz não mexe no piscar
+  // da lâmpada nem no tempo que o oponente leva pensando.
+  anfitriao = criarAnfitriao(criarRng((jogo.seed ^ 0x5bd1e995) >>> 0));
   lampada = criarLampada(rngVisual, parametros.fatorTempo);
   pontuacao = criarPontuacao();
   mesa.pontos = { total: 0, multiplicador: 1, ultimo: null };
@@ -312,6 +322,7 @@ function novaPartida(opcoes = {}) {
   levouPunicaoNaPartida = false;
   trapaca = criarTrapaca();
   mesa.trapaca = { forca: 0 };
+  mesa.comentario = null;
   // Começando direto no nível 3 (?nivel=3), a carta da saída já vem.
   prepararTrapaca(jogo);
 
@@ -474,6 +485,14 @@ function adicionarRevelacao(resultado) {
   });
 
   adicionarPunicao(resultado);
+
+  // Só agora, com a lâmina já tendo descido e a mesa atualizada, ele
+  // comenta. Antes disso ele estaria falando por cima do resultado.
+  sequencia.adicionar({
+    nome: 'comentario',
+    duracao: 0,
+    aoTerminar() { comentarARodada(resultado); },
+  });
 
   if (jogo.fase === FASE.FIM_DE_JOGO) adicionarFimDeJogo();
   else if (jogo.fase === FASE.NIVEL_CONCLUIDO) adicionarTrocaDeNivel();
@@ -1307,6 +1326,33 @@ function gravarNoPlacar() {
   salvarProgresso();
 }
 
+/** True se este lado está a uma derrota de sair da mesa. */
+function quaseMorto(lado) {
+  if (mesa.nivel === 2) return mesa[lado].medidor >= 8;
+  if (mesa.nivel === 3) return lado === 'eu' ? mesa.serraPos <= 2 : mesa.serraPos >= 13;
+  return mesa[lado].dedos <= 1;
+}
+
+/**
+ * O Kaio comentando a rodada que acabou de ser resolvida. Ele escolhe a
+ * situação mais interessante da lista e pode muito bem ficar calado.
+ */
+function comentarARodada(resultado) {
+  const situacoes = [];
+  if (resultado.estourou.jogador) situacoes.push('jogadorEstourou');
+  if (resultado.estourou.oponente) situacoes.push('oponenteEstourou');
+  if (resultado.totais.jogador === mesa.alvo) situacoes.push('alvoExato');
+  if (resultado.vencedor === RESULTADO.EMPATE) situacoes.push('empate');
+  else if (resultado.vencedor === RESULTADO.JOGADOR) situacoes.push('jogadorVenceuRodada');
+  else situacoes.push('jogadorPerdeuRodada');
+  if (quaseMorto('eu') || intensidadeDoPerigo(mesa) >= 0.8) situacoes.push('jogadorQuaseMorto');
+  if (quaseMorto('adv')) situacoes.push('oponenteQuaseMorto');
+  if (mesa.eu.aposta >= 3) situacoes.push('apostaAlta');
+
+  const fala = comentarSobre(anfitriao, situacoes, mesa.rodada);
+  if (fala) mesa.comentario = { texto: fala, ate: performance.now() + DURACAO_DO_COMENTARIO };
+}
+
 /** Sufixo da mensagem de resultado com os pontos da rodada. */
 function descreverPontos(detalhe) {
   if (!detalhe.venceu) return '';
@@ -1607,6 +1653,7 @@ function atualizarBotoes() {
   document.body.dataset.fps = String(fps);
   // A trapaça do anfitrião (4.8), para o roteiro de captura.
   document.body.dataset.trapaca = trapaca.aconteceu ? '1' : '0';
+  document.body.dataset.comentario = mesa.comentario ? mesa.comentario.texto : '';
   document.body.dataset.desbloqueios = progresso.desbloqueios.join(',');
   document.body.dataset.partidasJogadas = String(progresso.estatisticas.partidasJogadas);
   document.body.dataset.placar = placarDaSessao.entradas
@@ -1639,6 +1686,9 @@ function quadro(agora) {
     mesa.recorde.piscando = decorrido < DURACAO_DO_PISCA * parametros.fatorTempo;
     if (!mesa.recorde.piscando) mesa.recorde.piscandoDesde = null;
   }
+
+  // A fala do Kaio sai da tela sozinha.
+  if (mesa.comentario && agora >= mesa.comentario.ate) mesa.comentario = null;
 
   // O aviso de "dados apagados" fica alguns segundos e some.
   if (apagadoEm !== null) {

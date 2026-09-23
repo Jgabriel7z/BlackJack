@@ -301,3 +301,12 @@ Primeira rodada de mudanças pedidas jogando, não planejando.
 - **`jogar.cmd`**: dois cliques sobem o servidor e abrem o navegador sozinho, sem ninguém precisar copiar endereço.
 - Medido em 400 partidas com os dois lados usando trunfos: o Luiz vence 67,9% no normal e 81,1% no difícil.
 - Testes: 306/306 (12 novos da raridade, 18 da IA com trunfos). A regressão da seed 1617 e a captura do ciclo completo (seed 177) continuam iguais.
+
+## 2026-09-23 — O Kaio ganhou boca
+- Novo `src/engine/anfitriao.js` (puro): decide **quando** e **qual** fala, com o gerador de seed vindo de fora. As falas moram no `config.js`, junto com os nomes — 35 delas, em 9 situações.
+- Ele comenta **depois da punição**, não junto com o resultado: a lâmina desce primeiro, aí ele fala. E a fala aparece numa tarja de televisão no alto da tela, tremulando de leve, que é de onde a voz dele vem.
+- Duas regras para ele não virar barulho de fundo: no máximo **uma fala por rodada**, e ele não repete enquanto houver outra daquela situação guardada. Com 72% de chance de falar quando poderia, ele às vezes fica calado — e o silêncio dele pesa mais que a fala.
+- Ordem de interesse: estar a um passo do fim vem antes de estourar, que vem antes de ganhar. Ele comenta o que é mais engraçado para ele, não o que é mais importante para você.
+- As falas entre os níveis ganharam uma terceira linha cada, no mesmo tom.
+- **A regra de violência sem sangue virou teste**: um teste varre todas as falas atrás de palavras como sangue, ferida, corte, carne e osso, e falha se alguma aparecer. Ele é cruel de boca; o jogo continua não descrevendo mutilação.
+- Testes: 319/319 (13 novos).

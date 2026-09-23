@@ -1295,6 +1295,41 @@ function desenharRodapeDosDados(ctx, mesa) {
   }
 }
 
+/**
+ * A tarja com a fala do anfitrião durante a rodada. Fica no alto, presa
+ * na largura do texto, e tremula de leve como legenda de transmissão.
+ */
+function desenharComentarioDoAnfitriao(ctx, fala, agora) {
+  const tamanho = 17;
+  ctx.font = `${tamanho}px ${FONTE}`;
+  const rotulo = `${NOME_ANFITRIAO.toUpperCase()}  ·  `;
+  ctx.font = `bold 12px ${FONTE}`;
+  const larguraRotulo = ctx.measureText(rotulo).width;
+  ctx.font = `${tamanho}px ${FONTE}`;
+  const larguraFala = ctx.measureText(fala).width;
+
+  const margem = 18;
+  const largura = Math.min(LARGURA - 80, larguraRotulo + larguraFala + margem * 2);
+  const x = (LARGURA - largura) / 2;
+  const y = 14;
+  const altura = 40;
+
+  ctx.save();
+  // Um tremor de um pixel, no ritmo do chiado: é legenda de TV velha.
+  ctx.translate(0, Math.round(Math.sin(agora / 140) * 0.5));
+  retanguloArredondado(ctx, x, y, largura, altura, 4);
+  ctx.fillStyle = 'rgba(10, 8, 8, 0.86)';
+  ctx.fill();
+  retanguloArredondado(ctx, x, y, largura, altura, 4);
+  ctx.strokeStyle = 'rgba(120, 40, 36, 0.75)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  texto(ctx, rotulo, x + margem, y + 26, 12, COR.vermelho, 'left', true);
+  texto(ctx, fala, x + margem + larguraRotulo, y + 26, tamanho, COR.texto, 'left');
+  ctx.restore();
+}
+
 /** A linha de recompensa nova, no fim da partida. */
 function desenharDesbloqueios(ctx, mesa, y) {
   if (!mesa.desbloqueios || mesa.desbloqueios.length === 0) return;
@@ -1767,12 +1802,16 @@ export function criarRenderizador(canvas, opcoes = {}) {
     // anfitrião fala.
     const tensao = mesa.tela === 'jogando' ? tensaoDaCena(mesa) : 0;
     efeitos.aplicar(ctx, agora, Math.max(mesa.escurecimento, tensao), {
-      tvForca: mesa.kaio ? 0.45 + 0.55 * mesa.tvForte : 0,
+      tvForca: mesa.kaio ? 0.45 + 0.55 * mesa.tvForte : (mesa.comentario ? 0.35 : 0),
       tvArea: TV,
       // No modo difícil as bordas respiram vermelho o tempo todo, e
       // apertam junto com a tensão da mesa.
       medo: mesa.dificil && mesa.tela === 'jogando' ? 0.45 + 0.55 * tensao : 0,
     });
+
+    // O Kaio comentando a rodada: uma tarja de televisão no alto, que é
+    // de onde a voz dele vem.
+    if (mesa.comentario) desenharComentarioDoAnfitriao(ctx, mesa.comentario.texto, agora);
 
     // A trapaça do anfitrião (4.8): a luz da sala vira vermelha.
     if (mesa.trapaca?.forca > 0) {
