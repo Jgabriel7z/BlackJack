@@ -310,3 +310,9 @@ Primeira rodada de mudanças pedidas jogando, não planejando.
 - As falas entre os níveis ganharam uma terceira linha cada, no mesmo tom.
 - **A regra de violência sem sangue virou teste**: um teste varre todas as falas atrás de palavras como sangue, ferida, corte, carne e osso, e falha se alguma aparecer. Ele é cruel de boca; o jogo continua não descrevendo mutilação.
 - Testes: 319/319 (13 novos).
+
+## 2026-09-23 — Torneira fechada e a voz do Kaio
+- **Uma carta trunfo por rodada**, e só. Os níveis 2 e 3 davam duas no começo e ainda caía carta a cada compra (18% de chance); agora é uma no começo de cada rodada em todos os níveis, e comprar não traz mais nada. O que ainda enche a mão é efeito de outra carta (Harvest, Ultimate Draw, Trump Switch) — isso é jogada, não sorte.
+- **A carta chega com animação**: sobe pela borda de baixo até o lugar dela na mão, passa um pouco do ponto e volta. Como agora é a única da rodada, ela merecia ser vista chegando; a mensagem da mesa diz qual foi.
+- **O Kaio ganhou voz**: nenhuma palavra, só grunhidos graves com chiado de alto-falante por cima, no espírito do que o grupo pediu. O ritmo dos grunhidos sai do próprio texto da fala (soma dos códigos das letras), sem `Math.random` — então a mesma fala soa sempre igual e nenhuma soa como a outra. Vale para os comentários da rodada, as trocas de nível, a despedida e a trapaça.
+- Testes: 321/321. A regressão da seed 1617 e o ciclo completo (seed 177) continuam iguais.

@@ -264,11 +264,12 @@ teste('Go For: o alvo novo vale na hora de decidir a rodada', () => {
 //  Mão, chance ao comprar e limites
 // ---------------------------------------------------------------------
 
-teste('trunfos: cada lado recebe os iniciais no começo da rodada', () => {
+teste('trunfos: cada lado recebe uma carta no começo da rodada', () => {
   const jogo = criarJogo({ seed: 3, catalogoTrunfos: CATALOGO });
   iniciarRodada(jogo);
-  assertIgual(jogo.jogadores.jogador.trunfos.length, TRUNFOS.iniciaisPorRodada);
-  assertIgual(jogo.jogadores.oponente.trunfos.length, TRUNFOS.iniciaisPorRodada);
+  assertIgual(jogo.jogadores.jogador.trunfos.length, TRUNFOS.porRodada);
+  assertIgual(jogo.jogadores.oponente.trunfos.length, TRUNFOS.porRodada);
+  assertIgual(TRUNFOS.porRodada, 1, 'depois de jogar, o grupo fechou em uma por rodada');
 });
 
 teste('trunfos: a mesa é limpa entre rodadas, a mão não', () => {
@@ -288,24 +289,19 @@ teste('trunfos: a mão não passa do máximo do config', () => {
   assertIgual(jogo.jogadores.jogador.trunfos.length, TRUNFOS.maximoNaMao);
 });
 
-teste('trunfos: comprar carta dá trunfo com a chance do config', () => {
-  const contar = (chance) => {
-    const original = TRUNFOS.chanceAoComprar;
-    let ganhos = 0;
-    for (let seed = 1; seed <= 60; seed++) {
-      const jogo = criarJogo({ seed, catalogoTrunfos: CATALOGO });
-      iniciarRodada(jogo);
-      jogo.jogadores[LADO.JOGADOR].trunfos = [];
-      // força a chance sem mexer no config congelado: troca o gerador de trunfos
-      jogo._aleatorioTrunfos = () => (chance > 0.5 ? 0.01 : 0.99);
-      const r = hit(jogo, LADO.JOGADOR);
-      if (r.trunfoGanho) ganhos++;
-    }
-    assertIgual(original, TRUNFOS.chanceAoComprar);
-    return ganhos;
-  };
-  assertIgual(contar(1), 60, 'com sorteio baixo, sempre ganha');
-  assertIgual(contar(0), 0, 'com sorteio alto, nunca ganha');
+teste('trunfos: comprar carta não dá mais trunfo nenhum', () => {
+  // A torneira fechou depois de jogar: a única carta da rodada é a do
+  // começo. O que ainda traz carta é efeito de outra carta, que é jogada.
+  assertIgual(TRUNFOS.chanceAoComprar, 0);
+  const jogo = criarJogo({ seed: 5, catalogoTrunfos: CATALOGO });
+  iniciarRodada(jogo);
+  const antes = jogo.jogadores[LADO.JOGADOR].trunfos.length;
+  for (let i = 0; i < 5; i++) {
+    if (jogo.turno !== LADO.JOGADOR) jogo.turno = LADO.JOGADOR;
+    const r = hit(jogo, LADO.JOGADOR);
+    assertIgual(r.trunfoGanho, null, 'nenhuma carta cai ao comprar');
+  }
+  assertIgual(jogo.jogadores[LADO.JOGADOR].trunfos.length, antes);
 });
 
 teste('trunfos: não dá para jogar carta que não está na mão nem fora do turno', () => {

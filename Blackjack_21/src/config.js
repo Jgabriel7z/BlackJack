@@ -168,10 +168,14 @@ export const RARIDADE_DOS_TRUNFOS = Object.freeze({
  * do PDF de referência. Mexa aqui para calibrar.
  */
 export const TRUNFOS = Object.freeze({
-  // Ajustado depois de jogar: a mão estava larga demais e caíam cartas
-  // demais, então dava para acumular e resolver tudo no trunfo.
-  chanceAoComprar: 0.18,   // chance de ganhar 1 trunfo a cada carta comprada (HIT)
+  // Ajustado duas vezes depois de jogar. Primeiro a mão encolheu de 8
+  // para 4; depois a torneira fechou de vez: agora é UMA carta por
+  // rodada para cada lado, entregue no começo com animação, e mais
+  // nenhuma cai sozinha no meio da rodada. O que ainda traz carta é o
+  // efeito de outra carta (Harvest, Ultimate Draw, Trump Switch), que é
+  // uma jogada, não sorte.
+  chanceAoComprar: 0,      // desligado: nada mais cai ao comprar (HIT)
   maximoNaMao: 4,          // acima disso, o trunfo mais antigo é descartado
-  iniciaisPorRodada: 1,    // trunfos recebidos por cada lado no começo da rodada
+  porRodada: 1,            // quantos cada lado GANHA no começo da rodada
   maximoPorRodada: 3,      // quantos cada lado pode JOGAR na mesma rodada
 });

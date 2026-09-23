@@ -39,7 +39,7 @@ export const NIVEIS = Object.freeze({
     nome: 'Choque',
     punicao: 'choque',
     maximo: 10,
-    trunfosIniciais: 2,
+    trunfosIniciais: 1,
     fala: [
       'Dedos são baratos. Sobram nove.',
       'Anima, João. Você ainda consegue contar o que te resta.',
@@ -51,7 +51,7 @@ export const NIVEIS = Object.freeze({
     id: 'serra',
     nome: 'Serra',
     punicao: 'serra',
-    trunfosIniciais: 2,
+    trunfosIniciais: 1,
     fala: [
       'Vocês dois já me entediaram.',
       'Trouxe uma coisa que não precisa de mão nenhuma para funcionar.',

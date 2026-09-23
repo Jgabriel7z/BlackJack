@@ -44,8 +44,10 @@ teste('níveis: os três existem, com aparelho e trunfos iniciais próprios', ()
   assertIgual(configDoNivel(1).punicao, 'dedos');
   assertIgual(configDoNivel(2).punicao, 'choque');
   assertIgual(configDoNivel(3).punicao, 'serra');
-  assertIgual(configDoNivel(2).trunfosIniciais, 2, 'no choque cada um começa com 2');
-  assertIgual(configDoNivel(3).trunfosIniciais, 2);
+  // Depois de jogar, o grupo fechou a torneira: uma carta por rodada em
+  // todos os níveis, e nada mais cai sozinho no meio dela.
+  assertIgual(configDoNivel(2).trunfosIniciais, 1, 'no choque também é uma');
+  assertIgual(configDoNivel(3).trunfosIniciais, 1);
   assertIgual(configDoNivel(2).maximo, 10, 'o medidor vai até 10');
   assert(NIVEIS[NIVEL.CHOQUE].fala.length >= 1, 'o Kaio precisa ter o que falar');
   assert(NIVEIS[NIVEL.SERRA].fala.length >= 1);

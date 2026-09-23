@@ -213,11 +213,37 @@ teste('som: todos os efeitos rodam sem lançar erro', () => {
   const { ContextoFalso } = contextoFalso();
   const audio = criarAudio({ contexto: ContextoFalso });
   audio.ligar();
-  for (const efeito of ['carta', 'lamina', 'capacitor', 'descarga', 'passoDaSerra', 'impacto']) {
+  for (const efeito of ['carta', 'lamina', 'capacitor', 'descarga', 'passoDaSerra', 'impacto', 'grito']) {
     audio[efeito]();
   }
-  assertIgual(audio.ultimoSom, 'impacto');
-  assertIgual(audio.totalDeSons, 6);
+  audio.voz('Uma fala qualquer do anfitrião, com acento e tudo.');
+  assertIgual(audio.ultimoSom, 'voz');
+  assertIgual(audio.totalDeSons, 8);
+});
+
+teste('som: a voz do anfitrião aguenta qualquer texto', () => {
+  const { ContextoFalso, criados } = contextoFalso();
+  const audio = criarAudio({ contexto: ContextoFalso });
+  audio.ligar();
+  const antes = criados.osc;
+  for (const fala of ['', 'oi', 'NÃO. Não assim. Não hoje.', 'a'.repeat(400)]) {
+    audio.voz(fala);
+  }
+  assert(criados.osc > antes, 'grunhiu alguma coisa');
+});
+
+teste('som: a mesma fala soa sempre igual', () => {
+  // O ritmo dos grunhidos sai do próprio texto, sem Math.random, então a
+  // mesma fala cria sempre a mesma quantidade de sons.
+  const contar = () => {
+    const { ContextoFalso, criados } = contextoFalso();
+    const audio = criarAudio({ contexto: ContextoFalso });
+    audio.ligar();
+    const antes = criados.osc;
+    audio.voz('Empate. Os dois pagam. Adoro empate.');
+    return criados.osc - antes;
+  };
+  assertIgual(contar(), contar());
 });
 
 teste('som: a tecla M alterna o mudo', () => {

@@ -214,38 +214,41 @@ export function criarAudio(opcoes = {}) {
   }
 
   /** Uma rajada de ruído com filtro e envelope próprios. */
-  function rajada({ duracao, volume, tipo = 'bandpass', de, para, q = 1, destino }) {
+  function rajada({ duracao, volume, tipo = 'bandpass', de, para, q = 1, destino, atraso = 0 }) {
+    const inicio = agoraCtx() + atraso;
     const fonte = ctx.createBufferSource();
     fonte.buffer = pegarRuido();
     const filtro = ctx.createBiquadFilter();
     filtro.type = tipo;
     filtro.Q.value = q;
-    filtro.frequency.setValueAtTime(de, agoraCtx());
-    filtro.frequency.exponentialRampToValueAtTime(Math.max(para, 30), agoraCtx() + duracao);
+    filtro.frequency.setValueAtTime(de, inicio);
+    filtro.frequency.exponentialRampToValueAtTime(Math.max(para, 30), inicio + duracao);
     const g = ctx.createGain();
-    g.gain.setValueAtTime(volume, agoraCtx());
-    g.gain.exponentialRampToValueAtTime(0.0001, agoraCtx() + duracao);
+    g.gain.setValueAtTime(0.0001, agoraCtx());
+    g.gain.setValueAtTime(volume, inicio);
+    g.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
     fonte.connect(filtro);
     filtro.connect(g);
     g.connect(destino ?? foley);
-    fonte.start();
-    fonte.stop(agoraCtx() + duracao + 0.05);
+    fonte.start(inicio);
+    fonte.stop(inicio + duracao + 0.05);
   }
 
   /** Um tom com envelope, opcionalmente varrendo de uma nota a outra. */
-  function tom({ de, para = null, duracao, volume, tipo = 'sine', destino }) {
+  function tom({ de, para = null, duracao, volume, tipo = 'sine', destino, atraso = 0 }) {
+    const inicio = agoraCtx() + atraso;
     const osc = ctx.createOscillator();
     osc.type = tipo;
-    osc.frequency.setValueAtTime(de, agoraCtx());
-    if (para !== null) osc.frequency.exponentialRampToValueAtTime(Math.max(para, 20), agoraCtx() + duracao);
+    osc.frequency.setValueAtTime(de, inicio);
+    if (para !== null) osc.frequency.exponentialRampToValueAtTime(Math.max(para, 20), inicio + duracao);
     const g = ctx.createGain();
-    g.gain.setValueAtTime(0.0001, agoraCtx());
-    g.gain.exponentialRampToValueAtTime(volume, agoraCtx() + Math.min(0.02, duracao / 4));
-    g.gain.exponentialRampToValueAtTime(0.0001, agoraCtx() + duracao);
+    g.gain.setValueAtTime(0.0001, inicio);
+    g.gain.exponentialRampToValueAtTime(volume, inicio + Math.min(0.02, duracao / 4));
+    g.gain.exponentialRampToValueAtTime(0.0001, inicio + duracao);
     osc.connect(g);
     g.connect(destino ?? foley);
-    osc.start();
-    osc.stop(agoraCtx() + duracao + 0.05);
+    osc.start(inicio);
+    osc.stop(inicio + duracao + 0.05);
   }
 
   /** Executa `fn` só se houver som ligado; erro aqui nunca sobe. */
@@ -337,6 +340,48 @@ export function criarAudio(opcoes = {}) {
         osc.stop(agoraCtx() + DURACAO_DO_ABAFAMENTO / 1000 + 0.1);
       });
       pedirAbafamento = true;   // o próximo quadro fecha o abafador
+    },
+
+    /**
+     * A voz do anfitrião: nenhuma palavra, só grunhidos abafados com
+     * chiado por cima, como uma respiração passando por um alto-falante
+     * velho. O ritmo sai do próprio texto (soma dos códigos das letras),
+     * então a mesma fala soa sempre igual e nenhuma soa como a outra.
+     */
+    voz(fala = '') {
+      tocar('voz', () => {
+        const letras = [...fala];
+        const grunhidos = Math.max(3, Math.min(11, Math.round(letras.length / 9)));
+        // Um "acaso" que vem do texto: sem Math.random, sempre igual.
+        const semente = (i) => {
+          const c = letras[(i * 7) % Math.max(1, letras.length)]?.charCodeAt(0) ?? 65;
+          return ((c * 37 + i * 61) % 100) / 100;
+        };
+
+        let quando = 0;
+        for (let i = 0; i < grunhidos; i++) {
+          const r = semente(i);
+          const duracao = 0.10 + r * 0.10;
+          // O grunhido: grave, curto, e sempre descendo um pouco.
+          tom({
+            de: 96 + r * 54, para: 62 + r * 22, duracao,
+            volume: 0.085 + r * 0.03, tipo: 'sawtooth', atraso: quando,
+          });
+          // E o chiado do alto-falante em cima dele.
+          rajada({
+            duracao: duracao + 0.05, volume: 0.075 + r * 0.04,
+            tipo: 'bandpass', de: 900 + r * 700, para: 420 + r * 260,
+            q: 1.6, atraso: quando,
+          });
+          quando += duracao + 0.035 + semente(i + 3) * 0.075;
+        }
+
+        // A respiração por baixo de tudo, do começo ao fim da fala.
+        rajada({
+          duracao: quando + 0.25, volume: 0.05,
+          tipo: 'bandpass', de: 640, para: 300, q: 0.9,
+        });
+      });
     },
 
     /**

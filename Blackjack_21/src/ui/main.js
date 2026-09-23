@@ -87,6 +87,7 @@ import {
   posicaoTrunfoNaMesa,
   POSICOES,
   TRUNFO,
+  ALTURA,
   definirNomeDoAnfitriao,
   definirTextosDoTitulo,
 } from './render.js';
@@ -671,6 +672,7 @@ function adicionarTrocaDeNivel() {
       aoIniciar() {
         mesa.kaio = fala;
         mesa.tvForte = 1;
+        audio.voz(fala);
       },
     });
   }
@@ -804,6 +806,7 @@ function adicionarDespedidaDoAnfitriao() {
       aoIniciar() {
         mesa.kaio = fala;
         mesa.tvForte = 1;
+        audio.voz(fala);
       },
     });
   }
@@ -871,6 +874,38 @@ function passoTrunfoVoando(carta, inicio, lado = 'eu') {
   };
 }
 const TRUNFO_MESA_ESCALA = 52 / 84; // largura da carta na mesa dividida pela da mão
+
+/**
+ * A carta trunfo da rodada entrando na mão: sobe pela borda de baixo até
+ * o lugar dela, com um exagero no fim. É a única que o jogador ganha por
+ * rodada, então ela merece ser vista chegando.
+ */
+function passoTrunfoChegando(carta, indice, total) {
+  let destino;
+  const saida = ALTURA + 60;
+  return {
+    nome: 'ganhando-trunfo',
+    duracao: 560,
+    aoIniciar() {
+      destino = posicaoTrunfoNaMao(indice, total);
+      mesa.trunfoEmVoo = { carta, lado: 'eu', x: destino.x, y: saida, escala: 1 };
+      audio.carta();
+      mesa.mensagem = `Você recebeu ${carta.nome}.`;
+      mesa.mensagemVermelha = false;
+    },
+    aoAtualizar(p) {
+      const e = suavizar.saidaCubica(p);
+      // Passa um pouco do lugar e volta: dá peso à chegada.
+      const exagero = Math.sin(p * Math.PI) * 14;
+      mesa.trunfoEmVoo.y = interpolar(saida, destino.y, e) - exagero;
+      mesa.trunfoEmVoo.escala = 1 + Math.sin(p * Math.PI) * 0.10;
+    },
+    aoTerminar() {
+      mesa.trunfoEmVoo = null;
+      mesa.eu.trunfosNaMao = [...mesa.eu.trunfosNaMao, carta];
+    },
+  };
+}
 
 /** O "estalo" da placa quando uma carta Go For muda o alvo. */
 function passoTrocaDeAlvo(anterior, novo) {
@@ -1350,7 +1385,9 @@ function comentarARodada(resultado) {
   if (mesa.eu.aposta >= 3) situacoes.push('apostaAlta');
 
   const fala = comentarSobre(anfitriao, situacoes, mesa.rodada);
-  if (fala) mesa.comentario = { texto: fala, ate: performance.now() + DURACAO_DO_COMENTARIO };
+  if (!fala) return;
+  mesa.comentario = { texto: fala, ate: performance.now() + DURACAO_DO_COMENTARIO };
+  audio.voz(fala);
 }
 
 /** Sufixo da mensagem de resultado com os pontos da rodada. */
@@ -1372,6 +1409,7 @@ function descreverFim() {
 // ---------------------------------------------------------------------
 
 function comecarRodada() {
+  const trunfosAntes = jogo.jogadores[LADO.JOGADOR].trunfos.length;
   iniciarRodada(jogo);
 
   // ?trunfos=two_up,shield,go_for_24 fixa a mão da primeira rodada (testes e captura).
@@ -1389,6 +1427,17 @@ function comecarRodada() {
   mesa.alvo = visao.alvo;
   mesa.trocaDeAlvo = null;
   sincronizarTrunfos();
+
+  // As cartas que acabaram de chegar ficam FORA da mão visível até a
+  // animação de chegada rodar, lá embaixo.
+  const ganhasAgora = Math.max(0, visao.eu.trunfos.length - trunfosAntes);
+  const chegando = ganhasAgora > 0
+    ? mesa.eu.trunfosNaMao.slice(-ganhasAgora)
+    : [];
+  if (ganhasAgora > 0) {
+    mesa.eu.trunfosNaMao = mesa.eu.trunfosNaMao.slice(0, -ganhasAgora);
+  }
+
   mesa.baralhoRestante = visao.cartasNoBaralho + 4;
   mesa.escurecimento = 0;
   mesa.mensagem = `Rodada ${visao.rodada}. Aposta: ${plural(visao.eu.aposta, 'dedo', 'dedos')}.`;
@@ -1399,6 +1448,12 @@ function comecarRodada() {
   sequencia.adicionar(passoCartaVoando({ nome: 'distribuindo', lado: 'adv', valor: null, faceFinal: 'baixo' }));
   sequencia.adicionar(passoCartaVoando({ nome: 'distribuindo', lado: 'eu', valor: visao.eu.abertas[0], faceFinal: 'cima' }));
   sequencia.adicionar(passoCartaVoando({ nome: 'distribuindo', lado: 'adv', valor: visao.adversario.abertas[0], faceFinal: 'cima' }));
+
+  // E só então a carta trunfo da rodada sobe para a mão.
+  const totalNaMao = mesa.eu.trunfosNaMao.length + chegando.length;
+  chegando.forEach((carta, i) => {
+    sequencia.adicionar(passoTrunfoChegando(carta, mesa.eu.trunfosNaMao.length + i, totalNaMao));
+  });
   if (demonstracao) {
     sequencia.adicionar(passoMensagem('A casa joga contra ela mesma.', 150));
     sequencia.adicionar(passoPensandoDoJogador());
@@ -1445,6 +1500,7 @@ function adicionarTrapacaDoAnfitriao() {
         mesa.kaio = fala;
         mesa.tvForte = 1;
         mesa.trapaca.forca = 1;
+        audio.voz(fala);
       },
     });
   }

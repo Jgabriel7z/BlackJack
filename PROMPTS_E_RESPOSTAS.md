@@ -928,6 +928,23 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
   - **Gerador próprio para as falas**, separado do visual: mudar o que ele diz não mexe no piscar da lâmpada nem no tempo que o oponente leva pensando, então as seeds das capturas continuam valendo.
 - **Impressões da equipe:**
 
+### Prompt 32 — Uma carta por rodada e a voz do anfitrião
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> To ganhando muito trunfo, faça ser apenas um por rodada e com animação de comprar os trunfos e faça que kaio falar tenha som de chiado e ruido, tipo o darth vader, mas não precisa ser usando palavras grunidos com chiado e ruido já servem
+
+- **Resposta (resumo):** a torneira dos trunfos tinha duas bocas — as cartas do começo da rodada (duas nos níveis 2 e 3) e a chance de 18% a cada compra. As duas fecharam: uma carta por rodada, em todos os níveis, entregue com animação. E o Kaio, que até agora falava em silêncio, ganhou grunhidos com chiado.
+- **Arquivos gerados/alterados:** alterados `src/config.js`, `src/engine/niveis.js`, `src/ui/audio.js`, `src/ui/main.js`, `tests/trumps.test.js`, `tests/niveis.test.js`, `tests/audio.test.js`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **Uma carta por rodada mudou o que a animação significa.** Enquanto caíam cartas o tempo todo, mostrar cada chegada seria poíção; com uma só, ela vira um momento. Por isso ela sobe pela borda de baixo, passa do ponto e volta — e a mesa diz o nome dela.
+  - **A animação obrigou a segurar a mão visível.** O motor entrega a carta na hora em que a rodada começa; a interface passou a esconder a recém-chegada até o passo da animação rodar, senão ela apareceria na mão antes de "chegar".
+  - **Um teste ficou sem sentido e foi removido, não remendado.** Havia um teste que media a chance de ganhar carta ao comprar forçando o gerador; com a chance em zero ele só poderia passar mentindo. Entrou outro no lugar, que afirma o novo contrato: comprar não dá mais carta nenhuma.
+  - **A voz não usa `Math.random`.** O ritmo dos grunhidos sai dos códigos das letras da própria fala, então a mesma frase soa sempre igual, frases diferentes soam diferentes, e a regra do projeto (nada aleatório sem seed) continua de pé. Tem teste que prova que a mesma fala gera sempre a mesma quantidade de sons.
+  - Os ajudantes de áudio (`tom` e `rajada`) ganharam `atraso` para dar para agendar a sequência de grunhidos — antes tudo tocava no instante da chamada.
+- **Impressões da equipe:**
+
 ---
 
 ## Contagem de prompts por etapa
@@ -939,4 +956,4 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
 | Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
 | Etapa 3 — Abertura | 4 (sub-passos 3.1 a 3.5; o prompt 26 trouxe 3.4 e 3.5 juntos) | 1 (fechamento) | 5 |
-| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 3 (prompt 29: fechar o trabalho; 30: ajustes depois de jogar; 31: o Kaio piadista) | 4 |
+| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 4 (29: fechar o trabalho; 30: ajustes depois de jogar; 31: o Kaio piadista; 32: uma carta por rodada e a voz dele) | 5 |
