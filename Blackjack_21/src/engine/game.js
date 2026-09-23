@@ -111,7 +111,12 @@ export function criarJogo(opcoes = {}) {
     _aleatorio: aleatorio,
     _aleatorioTrunfos: criarRng((seed ^ 0x85ebca6b) >>> 0),
     _ordemTrunfo: 0,
-    stats: { trunfosUsados: { [LADO.JOGADOR]: 0, [LADO.OPONENTE]: 0 } },
+    stats: {
+      trunfosUsados: { [LADO.JOGADOR]: 0, [LADO.OPONENTE]: 0 },
+      // Quantos cada lado jogou NESTA rodada: zera a cada rodada e
+      // segura o limite de `TRUNFOS.maximoPorRodada`.
+      trunfosNaRodada: { [LADO.JOGADOR]: 0, [LADO.OPONENTE]: 0 },
+    },
     rodada: 0,
     fase: FASE.AGUARDANDO,
     turno: LADO.JOGADOR,
@@ -148,6 +153,8 @@ export function iniciarRodada(jogo) {
 
   jogo.rodada += 1;
   jogo.rodadaDoNivel += 1;
+  jogo.stats.trunfosNaRodada[LADO.JOGADOR] = 0;
+  jogo.stats.trunfosNaRodada[LADO.OPONENTE] = 0;
   jogo.baralho = jogo._embaralhar(criarBaralho());
 
   const jogador = jogo.jogadores[LADO.JOGADOR];

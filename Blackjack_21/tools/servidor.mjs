@@ -17,6 +17,7 @@ import http from 'node:http';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawn } from 'node:child_process';
 
 /** Pasta Blackjack_21/ (um nível acima de tools/). */
 export const RAIZ_JOGO = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -111,10 +112,28 @@ const executadoDireto = process.argv[1]
   && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
 
 if (executadoDireto) {
-  const porta = Number(process.argv[2] ?? 8080);
+  const argumentos = process.argv.slice(2);
+  const abrirSozinho = argumentos.includes('--abrir');
+  const porta = Number(argumentos.find((a) => !a.startsWith('--')) ?? 8080);
   const s = await iniciarServidor(porta);
   console.log(`Servindo ${RAIZ_JOGO}`);
   console.log(`  jogo:   ${s.url}/index.html`);
   console.log(`  testes: ${s.url}/tests/tests.html`);
+
+  // --abrir chama o navegador padrão sozinho, para dar para jogar sem
+  // copiar endereço nenhum (é o que o `jogar.cmd` usa).
+  if (abrirSozinho) {
+    const endereco = `${s.url}/index.html`;
+    const comando = process.platform === 'win32' ? 'cmd'
+      : process.platform === 'darwin' ? 'open' : 'xdg-open';
+    const parametros = process.platform === 'win32' ? ['/c', 'start', '', endereco] : [endereco];
+    try {
+      spawn(comando, parametros, { detached: true, stdio: 'ignore' }).unref();
+      console.log('  (abrindo no navegador padrão)');
+    } catch {
+      console.log('  Não consegui abrir o navegador sozinho; abra o endereço acima.');
+    }
+  }
+
   console.log('Ctrl+C para parar.');
 }

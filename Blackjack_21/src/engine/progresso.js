@@ -50,7 +50,7 @@ export function criarProgresso() {
     desbloqueios: [],
     // Preferências de quem joga (4.3). Ficam aqui para atravessarem o
     // recarregar junto com o resto.
-    opcoes: { efeitos: true },
+    opcoes: { efeitos: true, dificil: false },
   };
 }
 
@@ -234,6 +234,8 @@ export function normalizar(dados) {
   if (dados.opcoes && typeof dados.opcoes === 'object') {
     // Só `false` desliga: qualquer outra coisa deixa como está de fábrica.
     limpo.opcoes.efeitos = dados.opcoes.efeitos !== false;
+    // E só `true` liga o modo difícil.
+    limpo.opcoes.dificil = dados.opcoes.dificil === true;
   }
 
   if (Array.isArray(dados.desbloqueios)) {

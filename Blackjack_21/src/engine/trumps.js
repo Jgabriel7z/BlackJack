@@ -20,7 +20,7 @@
 // =====================================================================
 
 import { comprar } from './deck.js';
-import { TRUNFOS } from '../config.js';
+import { TRUNFOS, RARIDADES, RARIDADE_DOS_TRUNFOS } from '../config.js';
 
 /**
  * As cartas trunfo do jogador. As 16 primeiras são da Etapa 2; as 11
@@ -85,7 +85,19 @@ export function prepararCatalogo(json, opcoes = {}) {
     ? todas.filter((id) => opcoes.sorteaveis.includes(id))
     : todas;
   if (sorteaveis.length === 0) throw new Error('Nenhuma carta trunfo pode ser sorteada.');
-  return { porId, disponiveis: sorteaveis };
+
+  // Tabela de sorteio por peso: as boas saem menos. O acumulado é
+  // calculado uma vez aqui, em cima das cartas que estão liberadas.
+  let acumulado = 0;
+  const faixas = sorteaveis.map((id) => {
+    acumulado += pesoDaCarta(id);
+    return { id, ate: acumulado };
+  });
+  const porcentagens = new Map(
+    sorteaveis.map((id) => [id, (pesoDaCarta(id) / acumulado) * 100]),
+  );
+
+  return { porId, disponiveis: sorteaveis, faixas, pesoTotal: acumulado, porcentagens };
 }
 
 // ---------------------------------------------------------------------
@@ -98,12 +110,21 @@ export function prepararCatalogo(json, opcoes = {}) {
  */
 export function darTrunfo(jogo, lado, id = null) {
   const participante = jogo.jogadores[lado];
-  const escolhido = id ?? jogo.catalogoTrunfos.disponiveis[
-    Math.floor(jogo._aleatorioTrunfos() * jogo.catalogoTrunfos.disponiveis.length)
-  ];
+  const escolhido = id ?? sortearTrunfo(jogo.catalogoTrunfos, jogo._aleatorioTrunfos());
   participante.trunfos.push(escolhido);
   while (participante.trunfos.length > TRUNFOS.maximoNaMao) participante.trunfos.shift();
   return escolhido;
+}
+
+/**
+ * Sorteia uma carta respeitando os pesos de raridade. `aleatorio` é um
+ * número de 0 a 1 vindo do gerador com seed, então a mesma seed dá
+ * sempre a mesma carta.
+ */
+export function sortearTrunfo(catalogo, aleatorio) {
+  const alvo = aleatorio * catalogo.pesoTotal;
+  const faixa = catalogo.faixas.find((f) => alvo < f.ate);
+  return (faixa ?? catalogo.faixas[catalogo.faixas.length - 1]).id;
 }
 
 /** True se `lado` tem esse trunfo na mão e pode jogá-lo agora. */
@@ -143,6 +164,23 @@ function temEfeitoContra(jogo, lado, tipo) {
     }
   }
   return false;
+}
+
+/** A gaveta de raridade da carta; o que não estiver na lista é comum. */
+export function raridadeDaCarta(id) {
+  return RARIDADES[RARIDADE_DOS_TRUNFOS[id] ?? 'comum'];
+}
+
+function pesoDaCarta(id) {
+  return raridadeDaCarta(id).peso;
+}
+
+/**
+ * A chance de esta carta sair num sorteio, em porcentagem, com as cartas
+ * que estão liberadas agora. Devolve null se ela não entra no sorteio.
+ */
+export function chanceDaCarta(catalogo, id) {
+  return catalogo?.porcentagens?.get(id) ?? null;
 }
 
 /** Cartas persistentes na mesa do lado de `lado`. */
@@ -384,6 +422,7 @@ export function aplicarTrunfo(jogo, lado, id) {
   }
 
   jogo.stats.trunfosUsados[lado] += 1;
+  jogo.stats.trunfosNaRodada[lado] = (jogo.stats.trunfosNaRodada[lado] ?? 0) + 1;
 
   // E agora a Harvest que já estava na mesa devolve uma carta.
   for (const colheita of colheitas) {

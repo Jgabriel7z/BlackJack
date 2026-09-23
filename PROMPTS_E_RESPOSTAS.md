@@ -884,6 +884,33 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
   - **A nota sobre o vídeo mudo entrou no rodapé da página**, porque é a primeira pergunta que alguém faz ao abrir.
 - **Impressões da equipe:**
 
+### Prompt 30 — Ajustes depois de jogar
+- **Data:** 2026-09-23
+- **Ferramenta:** Claude Code (Opus 5)
+- **Prompt (verbatim):**
+
+> Seguinte, o limite o de trunfos vai ser 4 cartas. Veja se o luiz tá usando os trunfos. veja se tem trunfos que interagem com o oponente, faça um modo hard no menu inical onde o luiz sempre estará na dificuldade maxima deste o nivel um. E não dê muitos trunfos pro jogador.
+
+> E faça um botão de tela cheia que possa ser apertado em qualquer momento
+
+> pare o jogo, coloque uma taxa de porcentagem nos trunfos, os melhores devem ser mais dificeis de conseguir, aumente o tamanho das cartas de trunfo. tem alguma maneira de rodar ser ser abrindo esse link?
+
+> quando tiver no modo dificil deixa as bordas com sombras da tela vermelhas, como se fosse uma fumaça de sangue/medo
+
+- **Resposta (resumo):** a primeira rodada de mudanças pedidas **jogando**, e não planejando — e a primeira em que duas perguntas do grupo eram auditoria, não pedido.
+- **Arquivos gerados/alterados:** `tests/ai-trunfos.test.js`, `tests/raridade.test.js` e `jogar.cmd` (novos); alterados `src/config.js`, `src/engine/ai.js`, `game.js`, `trumps.js`, `progresso.js`, `src/ui/main.js`, `render.js`, `efeitos.js`, `tools/servidor.mjs`, `index.html`, `CLAUDE.md`, `progresso/LINHA_DO_TEMPO.md`.
+- **Observações (retrabalho, bugs, correções):**
+  - **"Veja se o Luiz tá usando os trunfos" era uma pergunta com resposta ruim.** Ele usava **6 das 27** cartas, e no nível 1 não jogava nenhuma — uma regra do sub-passo 1.2 que nunca tinha sido revista depois de o jogo ganhar 21 cartas. As 11 que entraram no 4.4a ficavam mortas na mão dele.
+  - **"Tem trunfos que interagem com o oponente?" também.** Nove das 27 mexem com o outro lado; ele só usava quatro. Agora tem regra para quase todas, com preferência pela versão forte da família.
+  - **Um laço infinito apareceu junto.** Com a IA usando mais cartas, uma Harvest na mesa (que repõe a mão a cada carta jogada) faria o turno dela nunca acabar. Entrou um teto de 3 trunfos por rodada, com teste que prova que sem ele a IA jogaria para sempre.
+  - **A raridade virou número visível.** Quatro gavetas com peso 8/4/2/1, o que dá 6,25% para uma comum e 0,78% para uma lendária. A porcentagem aparece na dica da carta e é calculada em cima das cartas liberadas no momento — com Go For 24 e 27 ainda presos pelas recompensas, as outras sobem.
+  - **As bordas vermelhas do modo difícil são luz, não sangue.** Duas respirações de períodos diferentes para a mancha nunca pulsar certinho, e um escurecimento por cima para a fumaça não clarear a cena. Nenhuma ferida é desenhada: a regra de violência sem sangue continua de pé.
+  - **As cartas maiores quebraram o rodapé da mesa.** Com 84×112 elas passaram por cima do "TOTAL" e do nome do jogador; os dois subiram, e a mão desceu para a linha dos visores.
+  - **"Tem como rodar sem abrir esse link?"** Tem: o `servidor.mjs` ganhou `--abrir`, e o `jogar.cmd` na raiz do jogo sobe o servidor e chama o navegador padrão sozinho. Abrir o `index.html` direto do disco não funciona — o navegador bloqueia módulos ES em `file://`.
+  - **Equilíbrio medido, não chutado:** 400 partidas com os dois lados usando trunfos dão 67,9% de vitória do Luiz no normal e 81,1% no difícil.
+  - Testes: 306. A regressão da seed 1617 e a captura do ciclo completo continuam iguais.
+- **Impressões da equipe:**
+
 ---
 
 ## Contagem de prompts por etapa
@@ -895,4 +922,4 @@ Como preencher cada entrada: número, data, ferramenta, o prompt **exatamente co
 | Etapa 1 — Base | 5 (sub-passos 1.1 a 1.5) | 7 (prompt 5: config + seed + CLAUDE.md; prompt 6: cobrança de prints; prompt 7: ferramenta de captura; prompts 11 e 12: refazer mão e oponente; prompt 13: referências; prompt 15: passe visual + fechamento; mais 4 mensagens no meio da execução) | 12 |
 | Etapa 2 — Níveis/pontuação | 6 (sub-passos 2.1 a 2.6) | 1 (fechamento) + 4 mensagens no meio da execução | 7 |
 | Etapa 3 — Abertura | 4 (sub-passos 3.1 a 3.5; o prompt 26 trouxe 3.4 e 3.5 juntos) | 1 (fechamento) | 5 |
-| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 1 (prompt 29: seguir até o fim da fila e fechar o trabalho) | 2 |
+| Etapa 4 — Extras | 1 (prompt 28, que pediu 4.1, 4.2, 4.3, 4.4a e 4.8 de uma vez) | 2 (prompt 29: fechar o trabalho; prompt 30: ajustes depois de jogar) | 3 |

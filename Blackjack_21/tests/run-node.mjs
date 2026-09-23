@@ -13,6 +13,8 @@ import './audio.test.js';
 import './tensao.test.js';
 import './trumps-4-4a.test.js';
 import './trapaca.test.js';
+import './ai-trunfos.test.js';
+import './raridade.test.js';
 import { rodarTodos } from './testador.js';
 
 const resultados = rodarTodos();

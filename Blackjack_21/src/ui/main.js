@@ -72,6 +72,8 @@ import {
   prepararCatalogo,
   aplicarTrunfo,
   podeJogarTrunfo,
+  raridadeDaCarta,
+  chanceDaCarta,
   CARTAS_DO_JOGADOR,
 } from '../engine/trumps.js';
 import catalogoJson from '../../data/trump_cards.js';
@@ -143,6 +145,8 @@ const botaoHit = document.getElementById('botao-hit');
 const botaoStay = document.getElementById('botao-stay');
 const botaoProxima = document.getElementById('botao-proxima');
 const botaoReiniciar = document.getElementById('botao-reiniciar');
+const botaoTelaCheia = document.getElementById('botao-tela-cheia');
+const palco = document.getElementById('palco');
 const telaFinal = document.getElementById('tela-final');
 
 let jogo = null;
@@ -221,6 +225,8 @@ const mesa = {
   recorde: { valor: 0, piscando: false, piscandoDesde: null },
   // 4.8
   trapaca: { forca: 0 },   // 0..1, a luz virando e a TV gritando
+  // ajuste depois de jogar
+  dificil: false,     // o Luiz Alberto na cabeça do nível 3 desde o começo
   // 4.3
   tremorAmbiente: 0,
   efeitos: { ligados: true },
@@ -845,7 +851,7 @@ function passoTrunfoVoando(carta, inicio, lado = 'eu') {
     },
   };
 }
-const TRUNFO_MESA_ESCALA = 40 / 66; // largura da carta na mesa dividida pela da mão
+const TRUNFO_MESA_ESCALA = 52 / 84; // largura da carta na mesa dividida pela da mão
 
 /** O "estalo" da placa quando uma carta Go For muda o alvo. */
 function passoTrocaDeAlvo(anterior, novo) {
@@ -969,6 +975,9 @@ function aoMoverMouse(evento) {
   mesa.dica = {
     titulo: achado.carta.nome,
     texto: achado.carta.texto,
+    // Raridade e chance de sair no sorteio, com as cartas liberadas agora.
+    raridade: raridadeDaCarta(achado.carta.id),
+    chance: chanceDaCarta(catalogo, achado.carta.id),
     x: caixa.x + caixa.largura / 2,
     y: caixa.y,
     origem: achado.origem,
@@ -1065,6 +1074,15 @@ function pararDemonstracao() {
   sequencia.limpar();
   novaPartida();
   sequencia.limpar();
+}
+
+/**
+ * Qual cabeça de IA o Luiz Alberto está usando. No modo difícil ele joga
+ * com a do nível 3 (a que calcula risco e briga pelas cartas) desde o
+ * primeiro aparelho; no normal, a do nível em que a partida está.
+ */
+function nivelDaIa() {
+  return mesa.dificil ? 3 : jogo.nivel;
 }
 
 /** Na demonstração o jogador também pensa antes de jogar. */
@@ -1196,6 +1214,13 @@ function alternarEfeitos() {
   renderizador.efeitos.definirAtivos(ligados);
   mesa.efeitos.ligados = ligados;
   progresso.opcoes.efeitos = ligados;
+  salvarProgresso();
+}
+
+/** Liga ou desliga o modo difícil e guarda a escolha. */
+function alternarDificil() {
+  mesa.dificil = !mesa.dificil;
+  progresso.opcoes.dificil = mesa.dificil;
   salvarProgresso();
 }
 
@@ -1428,7 +1453,7 @@ function adicionarTrapacaDoAnfitriao() {
  * comprar ou parar. Devolve true se jogou (e a vez dele continua depois).
  */
 function trunfoDoOponente() {
-  const id = decidirTrunfo(jogo, LADO.OPONENTE);
+  const id = decidirTrunfo(jogo, LADO.OPONENTE, nivelDaIa());
   if (!id) return false;
 
   const carta = descricaoDoTrunfo(id);
@@ -1456,7 +1481,7 @@ function jogadaDoOponente() {
     return;
   }
 
-  if (decidirAcao(jogo, LADO.OPONENTE) === ACAO.HIT) {
+  if (decidirAcao(jogo, LADO.OPONENTE, nivelDaIa()) === ACAO.HIT) {
     const { carta } = hit(jogo, LADO.OPONENTE);
     mesa.mensagem = `${NOMES.oponente} compra uma carta.`;
     sequencia.adicionar(passoCartaVoando({ nome: 'comprando', lado: 'adv', valor: carta, faceFinal: 'cima' }));
@@ -1577,6 +1602,7 @@ function atualizarBotoes() {
   // Efeitos visuais (4.3): se estão ligados, o quanto a cena está tensa,
   // e o desempenho com tudo isso rodando.
   document.body.dataset.efeitos = mesa.efeitos.ligados ? '1' : '0';
+  document.body.dataset.dificil = mesa.dificil ? '1' : '0';
   document.body.dataset.tensao = tensaoDaCena(mesa).toFixed(2);
   document.body.dataset.fps = String(fps);
   // A trapaça do anfitrião (4.8), para o roteiro de captura.
@@ -1641,6 +1667,43 @@ function quadro(agora) {
   requestAnimationFrame(quadro);
 }
 
+// ---------------------------------------------------------------------
+//  Tela cheia
+//
+//  O palco é fixo em 1280x720 (o mesmo tamanho dos prints), então em
+//  tela cheia ele não estica sozinho: é uma escala CSS por cima, que
+//  mantém a proporção e deixa o canvas nítido. Vale em qualquer tela,
+//  inclusive no título e no GAME OVER.
+// ---------------------------------------------------------------------
+
+function emTelaCheia() {
+  return document.fullscreenElement !== null && document.fullscreenElement !== undefined;
+}
+
+function ajustarEscalaDoPalco() {
+  const fator = emTelaCheia()
+    ? Math.min(window.innerWidth / 1280, window.innerHeight / 720)
+    : 1;
+  palco.style.transform = fator === 1 ? '' : `scale(${fator})`;
+  botaoTelaCheia.textContent = emTelaCheia() ? 'SAIR DA TELA CHEIA' : 'TELA CHEIA';
+}
+
+function alternarTelaCheia() {
+  try {
+    if (emTelaCheia()) document.exitFullscreen?.();
+    else document.documentElement.requestFullscreen?.().catch(() => {});
+  } catch { /* navegador que não deixa: o jogo segue na janela */ }
+}
+
+botaoTelaCheia.addEventListener('click', (evento) => {
+  evento.stopPropagation();
+  garantirSom();
+  alternarTelaCheia();
+});
+document.addEventListener('fullscreenchange', ajustarEscalaDoPalco);
+window.addEventListener('resize', ajustarEscalaDoPalco);
+ajustarEscalaDoPalco();
+
 canvas.addEventListener('mousemove', aoMoverMouse);
 canvas.addEventListener('mouseleave', () => { mesa.dica = null; });
 canvas.addEventListener('click', aoClicarNoCanvas);
@@ -1702,10 +1765,25 @@ function aoTeclar(evento) {
     return;
   }
 
+  // F entra e sai da tela cheia, em qualquer tela.
+  if ((evento.key === 'f' || evento.key === 'F') && telas.atual !== TELA.INICIAIS) {
+    evento.preventDefault();
+    alternarTelaCheia();
+    return;
+  }
+
   // E liga e desliga os efeitos visuais, nas mesmas condições do M.
   if ((evento.key === 'e' || evento.key === 'E') && telas.atual !== TELA.INICIAIS) {
     evento.preventDefault();
     alternarEfeitos();
+    return;
+  }
+
+  // H liga e desliga o modo difícil, e só no título: trocar a cabeça do
+  // oponente no meio de uma partida seria trapaça ao contrário.
+  if ((evento.key === 'h' || evento.key === 'H') && telas.atual === TELA.TITULO) {
+    evento.preventDefault();
+    alternarDificil();
     return;
   }
 
@@ -1736,6 +1814,7 @@ mesa.dados.desbloqueadas = progresso.desbloqueios.length;
 // A preferência de efeitos visuais vem do disco; `?efeitos=0` vence.
 mesa.efeitos.ligados = parametros.efeitos && progresso.opcoes.efeitos;
 renderizador.efeitos.definirAtivos(mesa.efeitos.ligados);
+mesa.dificil = progresso.opcoes.dificil === true;
 
 definirNomeDoAnfitriao(NOMES.anfitriao);
 definirTextosDoTitulo(TITULO.subtitulo, EQUIPE);

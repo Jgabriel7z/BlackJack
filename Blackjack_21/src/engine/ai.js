@@ -30,6 +30,7 @@
 import { somarMao } from './rules.js';
 import { podeComprar, verMesa, apostaEfetiva } from './game.js';
 import { VALOR_MINIMO, VALOR_MAXIMO } from './deck.js';
+import { TRUNFOS } from '../config.js';
 
 /** Total a partir do qual a IA dos níveis 1 e 2 para de comprar. */
 export const LIMITE_COMPRA = 17;
@@ -167,40 +168,105 @@ function alvoDaCarta(jogo, id) {
 export function decidirTrunfo(jogo, lado, nivel = jogo.nivel ?? 1) {
   if (nivel < 2 || !jogo.catalogoTrunfos) return null;      // no nível 1 ele não usa trunfos
   if (jogo.fase !== 'jogando' || jogo.turno !== lado) return null;
+  // Teto de cartas por rodada: sem ele, uma Harvest na mesa repondo o que
+  // sai da mão deixaria a IA jogando para sempre no mesmo turno.
+  if ((jogo.stats.trunfosNaRodada?.[lado] ?? 0) >= TRUNFOS.maximoPorRodada) return null;
 
   const mao = jogo.jogadores[lado].trunfos;
   if (mao.length === 0) return null;
 
   const visao = verMesa(jogo, lado);
   const meuTotal = visao.eu.totalVisivel;
+  const alvo = visao.alvo;
   const visivelDele = visao.adversario.abertas.reduce((soma, carta) => soma + carta, 0);
+  const ultimaDele = visao.adversario.abertas.at(-1) ?? 0;
+  const minhaUltima = visao.eu.abertas.at(-1) ?? 0;
+
   const tem = (id) => mao.includes(id);
+  /** A melhor carta disponível de uma família, da mais forte para a mais fraca. */
+  const melhorDe = (...ids) => ids.find(tem) ?? null;
 
   if (nivel >= 3) {
-    // Guardou o Destroy justamente para isto: tirar da mesa a carta que
-    // o adversário acabou de usar contra ele.
-    if (tem('destroy') && ameacaNaMesaDoAdversario(jogo, lado)) return 'destroy';
+    // Limpar a mesa dele: usa a versão mais forte que tiver na mão.
+    if (ameacaNaMesaDoAdversario(jogo, lado)) {
+      const destruir = melhorDe('destroy_plus_plus', 'destroy_plus', 'destroy');
+      if (destruir) return destruir;
+    }
+
+    // Love Your Enemy: obrigar o adversário a comprar só vale quando ele
+    // já está no limite — aí a carta a mais estoura a mão dele. Como a
+    // oculta dele é secreta, a conta é pelas cartas à mostra.
+    if (tem('love_your_enemy') && visivelDele >= alvo - 1) return 'love_your_enemy';
+
+    // Fechar a própria mão com a melhor carta do baralho. O Perfect
+    // Draw+ vem primeiro porque ainda encarece a derrota dele.
+    if (meuTotal <= alvo - 2) {
+      const comprar = melhorDe('perfect_draw_plus', 'ultimate_draw', 'perfect_draw');
+      if (comprar) return comprar;
+    }
+
+    // Atrasar o adversário: devolver ao baralho a carta grande que ele
+    // acabou de virar. O Two-Up+ faz isso e ainda encarece a aposta dele.
+    if (ultimaDele >= 8) {
+      const atrasar = melhorDe('two_up_plus', 'remove');
+      if (atrasar) return atrasar;
+    }
+
+    // Exchange: trocar a minha última carta pela dele quando a dele é
+    // melhor e a troca não me estoura.
+    if (tem('exchange') && ultimaDele > minhaUltima
+      && meuTotal + (ultimaDele - minhaUltima) <= alvo) {
+      return 'exchange';
+    }
 
     // "Go For" só se o alvo novo for melhor para a mão dele: salva quem
     // estourou, ou deixa o total dele exatamente no alvo.
     const goFors = mao.filter((id) => alvoDaCarta(jogo, id) !== null);
     const melhorGoFor = goFors
       .map((id) => ({ id, alvo: alvoDaCarta(jogo, id) }))
-      .filter(({ alvo }) => alvo !== visao.alvo && meuTotal <= alvo && meuTotal > visivelDele)
+      .filter(({ alvo: novo }) => novo !== alvo && meuTotal <= novo && meuTotal > visivelDele)
       .sort((a, b) => (a.alvo - meuTotal) - (b.alvo - meuTotal))[0];
-    if (melhorGoFor && (meuTotal > visao.alvo || meuTotal === melhorGoFor.alvo)) {
+    if (melhorGoFor && (meuTotal > alvo || meuTotal === melhorGoFor.alvo)) {
       return melhorGoFor.id;
+    }
+
+    // Harvest cedo: ela não faz nada sozinha, paga o que vier depois.
+    if (tem('harvest') && mao.length > 1
+      && !jaTemNaMesa(jogo, lado, 'on_trump_use_draw_trump')) {
+      return 'harvest';
     }
   }
 
   // Níveis 2 e 3: proteção e pressão.
-  // Shield quando a derrota sairia cara e ele ainda não tem um na mesa.
-  if (tem('shield') && apostaEfetiva(jogo, lado) >= APOSTA_CARA && !jaTemNaMesa(jogo, lado, 'bet_mod')) {
-    return 'shield';
+  // Escudo quando a derrota sairia cara e ele ainda não tem um na mesa.
+  if (apostaEfetiva(jogo, lado) >= APOSTA_CARA && !jaTemNaMesa(jogo, lado, 'bet_mod')) {
+    const escudo = melhorDe('shield_plus', 'shield');
+    if (escudo) return escudo;
   }
-  // Two-Up quando está na frente pelas cartas à mostra: encarece a derrota dele.
-  if (tem('two_up') && meuTotal > visivelDele && meuTotal <= visao.alvo) return 'two_up';
-  if (tem('one_up') && meuTotal > visivelDele && meuTotal <= visao.alvo) return 'one_up';
+  // Encarecer a derrota dele quando está na frente pelas cartas à mostra.
+  if (meuTotal > visivelDele && meuTotal <= alvo) {
+    const pressao = melhorDe('two_up_plus', 'two_up', 'one_up');
+    if (pressao) return pressao;
+  }
+
+  // Último recurso, só no nível 3: a mão só tem carta que ele não sabe
+  // usar, então troca o que dá por outras.
+  if (nivel >= 3) {
+    const trocar = melhorDe('trump_switch_plus', 'trump_switch');
+    if (trocar && mao.every((id) => id === trocar || !SABE_USAR.has(id))) return trocar;
+  }
 
   return null;
 }
+
+/**
+ * As cartas para as quais existe regra aí em cima. Serve para a IA
+ * saber quando a mão dela só tem carta inútil e vale trocar tudo.
+ */
+const SABE_USAR = new Set([
+  'destroy', 'destroy_plus', 'destroy_plus_plus',
+  'love_your_enemy', 'perfect_draw', 'perfect_draw_plus', 'ultimate_draw',
+  'remove', 'two_up_plus', 'exchange', 'harvest',
+  'go_for_17', 'go_for_24', 'go_for_27',
+  'shield', 'shield_plus', 'two_up', 'one_up',
+]);

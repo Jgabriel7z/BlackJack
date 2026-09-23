@@ -18,6 +18,7 @@ import {
   apostaEfetiva,
   LADO,
 } from '../src/engine/game.js';
+import { TRUNFOS } from '../src/config.js';
 
 const CATALOGO = prepararCatalogo(catalogoJson);
 
@@ -126,13 +127,15 @@ teste('4.4a: Trump Switch descarta 2 da mão e compra 3', () => {
   assertIgual(jogo.jogadores[LADO.JOGADOR].trunfos.length, 4);
 });
 
-teste('4.4a: Trump Switch+ descarta só 1 e compra 4', () => {
+teste('4.4a: Trump Switch+ descarta só 1 e compra 4, respeitando o limite da mão', () => {
   const jogo = rodada();
   jogo.jogadores[LADO.JOGADOR].trunfos = ['shield', 'destroy'];
 
   const r = jogar(jogo, LADO.JOGADOR, 'trump_switch_plus');
   assertIgual(acao(r, 'discard_random_trumps').descartados.length, 1);
-  assertIgual(jogo.jogadores[LADO.JOGADOR].trunfos.length, 5);
+  // Daria 5 cartas, mas a mão só comporta `TRUNFOS.maximoNaMao`: as mais
+  // antigas caem. É o limite de 4 que o grupo pediu depois de jogar.
+  assertIgual(jogo.jogadores[LADO.JOGADOR].trunfos.length, TRUNFOS.maximoNaMao);
 });
 
 teste('4.4a: Trump Switch com a mão vazia não quebra', () => {

@@ -55,6 +55,13 @@ Necessários para a ferramenta de captura funcionar e os prints saírem sempre i
 - Cada parte que pode sumir ou se mexer (dedo, cabeça) é uma **camada separada**; animação de personagem é por **quadros** (grades alternativas), não por rotação no canvas, para manter os pixels nítidos.
 - Python só é usado nas ferramentas de arte; o jogo continua sem dependências.
 
+## Cartas trunfo (ajustes de equilíbrio)
+
+- A mão comporta **4 cartas** e cada lado pode **jogar 3 por rodada**. O teto por rodada não é decoração: sem ele, uma Harvest na mesa repondo o que sai da mão deixaria a IA jogando para sempre no mesmo turno.
+- Toda carta tem **raridade** (`RARIDADES` e `RARIDADE_DOS_TRUNFOS` no `config.js`): quanto mais a carta resolve sozinha, menos ela sai. O sorteio é por peso, e a porcentagem aparece na dica quando o cursor passa pela carta.
+- **Mexer nos pesos, no limite da mão ou na chance de ganhar trunfo muda as partidas antigas.** Medir antes com um script e depois rodar `3.regressao` (seed 1617, nível 1) e `3.final` (seed 177).
+- A IA do oponente tem regra para quase toda carta; quem acrescentar carta nova precisa decidir se ela entra em `decidirTrunfo` e em `SABE_USAR`, senão ela morre na mão dele.
+
 ## Som (a partir da Etapa 4)
 
 - Tudo sintetizado em `src/ui/audio.js`; **nenhum arquivo de áudio** entra no projeto.

@@ -61,11 +61,51 @@ export const TITULO = Object.freeze({
 });
 
 /**
+ * Raridade das cartas trunfo. O peso é o quanto a carta pesa no sorteio:
+ * uma comum sai oito vezes mais que uma lendária. A porcentagem de cada
+ * uma é calculada em cima das cartas que estão liberadas no momento, e
+ * aparece na dica quando o cursor passa pela carta.
+ */
+export const RARIDADES = Object.freeze({
+  comum: { peso: 8, nome: 'comum', cor: '#8e857a' },
+  incomum: { peso: 4, nome: 'incomum', cor: '#7fa06a' },
+  rara: { peso: 2, nome: 'rara', cor: '#6a8fb5' },
+  lendaria: { peso: 1, nome: 'lendária', cor: '#c08a3e' },
+});
+
+/**
+ * Em que gaveta cada carta cai. A régua: quanto mais a carta resolve
+ * sozinha, mais rara ela é. As quatro lendárias são as que viram a
+ * rodada de uma vez — limpar a mesa e trancar os trunfos do outro,
+ * comprar a melhor carta encarecendo a derrota dele, comprar a melhor e
+ * ainda encher a mão, e obrigar o adversário a estourar.
+ */
+export const RARIDADE_DOS_TRUNFOS = Object.freeze({
+  // comuns
+  card_2: 'comum', card_3: 'comum', card_4: 'comum', card_5: 'comum',
+  card_6: 'comum', card_7: 'comum',
+  return: 'comum', shield: 'comum', one_up: 'comum', remove: 'comum',
+  go_for_17: 'comum',
+  // incomuns
+  two_up: 'incomum', destroy: 'incomum', perfect_draw: 'incomum',
+  go_for_24: 'incomum', exchange: 'incomum', trump_switch: 'incomum',
+  // raras
+  shield_plus: 'rara', two_up_plus: 'rara', destroy_plus: 'rara',
+  harvest: 'rara', go_for_27: 'rara', trump_switch_plus: 'rara',
+  // lendárias
+  destroy_plus_plus: 'lendaria', perfect_draw_plus: 'lendaria',
+  ultimate_draw: 'lendaria', love_your_enemy: 'lendaria',
+});
+
+/**
  * Cartas trunfo — números que a wiki não define, propostos na Parte C7
  * do PDF de referência. Mexa aqui para calibrar.
  */
 export const TRUNFOS = Object.freeze({
-  chanceAoComprar: 0.30,   // chance de ganhar 1 trunfo a cada carta comprada (HIT)
-  maximoNaMao: 8,          // acima disso, o trunfo mais antigo é descartado
+  // Ajustado depois de jogar: a mão estava larga demais e caíam cartas
+  // demais, então dava para acumular e resolver tudo no trunfo.
+  chanceAoComprar: 0.18,   // chance de ganhar 1 trunfo a cada carta comprada (HIT)
+  maximoNaMao: 4,          // acima disso, o trunfo mais antigo é descartado
   iniciaisPorRodada: 1,    // trunfos recebidos por cada lado no começo da rodada
+  maximoPorRodada: 3,      // quantos cada lado pode JOGAR na mesma rodada
 });

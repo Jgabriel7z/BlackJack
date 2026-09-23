@@ -45,8 +45,10 @@ const COR = {
 
 export const CARTA = { largura: 78, altura: 110, espaco: 14 };
 /** Carta trunfo na mão (embaixo) e já jogada (menor, na mesa). */
-export const TRUNFO = { largura: 66, altura: 92 };
-export const TRUNFO_MESA = { largura: 40, altura: 56, passo: 20 };
+// Cartas trunfo maiores (pedido do grupo depois de jogar): com a mão
+// limitada a 4 sobra espaço, e o símbolo desenhado ficava pequeno demais.
+export const TRUNFO = { largura: 84, altura: 112 };
+export const TRUNFO_MESA = { largura: 52, altura: 72, passo: 26 };
 
 /** Posições fixas da mesa. As fileiras crescem para a direita a partir de fileiraX0. */
 export const POSICOES = {
@@ -59,7 +61,7 @@ export const POSICOES = {
   visorPontos: { x: 248, y: 590, largura: 156, altura: 58 },
   visorRecorde: { x: 414, y: 590, largura: 112, altura: 58 },
   // Trunfos (2.3): mão do jogador embaixo; cartas jogadas na mesa, cada uma do lado de quem jogou.
-  maoTrunfos: { centroX: 762, largura: 470, y: 614 },
+  maoTrunfos: { centroX: 768, largura: 470, y: 598 },
   // À direita da coluna de madeira da guilhotina (que termina em x≈276) e à
   // esquerda das cartas numéricas (que começam em x=470).
   mesaTrunfos: { eu: { x: 316, y: 440 }, adv: { x: 316, y: 172 } },
@@ -1114,7 +1116,8 @@ function desenharDica(ctx, dica) {
   }
   if (atual) linhas.push(atual);
 
-  const altura = margem * 2 + 18 + linhas.length * 16;
+  const temRaridade = Boolean(dica.raridade);
+  const altura = margem * 2 + 18 + linhas.length * 16 + (temRaridade ? 18 : 0);
   const x = Math.max(12, Math.min(LARGURA - largura - 12, dica.x - largura / 2));
   const y = Math.max(12, dica.y - altura - 14);
 
@@ -1134,6 +1137,20 @@ function desenharDica(ctx, dica) {
   linhas.forEach((linha, i) => {
     texto(ctx, linha, x + margem, y + margem + 32 + i * 16, 12, COR.texto, 'left');
   });
+
+  // Raridade e a chance de a carta sair num sorteio (pedido do grupo).
+  if (temRaridade) {
+    const base = y + margem + 32 + linhas.length * 16 + 4;
+    texto(ctx, dica.raridade.nome.toUpperCase(), x + margem, base + 8, 11,
+      dica.raridade.cor, 'left', true);
+    if (dica.chance !== null && dica.chance !== undefined) {
+      const numero = dica.chance < 10
+        ? dica.chance.toFixed(1).replace('.', ',')
+        : String(Math.round(dica.chance));
+      texto(ctx, `${numero}% de chance de sair`, x + largura - margem, base + 8, 11,
+        COR.textoApagado, 'right');
+    }
+  }
   ctx.restore();
 }
 
@@ -1260,6 +1277,13 @@ function desenharRodapeDosDados(ctx, mesa) {
   if (mesa.recorde.valor > 0) partes.push(`recorde ${mesa.recorde.valor}`);
   partes.push(`desbloqueios ${dados.desbloqueadas}/${dados.total}`);
   texto(ctx, partes.join('   ·   '), LARGURA / 2, y, 14, COR.textoApagado);
+
+  // O modo difícil é escolhido aqui, no menu inicial.
+  const modo = mesa.dificil
+    ? 'MODO DIFÍCIL LIGADO — o oponente joga no máximo desde o nível 1'
+    : 'modo normal   ·   H liga o modo difícil';
+  texto(ctx, modo, LARGURA / 2, y - 26, 14,
+    mesa.dificil ? COR.vermelho : COR.textoApagado, 'center', mesa.dificil);
 
   if (dados.salvando) {
     const efeitos = mesa.efeitos?.ligados === false ? 'E liga os efeitos' : 'E desliga os efeitos';
@@ -1576,7 +1600,7 @@ export function criarRenderizador(canvas, opcoes = {}) {
 
     // --- Lado do jogador ---
     for (const c of mesa.eu.cartas) desenharCarta(ctx, c);
-    texto(ctx, mesa.eu.nome.toUpperCase(), 640, 552, 15, COR.textoApagado);
+    texto(ctx, mesa.eu.nome.toUpperCase(), 640, 536, 15, COR.textoApagado);
     cenario.desenharPlacar(ctx, 1010, 470, 112, 62, mesa.eu.aposta, {
       digitos: 2, rotulo: 'SUA APOSTA', destaque: mesa.eu.aposta >= 3, agora,
     });
@@ -1584,7 +1608,7 @@ export function criarRenderizador(canvas, opcoes = {}) {
     const total = mesa.eu.cartas.reduce((s, c) => s + (c.valor ?? 0), 0);
     if (mesa.eu.cartas.length > 0) {
       const estourou = total > mesa.alvo;
-      texto(ctx, `TOTAL ${total}${estourou ? '   ·   ESTOUROU' : ''}`, 640, 584, 26, estourou ? COR.vermelho : COR.texto, 'center', true);
+      texto(ctx, `TOTAL ${total}${estourou ? '   ·   ESTOUROU' : ''}`, 640, 566, 26, estourou ? COR.vermelho : COR.texto, 'center', true);
     }
     // A sua mão: presa no aparelho, saindo da borda de baixo, tremendo mais a cada dedo perdido.
     const apEu = aparelhoDoJogador();
@@ -1667,7 +1691,7 @@ export function criarRenderizador(canvas, opcoes = {}) {
     if (mesa.eu.trunfosNaMao.length > 0 && mesa.tela !== 'attract') {
       const p = posicaoTrunfoNaMao(0, mesa.eu.trunfosNaMao.length);
       texto(ctx, mesa.podeJogarTrunfo ? 'clique para jogar' : 'aguarde sua vez',
-        POSICOES.maoTrunfos.centroX, p.y - 12, 11, COR.textoApagado);
+        POSICOES.maoTrunfos.centroX, p.y - 10, 11, COR.textoApagado);
     }
 
     // Trunfo voando da mão para a mesa.
@@ -1745,6 +1769,9 @@ export function criarRenderizador(canvas, opcoes = {}) {
     efeitos.aplicar(ctx, agora, Math.max(mesa.escurecimento, tensao), {
       tvForca: mesa.kaio ? 0.45 + 0.55 * mesa.tvForte : 0,
       tvArea: TV,
+      // No modo difícil as bordas respiram vermelho o tempo todo, e
+      // apertam junto com a tensão da mesa.
+      medo: mesa.dificil && mesa.tela === 'jogando' ? 0.45 + 0.55 * tensao : 0,
     });
 
     // A trapaça do anfitrião (4.8): a luz da sala vira vermelha.
@@ -1761,6 +1788,10 @@ export function criarRenderizador(canvas, opcoes = {}) {
     // Som desligado: um aviso discreto, no canto de cima.
     if (mesa.som?.mudo) {
       texto(ctx, 'SOM DESLIGADO  ·  M', LARGURA - 16, 26, 12, 'rgba(150, 140, 130, 0.8)', 'right');
+    }
+    // E, na mesa, lembrar que o oponente está no máximo.
+    if (mesa.dificil && mesa.tela === 'jogando') {
+      texto(ctx, 'DIFÍCIL', 16, 26, 12, COR.vermelho, 'left', true);
     }
 
     // A seed é informação de bastidor: só aparece com a mesa em jogo.

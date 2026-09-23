@@ -288,3 +288,16 @@ Uma entrada por sub-passo concluído. Prints e vídeos ficam em `progresso/etapa
 - **`progresso/index.html`**: a evolução etapa por etapa, com 136 prints e 24 vídeos em ordem, gerada por `tools/gerar_index_progresso.py` a partir das pastas de evidência e das datas desta linha do tempo. É a página para abrir na apresentação.
 - `progresso/etapa-4/RESUMO.md` escrito. Commit e tag `etapa-4`; o trabalho também foi publicado em github.com/Jgabriel7z/BlackJack.
 - Números finais: 16.673 linhas de código, 276 testes, 29 prompts registrados.
+
+## 2026-09-23 — Ajustes depois de jogar
+Primeira rodada de mudanças pedidas jogando, não planejando.
+
+- **Mão de trunfos limitada a 4** (era 8) e menos cartas caindo: a chance de ganhar trunfo ao comprar foi de 30% para 18%.
+- **Raridade com porcentagem**: as cartas viraram quatro gavetas — comum 6,25%, incomum 3,13%, rara 1,56% e lendária 0,78% cada. As quatro lendárias são as que viram a rodada sozinhas (Destroy++, Perfect Draw+, Ultimate Draw e Love Your Enemy). O sorteio passou a ser por peso, e a dica da carta mostra a raridade e a chance de ela sair.
+- **O Luiz aprendeu o resto das cartas.** Ele usava 6 das 27; agora tem regra para quase todas: prefere a versão forte da família, obriga o jogador a comprar com Love Your Enemy quando ele já está no limite, devolve ao baralho a carta grande que ele virou, troca a carta ruim pela boa com Exchange e recicla a mão com Trump Switch quando ela só tem lixo.
+- **Teto de 3 trunfos por rodada** para cada lado. Sem ele a Harvest repunha a mão e a IA jogava para sempre no mesmo turno — tem teste que prova isso.
+- **Modo difícil no título (tecla H)**: o oponente joga com a cabeça do nível 3 desde a guilhotina, e as bordas da tela respiram vermelho, como fumaça. É luz, não sangue: nenhuma ferida é desenhada.
+- **Cartas trunfo maiores** (66×92 → 84×112) e **botão de tela cheia** no canto, clicável em qualquer tela, com a tecla F junto.
+- **`jogar.cmd`**: dois cliques sobem o servidor e abrem o navegador sozinho, sem ninguém precisar copiar endereço.
+- Medido em 400 partidas com os dois lados usando trunfos: o Luiz vence 67,9% no normal e 81,1% no difícil.
+- Testes: 306/306 (12 novos da raridade, 18 da IA com trunfos). A regressão da seed 1617 e a captura do ciclo completo (seed 177) continuam iguais.

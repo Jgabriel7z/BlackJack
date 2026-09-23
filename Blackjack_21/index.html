@@ -37,6 +37,28 @@
       width: 1280px;
       height: 720px;
     }
+    /* Fica fora do fluxo dos botões do jogo: aparece em qualquer tela. */
+    #botao-tela-cheia {
+      position: absolute;
+      right: 16px;
+      bottom: 12px;
+      font-family: var(--fonte);
+      font-size: 11px;
+      letter-spacing: 0.16em;
+      color: var(--texto-apagado);
+      background: rgba(10, 8, 7, 0.55);
+      border: 1px solid #332e29;
+      padding: 5px 12px;
+      cursor: pointer;
+      z-index: 5;
+    }
+    #botao-tela-cheia:hover {
+      color: var(--texto);
+      border-color: var(--borda);
+    }
+    /* Em tela cheia o palco é escalado por JS; a origem fica no centro. */
+    #palco { transform-origin: center center; }
+
     #controles {
       position: absolute;
       right: 48px;
@@ -104,6 +126,8 @@
       <button id="botao-stay" type="button" data-acao="stay">Stay</button>
       <button id="botao-proxima" type="button" data-acao="proxima" hidden>Próxima rodada</button>
     </div>
+    <button id="botao-tela-cheia" type="button" title="Tela cheia (F)">TELA CHEIA</button>
+
     <div id="tela-final" hidden>
       <button id="botao-reiniciar" type="button" data-acao="reiniciar" hidden>Jogar de novo</button>
     </div>

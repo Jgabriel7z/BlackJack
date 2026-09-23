@@ -91,6 +91,45 @@ export function criarEfeitos(opcoes = {}) {
   let copiaDaTv = null;
 
   /**
+   * As bordas respirando vermelho, do modo difícil: uma fumaça que entra
+   * pelos cantos e nunca chega ao meio da mesa. É luz, não sangue — o
+   * jogo continua sem mostrar ferida nenhuma (Parte B7 do PDF).
+   */
+  function bordasDeMedo(ctx, agora, forca) {
+    if (forca <= 0.01) return;
+    // Duas respirações de períodos diferentes: a mancha nunca pulsa
+    // certinho, o que deixa o movimento incômodo em vez de decorativo.
+    const respiro = 0.72
+      + 0.18 * Math.sin(agora / 1900)
+      + 0.10 * Math.sin(agora / 730 + 1.1);
+    const alfa = Math.min(0.62, forca * respiro);
+
+    const raio = ALTURA * (0.62 - 0.06 * Math.sin(agora / 2300));
+    const g = ctx.createRadialGradient(
+      LARGURA / 2, ALTURA / 2, raio * 0.52,
+      LARGURA / 2, ALTURA / 2, ALTURA * 1.05,
+    );
+    g.addColorStop(0, 'rgba(120, 0, 0, 0)');
+    g.addColorStop(0.55, `rgba(110, 6, 6, ${alfa * 0.45})`);
+    g.addColorStop(1, `rgba(150, 10, 10, ${alfa})`);
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, LARGURA, ALTURA);
+    ctx.restore();
+
+    // E um escurecimento por cima, para a fumaça não clarear a cena.
+    const escuro = ctx.createRadialGradient(
+      LARGURA / 2, ALTURA / 2, raio * 0.70,
+      LARGURA / 2, ALTURA / 2, ALTURA * 1.02,
+    );
+    escuro.addColorStop(0, 'rgba(0,0,0,0)');
+    escuro.addColorStop(1, `rgba(20, 0, 0, ${alfa * 0.75})`);
+    ctx.fillStyle = escuro;
+    ctx.fillRect(0, 0, LARGURA, ALTURA);
+  }
+
+  /**
    * Separação de cores nas bordas: o quadro é redesenhado deslocado
    * para os lados, uma vez só no vermelho e uma no ciano, preso às
    * bordas por uma máscara. Montado em resolução baixa.
@@ -205,6 +244,8 @@ export function criarEfeitos(opcoes = {}) {
       v.addColorStop(1, `rgba(0,0,0,${0.58 + 0.30 * t})`);
       ctx.fillStyle = v;
       ctx.fillRect(0, 0, LARGURA, ALTURA);
+
+      bordasDeMedo(ctx, agora, extras.medo ?? 0);
     },
   };
 }
